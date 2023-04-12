@@ -26,16 +26,6 @@
 			<attribute name="javadoc_location" value="jar:file:/C:\Users\flums\Documents\CyberSec\Tools\ghidra_10.2.3_PUBLIC\docs\GhidraAPI_javadoc.zip!/api/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/flums/.ghidra/.ghidra_10.2.3_PUBLIC/Extensions/AngryGhidra/lib/AngryGhidra.jar" sourcepath="C:/Users/flums/.ghidra/.ghidra_10.2.3_PUBLIC/Extensions/AngryGhidra/lib/AngryGhidra-src.zip">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:file:/C:\Users\flums\Documents\CyberSec\Tools\ghidra_10.2.3_PUBLIC\docs\GhidraAPI_javadoc.zip!/api/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/flums/.ghidra/.ghidra_10.2.3_PUBLIC/Extensions/AngryGhidra/lib/json-20200518.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:file:/C:\Users\flums\Documents\CyberSec\Tools\ghidra_10.2.3_PUBLIC\docs\GhidraAPI_javadoc.zip!/api/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/flums/Documents/CyberSec/Tools/ghidra_10.2.3_PUBLIC/Ghidra/Debug/AnnotationValidator/lib/AnnotationValidator.jar" sourcepath="C:/Users/flums/Documents/CyberSec/Tools/ghidra_10.2.3_PUBLIC/Ghidra/Debug/AnnotationValidator/lib/AnnotationValidator-src.zip">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:file:/C:\Users\flums\Documents\CyberSec\Tools\ghidra_10.2.3_PUBLIC\docs\GhidraAPI_javadoc.zip!/api/"/>
