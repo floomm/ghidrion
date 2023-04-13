@@ -21,6 +21,7 @@ import ghidra.app.plugin.ProgramPlugin;
 import ghidra.app.services.GhidraScriptService;
 import ghidra.framework.plugintool.*;
 import ghidra.framework.plugintool.util.PluginStatus;
+import ghidra.program.model.listing.Program;
 import ghidra.util.HelpLocation;
 
 /**
@@ -49,7 +50,7 @@ public class GhidrionPlugin extends ProgramPlugin {
 		super(tool);
 		
 		String pluginName = getName();
-		provider = new GhidrionProvider(this, pluginName);
+		provider = new GhidrionProvider(this, pluginName, currentProgram);
 
 		// TODO: Customize help (or remove if help is not desired)
 		String topicName = this.getClass().getPackage().getName();
@@ -62,6 +63,14 @@ public class GhidrionPlugin extends ProgramPlugin {
 		super.init();
 
 		// TODO: Acquire services if necessary
+	}
+	
+	@Override
+	protected void programActivated(Program program) {
+		super.programActivated(program);
+		
+		this.currentProgram = program;
+		provider.setProgram(program);
 	}
 
 }
