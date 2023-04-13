@@ -18,6 +18,7 @@ package ghidrion;
 import ghidra.app.ExamplesPluginPackage;
 import ghidra.app.plugin.PluginCategoryNames;
 import ghidra.app.plugin.ProgramPlugin;
+import ghidra.app.services.GhidraScriptService;
 import ghidra.framework.plugintool.*;
 import ghidra.framework.plugintool.util.PluginStatus;
 import ghidra.util.HelpLocation;
@@ -31,12 +32,13 @@ import ghidra.util.HelpLocation;
 	packageName = ExamplesPluginPackage.NAME,
 	category = PluginCategoryNames.EXAMPLES,
 	shortDescription = "Plugin short description goes here.",
-	description = "Plugin long description goes here."
+	description = "Plugin long description goes here.",
+	servicesRequired = { GhidraScriptService.class }
 )
 //@formatter:on
 public class GhidrionPlugin extends ProgramPlugin {
 
-	GhidrionProvider provider;
+	private GhidrionProvider provider;
 
 	/**
 	 * Plugin constructor.
@@ -45,8 +47,7 @@ public class GhidrionPlugin extends ProgramPlugin {
 	 */
 	public GhidrionPlugin(PluginTool tool) {
 		super(tool);
-
-		// TODO: Customize provider (or remove if a provider is not desired)
+		
 		String pluginName = getName();
 		provider = new GhidrionProvider(this, pluginName);
 

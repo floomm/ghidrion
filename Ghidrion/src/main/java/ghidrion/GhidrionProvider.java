@@ -11,17 +11,22 @@ import docking.ActionContext;
 import docking.ComponentProvider;
 import docking.action.DockingAction;
 import docking.action.ToolBarData;
+import ghidra.app.services.GhidraScriptService;
 import ghidra.framework.plugintool.Plugin;
-import ghidra.util.Msg;
 import resources.Icons;
 
 public class GhidrionProvider extends ComponentProvider {
-
+	
+	private Plugin plugin;
+	
+	private GhidraScriptService scriptService;
+	
 	private JPanel panel;
 	private DockingAction action;
 
 	public GhidrionProvider(Plugin plugin, String owner) {
 		super(plugin.getTool(), owner, owner);
+		this.plugin = plugin;
 		buildPanel();
 		createActions();
 	}
@@ -40,7 +45,8 @@ public class GhidrionProvider extends ComponentProvider {
 		action = new DockingAction("My Action", getName()) {
 			@Override
 			public void actionPerformed(ActionContext context) {
-				Msg.showInfo(getClass(), panel, "Custom Action", "Hello Ghidrion!");
+				scriptService = ServiceHelper.getService(plugin.getTool(), GhidraScriptService.class);
+				scriptService.runScript("MorionTraceColorizerScript.java", null);
 			}
 		};
 		action.setToolBarData(new ToolBarData(Icons.ADD_ICON, null));
