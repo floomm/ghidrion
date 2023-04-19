@@ -38,6 +38,8 @@ import ghidra.util.HelpLocation;
 )
 //@formatter:on
 public class GhidrionPlugin extends ProgramPlugin {
+	
+	private static final String PLUGIN_NAME = "Ghidrion";
 
 	private GhidrionProvider provider;
 
@@ -49,8 +51,9 @@ public class GhidrionPlugin extends ProgramPlugin {
 	public GhidrionPlugin(PluginTool tool) {
 		super(tool);
 		
-		String pluginName = getName();
-		provider = new GhidrionProvider(this, pluginName, currentProgram);
+		String owner = getName();
+
+		provider = new GhidrionProvider(this, PLUGIN_NAME, owner, currentProgram);
 
 		// TODO: Customize help (or remove if help is not desired)
 		String topicName = this.getClass().getPackage().getName();

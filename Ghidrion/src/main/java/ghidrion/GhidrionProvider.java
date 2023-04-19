@@ -1,7 +1,11 @@
 package ghidrion;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -28,8 +32,8 @@ public class GhidrionProvider extends ComponentProvider {
 	private JPanel panel;
 	private DockingAction action;
 
-	public GhidrionProvider(Plugin plugin, String owner, Program currentProgram) {
-		super(plugin.getTool(), owner, owner);
+	public GhidrionProvider(Plugin plugin, String pluginName, String owner, Program currentProgram) {
+		super(plugin.getTool(), pluginName, owner);
 		this.plugin = plugin;
 		this.currentProgram = currentProgram;
 		if (currentProgram != null) {
@@ -37,32 +41,36 @@ public class GhidrionProvider extends ComponentProvider {
 		}
 
 		buildPanel();
-		createActions();
 	}
 
 	// Customize GUI
 	private void buildPanel() {
 		panel = new JPanel(new BorderLayout());
-		JTextArea textArea = new JTextArea(5, 25);
-		textArea.setEditable(false);
-		panel.add(new JScrollPane(textArea));
+		
+		panel.add(buildTracePanel());
 		
 		setVisible(true);
 	}
-
-	// Customize actions
-	private void createActions() {
-		action = new DockingAction("My Action", getName()) {
+	
+	private JPanel buildTracePanel() {
+		JPanel tracePanel = new JPanel(new FlowLayout());
+		
+		JButton pickTraceFileBtn = new JButton("Pick Morion trace file");
+		tracePanel.add(pickTraceFileBtn);
+		
+		pickTraceFileBtn.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionContext context) {
+			public void actionPerformed(ActionEvent e) {
 				scriptService = ServiceHelper.getService(plugin.getTool(), GhidraScriptService.class);
 				scriptService.runScript("MorionTraceColorizerScript.java", null);
 			}
-		};
-		action.setToolBarData(new ToolBarData(Icons.ADD_ICON, null));
-		action.setEnabled(true);
-		action.markHelpUnnecessary();
-		dockingTool.addLocalAction(this, action);
+		});
+		
+		JButton clearTracesBtn = new JButton("Clear Morion traces");
+		tracePanel.add(clearTracesBtn);
+		// TODO: ClearMorionTracesScript
+		
+		return tracePanel;
 	}
 
 	@Override
