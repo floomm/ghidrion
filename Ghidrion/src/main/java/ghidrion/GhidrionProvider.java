@@ -1,36 +1,32 @@
 package ghidrion;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 
-import docking.ActionContext;
 import docking.ComponentProvider;
-import docking.action.DockingAction;
-import docking.action.ToolBarData;
 import ghidra.app.services.GhidraScriptService;
 import ghidra.framework.plugintool.Plugin;
 import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.listing.Program;
-import resources.Icons;
 
 public class GhidrionProvider extends ComponentProvider {
 	
+	public static Color traceColor = Color.BLUE;
+
 	private Plugin plugin;
 	private Program currentProgram;
 	private FlatProgramAPI flatAPI;
-	
 	private GhidraScriptService scriptService;
 	
 	private JPanel panel;
-	private DockingAction action;
 
 	public GhidrionProvider(Plugin plugin, String pluginName, String owner, Program currentProgram) {
 		super(plugin.getTool(), pluginName, owner);
@@ -55,20 +51,38 @@ public class GhidrionProvider extends ComponentProvider {
 	private JPanel buildTracePanel() {
 		JPanel tracePanel = new JPanel(new FlowLayout());
 		
-		JButton pickTraceFileBtn = new JButton("Pick Morion trace file");
-		tracePanel.add(pickTraceFileBtn);
+		// Choose a color for tracing
+		JButton colorBtn = new JButton();
+		colorBtn.setBackground(traceColor);
+		colorBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+                Color newColor = JColorChooser.showDialog(panel, "Choose Color", traceColor);
+                if (newColor != null) {
+                    traceColor = newColor;
+                    colorBtn.setBackground(traceColor);
+                }
+			}
+		});
 		
+		// Import a yaml trace file 
+		JButton pickTraceFileBtn = new JButton("Import trace");
 		pickTraceFileBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				scriptService = ServiceHelper.getService(plugin.getTool(), GhidraScriptService.class);
-				scriptService.runScript("MorionTraceColorizerScript.java", null);
+				scriptService.runScript("/tracing/MorionTraceColorizerScript.java", null);
 			}
 		});
 		
-		JButton clearTracesBtn = new JButton("Clear Morion traces");
-		tracePanel.add(clearTracesBtn);
+		// Clear (decolorize) all Morion traces
+		JButton clearTracesBtn = new JButton("Clear trace");
 		// TODO: ClearMorionTracesScript
+
+		// Add all components to panel
+		tracePanel.add(pickTraceFileBtn);
+		tracePanel.add(colorBtn);
+		tracePanel.add(clearTracesBtn);
 		
 		return tracePanel;
 	}
