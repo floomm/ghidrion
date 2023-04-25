@@ -1,5 +1,6 @@
 package ghidrion;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -32,10 +33,10 @@ public class MorionTraceColorizer {
 		this.parent = parent;
 	}
 	
-	public void run() {
+	public String run(Color color) {
 		ColorizingService colorizingService = ServiceHelper.getService(plugin.getTool(), ColorizingService.class, this, parent);
 		if (colorizingService == null) {
-			return;
+			return null;
 		}
 		
 		File traceFile = getTraceFile();
@@ -45,8 +46,10 @@ public class MorionTraceColorizer {
         // TODO: Jump to start of trace in the Listing window
         
 		int id = plugin.getCurrentProgram().startTransaction("Colorize traced addresses");
-        colorizingService.setBackgroundColor(addresses, GhidrionProvider.traceColor);
+        colorizingService.setBackgroundColor(addresses, color);
         plugin.getCurrentProgram().endTransaction(id, true);
+        
+        return traceFile.getName();
 	}
 	
 	private File getTraceFile() {

@@ -3,24 +3,31 @@ package ghidrion;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 import docking.ComponentProvider;
 
 public class GhidrionProvider extends ComponentProvider {
 	
-	public static Color traceColor = Color.BLUE;
+	private Color traceColor = Color.CYAN;
 
 	private GhidrionPlugin plugin;
 	
 	private JPanel panel;
+	
+	private DefaultListModel<String> traceListModel = new DefaultListModel<>();
+	private JList<String> traceList = new JList<>(traceListModel);
 
 	public GhidrionProvider(GhidrionPlugin plugin, String pluginName, String owner) {
 		super(plugin.getTool(), pluginName, owner);
@@ -31,59 +38,93 @@ public class GhidrionProvider extends ComponentProvider {
 
 	// Customize GUI
 	private void buildPanel() {
-		panel = new JPanel(new GridBagLayout());
-		
-		panel.add(buildTracePanel());
+		panel = new JPanel(new GridLayout(6, 1));
+		panel.add(new JLabel("Create a Morion trace file"));
+		panel.add(new JPanel());
+		panel.add(new JLabel("Trace an execution"));
+		panel.add(new JPanel());
+		panel.add(new JLabel("Display Morion trace file"));
+		panel.add(buildDisplayTracePanel());
 		
 		setVisible(true);
 	}
 	
-	private JPanel buildTracePanel() {
-		JPanel tracePanel = new JPanel(new FlowLayout());
+	private JPanel buildDisplayTracePanel() {
+		JPanel displayTracePanel = new JPanel(new GridLayout(2, 1));
 		
-		// Choose a color for tracing
-		JButton colorBtn = new JButton();
-		colorBtn.setBackground(traceColor);
-		colorBtn.setPreferredSize(new Dimension(25, 25));
-		colorBtn.setMinimumSize(new Dimension(20, 20));
-		colorBtn.addActionListener(new ActionListener() {
+		JPanel panel1 = new JPanel(new FlowLayout());
+		panel1.add(buildDisplayTraceButton());
+		panel1.add(buildChooseColorButton());
+		panel1.add(buildRemoveTracesButton());
+		
+		displayTracePanel.add(panel1);
+		displayTracePanel.add(buildTracesScrollPane());
+		
+		return displayTracePanel;
+	}
+	
+	/**
+	 * @return Button which allows to choose a trace color
+	 */
+	private JButton buildChooseColorButton() {
+		JButton colorButton = new JButton();
+
+		colorButton.setBackground(traceColor);
+		colorButton.setPreferredSize(new Dimension(25, 25));
+		colorButton.setMinimumSize(new Dimension(20, 20));
+
+		colorButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
                 Color newColor = JColorChooser.showDialog(panel, "Choose a color", traceColor);
                 if (newColor != null) {
                     traceColor = newColor;
-                    colorBtn.setOpaque(true);
-                    colorBtn.setBackground(traceColor);
+                    colorButton.setBackground(traceColor);
+                    colorButton.setOpaque(true);
                 }
 			}
 		});
 		
-		// Import a yaml trace file 
-		JButton importTraceBtn = new JButton("Import trace");
-		importTraceBtn.addActionListener(new ActionListener() {
+		return colorButton;
+	}
+	
+	private JButton buildDisplayTraceButton() {
+		JButton importButton = new JButton("Display trace");
+		
+		importButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				MorionTraceColorizer colorizer = new MorionTraceColorizer(plugin, tracePanel);
-				colorizer.run();
+				MorionTraceColorizer colorizer = new MorionTraceColorizer(plugin, panel);
+				String traceName = colorizer.run(traceColor);
+				if (traceName != null) {
+					traceListModel.addElement(traceName);
+				}
 			}
 		});
 		
-		// Clear (decolorize) all Morion traces
-		JButton clearTraceBtn = new JButton("Clear trace");
-		clearTraceBtn.addActionListener(new ActionListener() {
-			
+		return importButton;
+	}
+	
+	private JButton buildRemoveTracesButton() {
+		JButton removeButton = new JButton("Remove selected traces");
+		
+		removeButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO
+				int selectedIndex = traceList.getSelectedIndex();
+				if (selectedIndex != -1) {
+					traceListModel.remove(selectedIndex);
+				}
 			}
 		});
-
-		// Add all components to panel
-		tracePanel.add(importTraceBtn);
-		tracePanel.add(colorBtn);
-		tracePanel.add(clearTraceBtn);
 		
-		return tracePanel;
+		return removeButton;
+	}
+	
+	private JScrollPane buildTracesScrollPane() {
+		JScrollPane tracesScrollPane = new JScrollPane(traceList);
+		
+		return tracesScrollPane;
 	}
 
 	@Override
