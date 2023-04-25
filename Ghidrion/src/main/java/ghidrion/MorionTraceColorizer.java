@@ -34,20 +34,13 @@ public class MorionTraceColorizer {
 	}
 	
 	public String run(Color color) {
-		ColorizingService colorizingService = ServiceHelper.getService(plugin.getTool(), ColorizingService.class, this, parent);
-		if (colorizingService == null) {
-			return null;
-		}
-		
 		File traceFile = getTraceFile();
 		
 		AddressSet addresses = extractTracedAddresses(traceFile);
         
         // TODO: Jump to start of trace in the Listing window
         
-		int id = plugin.getCurrentProgram().startTransaction("Colorize traced addresses");
-        colorizingService.setBackgroundColor(addresses, color);
-        plugin.getCurrentProgram().endTransaction(id, true);
+		colorize(addresses, color);
         
         return traceFile.getName();
 	}
@@ -97,5 +90,16 @@ public class MorionTraceColorizer {
         }
 
         return addresses;
+	}
+	
+	private void colorize(AddressSet addresses, Color color) {
+		ColorizingService colorizingService = ServiceHelper.getService(plugin.getTool(), ColorizingService.class, this, parent);
+		if (colorizingService == null) {
+			return;
+		}
+		
+		int id = plugin.getCurrentProgram().startTransaction("Colorize traced addresses");
+        colorizingService.setBackgroundColor(addresses, color);
+        plugin.getCurrentProgram().endTransaction(id, true);
 	}
 }
