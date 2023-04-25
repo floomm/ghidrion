@@ -44,7 +44,9 @@ public class MorionTraceColorizer {
         
         // TODO: Jump to start of trace in the Listing window
         
+		int id = plugin.getCurrentProgram().startTransaction("Colorize traced addresses");
         colorizingService.setBackgroundColor(addresses, GhidrionProvider.traceColor);
+        plugin.getCurrentProgram().endTransaction(id, true);
 	}
 	
 	private File getTraceFile() {
