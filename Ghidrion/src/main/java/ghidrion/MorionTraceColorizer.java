@@ -7,7 +7,9 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -19,6 +21,9 @@ import org.yaml.snakeyaml.Yaml;
 
 import ghidra.app.plugin.core.colorizer.ColorizingService;
 import ghidra.program.model.address.AddressSet;
+import ghidra.program.model.listing.CodeUnit;
+import ghidra.program.model.listing.Instruction;
+import ghidra.program.model.listing.InstructionIterator;
 import ghidra.util.Msg;
 
 public class MorionTraceColorizer {
@@ -26,23 +31,68 @@ public class MorionTraceColorizer {
 	private static final String INSTRUCTIONS_KEY = "instructions";
 	
 	private GhidrionPlugin plugin;
+	private ColorizingService colorizingService;
+	
 	private JComponent parent;
+
+	private Map<String, AddressSet> traces = new HashMap<>();
 	
 	public MorionTraceColorizer(GhidrionPlugin plugin, JComponent parent) {
 		this.plugin = plugin;
 		this.parent = parent;
+		this.colorizingService = ServiceHelper.getService(plugin.getTool(), ColorizingService.class, this, parent);
 	}
 	
-	public String run(Color color) {
+	/**
+	 * Asks for a Morion trace file (.yaml) and sets the background color of the traced instructions to the given color.
+	 * 
+	 * @param color - the background color
+	 * @return the name of the Morion trace file
+	 */
+	public String colorize(Color color) {
 		File traceFile = getTraceFile();
-		
 		AddressSet addresses = extractTracedAddresses(traceFile);
+		
+		String traceName = traceFile.getName();
+		traces.put(traceName, addresses);
+		String comment = "Trace: " + traceName;
+
+		// Colorize addresses
+		if (colorizingService == null) {
+			return null;
+		}
+		int colorizeId = plugin.getCurrentProgram().startTransaction("Colorize " + traceName);
+        colorizingService.setBackgroundColor(addresses, color);
+        plugin.getCurrentProgram().endTransaction(colorizeId, true);
+        
+        // Comment addresses
+        InstructionIterator iter = plugin.getCurrentProgram().getListing().getInstructions(addresses, true);
+		int commentId = plugin.getCurrentProgram().startTransaction("Comment traced addresses");
+        while (iter.hasNext()) {
+        	Instruction instruction = iter.next();
+        	instruction.setComment(CodeUnit.PRE_COMMENT, comment);
+        }
+        plugin.getCurrentProgram().endTransaction(commentId, true);
         
         // TODO: Jump to start of trace in the Listing window
         
-		colorize(addresses, color);
-        
-        return traceFile.getName();
+        return traceName;
+	}
+	
+	/**
+	 * Clears background color of all instructions of each Morion trace file.  
+	 * 
+	 * @param traceNames - the names of the Morion trace files
+	 */
+	public void decolorize(List<String> traceNames) {
+		for (String traceName : traceNames) {
+			AddressSet addresses = traces.get(traceName);
+			
+			// Decolorize
+			int decolorizeId = plugin.getCurrentProgram().startTransaction("Decolorize " + traceName);
+			colorizingService.clearBackgroundColor(addresses);
+			plugin.getCurrentProgram().endTransaction(decolorizeId, true);
+		}
 	}
 	
 	private File getTraceFile() {
@@ -91,15 +141,5 @@ public class MorionTraceColorizer {
 
         return addresses;
 	}
-	
-	private void colorize(AddressSet addresses, Color color) {
-		ColorizingService colorizingService = ServiceHelper.getService(plugin.getTool(), ColorizingService.class, this, parent);
-		if (colorizingService == null) {
-			return;
-		}
-		
-		int id = plugin.getCurrentProgram().startTransaction("Colorize traced addresses");
-        colorizingService.setBackgroundColor(addresses, color);
-        plugin.getCurrentProgram().endTransaction(id, true);
-	}
+
 }

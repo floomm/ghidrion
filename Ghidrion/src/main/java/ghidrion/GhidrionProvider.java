@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -19,21 +20,25 @@ import javax.swing.JScrollPane;
 import docking.ComponentProvider;
 
 public class GhidrionProvider extends ComponentProvider {
-	
-	private Color traceColor = Color.CYAN;
 
 	private GhidrionPlugin plugin;
 	
 	private JPanel panel;
-	
 	private DefaultListModel<String> traceListModel = new DefaultListModel<>();
 	private JList<String> traceList = new JList<>(traceListModel);
+	
+	private MorionTraceColorizer colorizer;
+	private Color traceColor = Color.CYAN;
 
 	public GhidrionProvider(GhidrionPlugin plugin, String pluginName, String owner) {
 		super(plugin.getTool(), pluginName, owner);
 		this.plugin = plugin;
 
 		buildPanel();
+	}
+	
+	public void init() {
+		this.colorizer = new MorionTraceColorizer(plugin, panel);
 	}
 
 	// Customize GUI
@@ -94,11 +99,8 @@ public class GhidrionProvider extends ComponentProvider {
 		importButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				MorionTraceColorizer colorizer = new MorionTraceColorizer(plugin, panel);
-				String traceName = colorizer.run(traceColor);
-				if (traceName != null) {
-					traceListModel.addElement(traceName);
-				}
+				String traceName = colorizer.colorize(traceColor);
+				traceListModel.addElement(traceName);
 			}
 		});
 		
@@ -111,9 +113,12 @@ public class GhidrionProvider extends ComponentProvider {
 		removeButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int selectedIndex = traceList.getSelectedIndex();
-				if (selectedIndex != -1) {
-					traceListModel.remove(selectedIndex);
+				List<String> selectedItems = traceList.getSelectedValuesList();
+				colorizer.decolorize(selectedItems);
+
+				int[] selectedIndices = traceList.getSelectedIndices();
+				for (int i : selectedIndices) {
+					traceListModel.remove(i);
 				}
 			}
 		});

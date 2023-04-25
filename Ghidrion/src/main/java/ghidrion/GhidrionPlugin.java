@@ -69,6 +69,7 @@ public class GhidrionPlugin extends ProgramPlugin {
 	@Override
 	public void init() {
 		super.init();
+		this.provider.init();
 
 		// TODO: Acquire services if necessary
 	}
