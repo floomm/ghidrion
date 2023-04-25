@@ -21,9 +21,6 @@ import org.yaml.snakeyaml.Yaml;
 
 import ghidra.app.plugin.core.colorizer.ColorizingService;
 import ghidra.program.model.address.AddressSet;
-import ghidra.program.model.listing.CodeUnit;
-import ghidra.program.model.listing.Instruction;
-import ghidra.program.model.listing.InstructionIterator;
 import ghidra.util.Msg;
 
 public class MorionTraceColorizer {
@@ -64,15 +61,6 @@ public class MorionTraceColorizer {
 		int colorizeId = plugin.getCurrentProgram().startTransaction("Colorize " + traceName);
         colorizingService.setBackgroundColor(addresses, color);
         plugin.getCurrentProgram().endTransaction(colorizeId, true);
-        
-        // Comment addresses
-        InstructionIterator iter = plugin.getCurrentProgram().getListing().getInstructions(addresses, true);
-		int commentId = plugin.getCurrentProgram().startTransaction("Comment traced addresses");
-        while (iter.hasNext()) {
-        	Instruction instruction = iter.next();
-        	instruction.setComment(CodeUnit.PRE_COMMENT, comment);
-        }
-        plugin.getCurrentProgram().endTransaction(commentId, true);
         
         // TODO: Jump to start of trace in the Listing window
         
