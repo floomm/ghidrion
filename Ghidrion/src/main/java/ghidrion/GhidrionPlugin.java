@@ -15,22 +15,15 @@
  */
 package ghidrion;
 
-import java.awt.BorderLayout;
-
-import javax.swing.*;
-
-import docking.ActionContext;
-import docking.ComponentProvider;
-import docking.action.DockingAction;
-import docking.action.ToolBarData;
 import ghidra.app.ExamplesPluginPackage;
 import ghidra.app.plugin.PluginCategoryNames;
 import ghidra.app.plugin.ProgramPlugin;
+import ghidra.app.services.GhidraScriptService;
 import ghidra.framework.plugintool.*;
 import ghidra.framework.plugintool.util.PluginStatus;
+import ghidra.program.flatapi.FlatProgramAPI;
+import ghidra.program.model.listing.Program;
 import ghidra.util.HelpLocation;
-import ghidra.util.Msg;
-import resources.Icons;
 
 /**
  * TODO: Provide class-level documentation that describes what this plugin does.
@@ -41,12 +34,16 @@ import resources.Icons;
 	packageName = ExamplesPluginPackage.NAME,
 	category = PluginCategoryNames.EXAMPLES,
 	shortDescription = "Plugin short description goes here.",
-	description = "Plugin long description goes here."
+	description = "Plugin long description goes here.",
+	servicesRequired = { GhidraScriptService.class }
 )
 //@formatter:on
 public class GhidrionPlugin extends ProgramPlugin {
+	
+	private static final String PLUGIN_NAME = "Ghidrion";
 
-	MyProvider provider;
+	private GhidrionProvider provider;
+	private FlatProgramAPI flatAPI;
 
 	/**
 	 * Plugin constructor.
@@ -55,10 +52,13 @@ public class GhidrionPlugin extends ProgramPlugin {
 	 */
 	public GhidrionPlugin(PluginTool tool) {
 		super(tool);
+		
+		String owner = getName();
 
-		// TODO: Customize provider (or remove if a provider is not desired)
-		String pluginName = getName();
-		provider = new MyProvider(this, pluginName);
+		this.provider = new GhidrionProvider(this, PLUGIN_NAME, owner);
+		if (currentProgram != null) {
+			this.flatAPI = new FlatProgramAPI(currentProgram);
+		}
 
 		// TODO: Customize help (or remove if help is not desired)
 		String topicName = this.getClass().getPackage().getName();
@@ -69,48 +69,21 @@ public class GhidrionPlugin extends ProgramPlugin {
 	@Override
 	public void init() {
 		super.init();
+		this.provider.init();
 
 		// TODO: Acquire services if necessary
 	}
-
-	// TODO: If provider is desired, it is recommended to move it to its own file
-	private static class MyProvider extends ComponentProvider {
-
-		private JPanel panel;
-		private DockingAction action;
-
-		public MyProvider(Plugin plugin, String owner) {
-			super(plugin.getTool(), owner, owner);
-			buildPanel();
-			createActions();
-		}
-
-		// Customize GUI
-		private void buildPanel() {
-			panel = new JPanel(new BorderLayout());
-			JTextArea textArea = new JTextArea(5, 25);
-			textArea.setEditable(false);
-			panel.add(new JScrollPane(textArea));
-			setVisible(true);
-		}
-
-		// TODO: Customize actions
-		private void createActions() {
-			action = new DockingAction("My Action", getName()) {
-				@Override
-				public void actionPerformed(ActionContext context) {
-					Msg.showInfo(getClass(), panel, "Custom Action", "Hello Ghidrion!");
-				}
-			};
-			action.setToolBarData(new ToolBarData(Icons.ADD_ICON, null));
-			action.setEnabled(true);
-			action.markHelpUnnecessary();
-			dockingTool.addLocalAction(this, action);
-		}
-
-		@Override
-		public JComponent getComponent() {
-			return panel;
-		}
+	
+	@Override
+	protected void programActivated(Program program) {
+		super.programActivated(program);
+		
+		this.currentProgram = program;
+		this.flatAPI = new FlatProgramAPI(program);
 	}
+	
+	public FlatProgramAPI getFlatAPI() {
+		return flatAPI;
+	}
+
 }
