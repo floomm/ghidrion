@@ -1,4 +1,4 @@
-package ghidrion;
+package view;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -18,6 +18,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import docking.ComponentProvider;
+import ghidrion.GhidrionPlugin;
+import ghidrion.MorionTraceColorizer;
 
 public class GhidrionProvider extends ComponentProvider {
 
