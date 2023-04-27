@@ -8,6 +8,7 @@ public class StatesPanel extends JPanel {
 	public StatesPanel() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		add(new RegistersPanel());
+		add(new MemoryPanel());
 	}
 	
 }
