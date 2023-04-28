@@ -5,10 +5,22 @@ import javax.swing.JPanel;
 
 public class StatesPanel extends JPanel {
 	
-	public StatesPanel() {
+	private CreateTraceFilePanel parent;
+	
+	public StatesPanel(CreateTraceFilePanel parent) {
+		this.parent = parent;
+		
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		add(new RegistersPanel());
-		add(new MemoryPanel());
+		add(new RegistersPanel(this));
+		add(new MemoryPanel(this));
+	}
+	
+	public void addEntryStateRegister(String name, String value, boolean isSymbolic) {
+		parent.addEntryStateRegister(name, value, isSymbolic);
+	}
+	
+	public void addEntryStateMemory(String address, String value, boolean isSymbolic) {
+		parent.addEntryStateMemory(address, value, isSymbolic);
 	}
 	
 }

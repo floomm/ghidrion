@@ -2,6 +2,7 @@ package view;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
@@ -14,6 +15,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 public class HooksPanel extends JPanel {
+	
 	private JTextField libraryField;
     private JTextField functionField;
     private JTextField entryAddressField;
@@ -23,7 +25,7 @@ public class HooksPanel extends JPanel {
     private DefaultListModel<ArrayList<String>> hookListModel = new DefaultListModel<>();
 	private JList<ArrayList<String>> hookList = new JList<>(hookListModel);
 	
-	public HooksPanel() {
+	public HooksPanel(CreateTraceFilePanel parent) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         JPanel inputPanel = new JPanel();
         inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.X_AXIS));
@@ -59,25 +61,33 @@ public class HooksPanel extends JPanel {
 
         JButton addButton = new JButton("Add");
         addButton.addActionListener(e -> {
-            String library = libraryField.getText();
-            String function = functionField.getText();
+            String libraryName = libraryField.getText();
+            String functionName = functionField.getText();
             String entryAddress = entryAddressField.getText();
             String leaveAddress = leaveAddressField.getText();
             String targetAddress = targetAddressField.getText();
-            String comboBoxSelection = (String) comboBox.getSelectedItem();
+            String mode = (String) comboBox.getSelectedItem();
 
             ArrayList<String> hook = new ArrayList<>(
-            		Arrays.asList(library, function, entryAddress, leaveAddress, targetAddress, comboBoxSelection)
+            		Arrays.asList(libraryName, functionName, entryAddress, leaveAddress, targetAddress, mode)
             	);
             
             hookListModel.addElement(hook);
+            
+            parent.addHook(libraryName, functionName, entryAddress, leaveAddress, targetAddress, mode);
         });
         inputPanel.add(addButton);
-
         add(inputPanel);
 
         JScrollPane scrollPane = new JScrollPane(hookList);
-        
         add(scrollPane);
+	}
+	
+	public List<ArrayList<String>> getHooks() {
+		List<ArrayList<String>> hooks = new ArrayList<>();
+		for (int i = 0; i < hookListModel.getSize(); i++) {
+			hooks.add(hookListModel.getElementAt(i));
+		}
+		return hooks;
 	}
 }
