@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
-import model.State;
+import model.MorionTraceFile;
 
 public class RegistersPanel extends JPanel {
 
@@ -29,12 +29,12 @@ public class RegistersPanel extends JPanel {
         inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.X_AXIS));
 
         JLabel nameLabel = new JLabel("Register name: ");
-        nameField = new JTextField(10);
+        nameField = new HexTextField(10);
         inputPanel.add(nameLabel);
         inputPanel.add(nameField);
 
         JLabel valueLabel = new JLabel("Register value: ");
-        valueField = new JTextField(10);
+        valueField = new HexTextField(10);
         inputPanel.add(valueLabel);
         inputPanel.add(valueField);
         
@@ -52,7 +52,7 @@ public class RegistersPanel extends JPanel {
             	);
             
             if (isSymbolic) {
-            	register.add(State.SYMBOLIC);
+            	register.add(MorionTraceFile.SYMBOLIC);
             }
             
             registerListModel.addElement(register);

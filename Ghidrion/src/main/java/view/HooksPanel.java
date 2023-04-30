@@ -41,17 +41,17 @@ public class HooksPanel extends JPanel {
         inputPanel.add(functionField);
 
         JLabel entryAddressLabel = new JLabel("Entry address: ");
-        entryAddressField = new JTextField(10);
+        entryAddressField = new HexTextField(10);
         inputPanel.add(entryAddressLabel);
         inputPanel.add(entryAddressField);
 
         JLabel leaveAddressLabel = new JLabel("Leave address: ");
-        leaveAddressField = new JTextField(10);
+        leaveAddressField = new HexTextField(10);
         inputPanel.add(leaveAddressLabel);
         inputPanel.add(leaveAddressField);
 
         JLabel targetAddressLabel = new JLabel("Target address: ");
-        targetAddressField = new JTextField(10);
+        targetAddressField = new HexTextField(10);
         inputPanel.add(targetAddressLabel);
         inputPanel.add(targetAddressField);
 

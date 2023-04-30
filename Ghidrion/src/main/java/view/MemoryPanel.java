@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
-import model.State;
+import model.MorionTraceFile;
 
 public class MemoryPanel extends JPanel {
 	private JTextField addressField;
@@ -28,12 +28,12 @@ public class MemoryPanel extends JPanel {
         inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.X_AXIS));
 
         JLabel nameLabel = new JLabel("Memory address: ");
-        addressField = new JTextField(10);
+        addressField = new HexTextField(10);
         inputPanel.add(nameLabel);
         inputPanel.add(addressField);
 
         JLabel valueLabel = new JLabel("Memory value: ");
-        valueField = new JTextField(10);
+        valueField = new HexTextField(10);
         inputPanel.add(valueLabel);
         inputPanel.add(valueField);
         
@@ -51,7 +51,7 @@ public class MemoryPanel extends JPanel {
             	);
             
             if (isSymbolic) {
-            	memoryUnit.add(State.SYMBOLIC);
+            	memoryUnit.add(MorionTraceFile.SYMBOLIC);
             }
             
             memoryListModel.addElement(memoryUnit);
