@@ -7,6 +7,8 @@ import java.util.Map;
 
 public class MorionTraceFile {
 	
+	public static final String SYMBOLIC = "$$";
+	
 	// Keys: "hooks", "info", "instructions", "states"
 	private Map<String, Object> traceFile = new HashMap<>();
 
@@ -69,7 +71,7 @@ public class MorionTraceFile {
 		List<String> valueList = new ArrayList<>();
 		valueList.add(value);
 		if (isSymbolic) {
-			valueList.add(State.SYMBOLIC);
+			valueList.add(SYMBOLIC);
 		}
 		entryRegisters.put(name, valueList);
 	}
@@ -78,7 +80,7 @@ public class MorionTraceFile {
 		List<String> valueList = new ArrayList<>();
 		valueList.add(value);
 		if (isSymbolic) {
-			valueList.add(State.SYMBOLIC);
+			valueList.add(SYMBOLIC);
 		}
 		entryMemory.put(address, valueList);
 	}
