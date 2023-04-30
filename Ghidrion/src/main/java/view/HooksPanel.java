@@ -83,8 +83,8 @@ public class HooksPanel extends JPanel {
         add(scrollPane);
 	}
 	
-	public List<ArrayList<String>> getHooks() {
-		List<ArrayList<String>> hooks = new ArrayList<>();
+	public List<List<String>> getHooks() {
+		List<List<String>> hooks = new ArrayList<>();
 		for (int i = 0; i < hookListModel.getSize(); i++) {
 			hooks.add(hookListModel.getElementAt(i));
 		}

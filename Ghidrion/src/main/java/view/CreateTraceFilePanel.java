@@ -1,8 +1,16 @@
 package view;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+
+import org.yaml.snakeyaml.Yaml;
 
 import model.MorionTraceFile;
 
@@ -15,13 +23,34 @@ public class CreateTraceFilePanel extends JPanel {
 
 	public CreateTraceFilePanel() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		add(hooksPanel);
-		add(statesPanel);
 		
 		JButton createButton = new JButton("Create Morion trace file");
 		createButton.addActionListener(e -> {
-			// TODO: Convert traceFile to yaml
+			File file = new File("tracefile.init.yaml");
+			Yaml yaml = new Yaml();
+			String content = yaml.dump(traceFile.getTraceFile());
+			
+			JFileChooser fileChooser = new JFileChooser();
+			int result = fileChooser.showSaveDialog(this.getParent());
+			if (result == JFileChooser.APPROVE_OPTION) {
+				file = fileChooser.getSelectedFile();
+			}
+			
+			if (file != null) {
+				try (FileOutputStream fos = new FileOutputStream(file)) {
+					fos.write(content.getBytes());
+					fos.close();
+				} catch (FileNotFoundException e1) {
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
 		});
+
+		add(hooksPanel);
+		add(statesPanel);
+		add(createButton);
 	}
 	
 	public void init() {
@@ -33,11 +62,11 @@ public class CreateTraceFilePanel extends JPanel {
 	}
 	
 	public void addEntryStateRegister(String name, String value, boolean isSymbolic) {
-		traceFile.addEntryStateRegister(name, value, isSymbolic);
+		traceFile.addEntryRegister(name, value, isSymbolic);
 	}
 	
 	public void addEntryStateMemory(String address, String value, boolean isSymbolic) {
-		traceFile.addEntryStateMemory(address, value, isSymbolic);
+		traceFile.addEntryMemory(address, value, isSymbolic);
 	}
 
 }
