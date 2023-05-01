@@ -446,6 +446,13 @@ public class GhidrionProvider extends ComponentProvider {
 		 * ----------------------------------------------------------------------------------------------------------
 		 */
 		
+		textFieldEntry.setDocument(new HexDocument());
+		textFieldLeave.setDocument(new HexDocument());
+		textFieldTarget.setDocument(new HexDocument());
+		textFieldRegisterValue.setDocument(new HexDocument());
+		textFieldMemoryAddress.setDocument(new HexDocument());
+		textFieldMemoryValue.setDocument(new HexDocument());
+		
 		setupBtnAddHook(btnAddHook, comboBoxHookMode);
 		scrollPaneHooks.setViewportView(hookList);
 		
