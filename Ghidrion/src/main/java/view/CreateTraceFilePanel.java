@@ -5,10 +5,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -18,11 +20,14 @@ public class CreateTraceFilePanel extends JPanel {
 	
 	private MorionTraceFile traceFile = new MorionTraceFile();
 	
-	private HooksPanel hooksPanel = new HooksPanel(this);
 	private StatesPanel statesPanel = new StatesPanel(this);
 
 	public CreateTraceFilePanel() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+
+		HooksPanel hooksPanel = new HooksPanel(this);
+		TitledBorder borderRegistersPanel = BorderFactory.createTitledBorder("Add hook");
+		hooksPanel.setBorder(borderRegistersPanel);
 		
 		JButton createButton = new JButton("Create Morion trace file");
 		createButton.addActionListener(e -> {
