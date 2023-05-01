@@ -5,6 +5,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.JFileChooser;
 
@@ -31,15 +35,31 @@ public class TraceFileController {
 	}
 	
 	public void addHook(String libraryName, String functionName, String entry, String leave, String target, String mode) {
-		traceFile.addHook(libraryName, functionName, entry, leave, target, mode);
+		Map<String, String> hookDetails = new HashMap<>();
+		hookDetails.put("entry", entry);
+		hookDetails.put("leave", leave);
+		hookDetails.put("target", target);
+		hookDetails.put("mode", mode);
+		
+		traceFile.addHook(libraryName, functionName, hookDetails);
 	}
 
 	public void addEntryStateRegister(String name, String value, boolean isSymbolic) {
-		traceFile.addEntryStateRegister(name, value, isSymbolic);
+		List<String> valueList = new ArrayList<>();
+		valueList.add(value);
+		if (isSymbolic) {
+			valueList.add(MorionTraceFile.SYMBOLIC);
+		}
+		traceFile.addEntryStateRegister(name, valueList);
 	}
 
 	public void addEntryStateMemory(String address, String value, boolean isSymbolic) {
-		traceFile.addEntryStateMemory(address, value, isSymbolic);
+		List<String> valueList = new ArrayList<>();
+		valueList.add(value);
+		if (isSymbolic) {
+			valueList.add(MorionTraceFile.SYMBOLIC);
+		}
+		traceFile.addEntryStateMemory(address, valueList);
 	}
 	
 	public void createTraceFile(Component container) {
