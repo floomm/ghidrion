@@ -1,4 +1,4 @@
-package ghidrion;
+package view;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -11,65 +11,57 @@ import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import docking.ComponentProvider;
+import ghidrion.GhidrionPlugin;
+import ghidrion.MorionTraceColorizer;
 
-public class GhidrionProvider extends ComponentProvider {
+public class DisplayTracePanel extends JPanel {
 
-	private GhidrionPlugin plugin;
-	
-	private JPanel panel;
+	private JPanel panel = this;
 	private DefaultListModel<String> traceListModel = new DefaultListModel<>();
 	private JList<String> traceList = new JList<>(traceListModel);
 	
 	private MorionTraceColorizer colorizer;
 	private Color traceColor = Color.CYAN;
 
-	public GhidrionProvider(GhidrionPlugin plugin, String pluginName, String owner) {
-		super(plugin.getTool(), pluginName, owner);
-		this.plugin = plugin;
+	public DisplayTracePanel() {
+		setLayout(new GridLayout(3, 1));
+		
+		JPanel colorizeTracePanel = new JPanel(new FlowLayout());
+		colorizeTracePanel.add(buildDisplayTraceButton());
+		colorizeTracePanel.add(buildChooseColorButton());
 
-		buildPanel();
+		add(colorizeTracePanel);
+		add(buildRemoveTracesButton());
+		add(buildTracesScrollPane());
 	}
 	
-	public void init() {
-		this.colorizer = new MorionTraceColorizer(plugin, panel);
-	}
-
-	// Customize GUI
-	private void buildPanel() {
-		panel = new JPanel(new GridLayout(6, 1));
-		panel.add(new JLabel("Create a Morion trace file"));
-		panel.add(new JPanel());
-		panel.add(new JLabel("Trace an execution"));
-		panel.add(new JPanel());
-		panel.add(new JLabel("Display Morion trace file"));
-		panel.add(buildDisplayTracePanel());
-		
-		setVisible(true);
-	}
-	
-	private JPanel buildDisplayTracePanel() {
-		JPanel displayTracePanel = new JPanel(new GridLayout(2, 1));
-		
-		JPanel panel1 = new JPanel(new FlowLayout());
-		panel1.add(buildDisplayTraceButton());
-		panel1.add(buildChooseColorButton());
-		panel1.add(buildRemoveTracesButton());
-		
-		displayTracePanel.add(panel1);
-		displayTracePanel.add(buildTracesScrollPane());
-		
-		return displayTracePanel;
+	public void init(GhidrionPlugin plugin) {
+		this.colorizer = new MorionTraceColorizer(plugin, this);
 	}
 	
 	/**
-	 * @return Button which allows to choose a trace color
+	 * @return Button that displays a Morion trace according to {@code MorionTraceColorizer}
+	 */
+	private JButton buildDisplayTraceButton() {
+		JButton importButton = new JButton("Display trace");
+		
+		importButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String traceName = colorizer.colorize(traceColor);
+				traceListModel.addElement(traceName);
+			}
+		});
+		
+		return importButton;
+	}
+	
+	/**
+	 * @return Button that allows to choose a trace color
 	 */
 	private JButton buildChooseColorButton() {
 		JButton colorButton = new JButton();
@@ -93,20 +85,9 @@ public class GhidrionProvider extends ComponentProvider {
 		return colorButton;
 	}
 	
-	private JButton buildDisplayTraceButton() {
-		JButton importButton = new JButton("Display trace");
-		
-		importButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String traceName = colorizer.colorize(traceColor);
-				traceListModel.addElement(traceName);
-			}
-		});
-		
-		return importButton;
-	}
-	
+	/**
+	 * @return Button that removes the traces selected in the ScrollPane
+	 */
 	private JButton buildRemoveTracesButton() {
 		JButton removeButton = new JButton("Remove selected traces");
 		
@@ -131,10 +112,4 @@ public class GhidrionProvider extends ComponentProvider {
 		
 		return tracesScrollPane;
 	}
-
-	@Override
-	public JComponent getComponent() {
-		return panel;
-	}
-
 }

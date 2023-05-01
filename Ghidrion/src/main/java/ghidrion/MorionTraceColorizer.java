@@ -52,7 +52,6 @@ public class MorionTraceColorizer {
 		
 		String traceName = traceFile.getName();
 		traces.put(traceName, addresses);
-		String comment = "Trace: " + traceName;
 
 		// Colorize addresses
 		if (colorizingService == null) {

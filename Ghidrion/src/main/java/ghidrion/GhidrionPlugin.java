@@ -24,6 +24,7 @@ import ghidra.framework.plugintool.util.PluginStatus;
 import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.listing.Program;
 import ghidra.util.HelpLocation;
+import view.GhidrionProvider;
 
 /**
  * TODO: Provide class-level documentation that describes what this plugin does.
