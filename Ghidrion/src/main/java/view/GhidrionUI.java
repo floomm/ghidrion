@@ -94,24 +94,40 @@ public class GhidrionUI {
 		);
 		GridBagLayout gbl_panelDisplayTraceFile = new GridBagLayout();
 		gbl_panelDisplayTraceFile.columnWidths = new int[]{0, 0, 0, 0};
-		gbl_panelDisplayTraceFile.rowHeights = new int[]{0, 0};
-		gbl_panelDisplayTraceFile.columnWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_panelDisplayTraceFile.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+		gbl_panelDisplayTraceFile.rowHeights = new int[]{0, 0, 0, 0};
+		gbl_panelDisplayTraceFile.columnWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_panelDisplayTraceFile.rowWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
 		panelDisplayTraceFile.setLayout(gbl_panelDisplayTraceFile);
 		
 		JButton btnDisplayTrace = new JButton("Import and Display");
 		GridBagConstraints gbc_btnDisplayTrace = new GridBagConstraints();
-		gbc_btnDisplayTrace.insets = new Insets(0, 0, 0, 5);
+		gbc_btnDisplayTrace.insets = new Insets(0, 0, 5, 5);
 		gbc_btnDisplayTrace.gridx = 0;
 		gbc_btnDisplayTrace.gridy = 0;
 		panelDisplayTraceFile.add(btnDisplayTrace, gbc_btnDisplayTrace);
 		
 		JButton btnChooseTraceColor = new JButton("Color");
 		GridBagConstraints gbc_btnChooseTraceColor = new GridBagConstraints();
-		gbc_btnChooseTraceColor.insets = new Insets(0, 0, 0, 5);
+		gbc_btnChooseTraceColor.insets = new Insets(0, 0, 5, 5);
 		gbc_btnChooseTraceColor.gridx = 1;
 		gbc_btnChooseTraceColor.gridy = 0;
 		panelDisplayTraceFile.add(btnChooseTraceColor, gbc_btnChooseTraceColor);
+		
+		JScrollPane scrollPaneTraces = new JScrollPane();
+		GridBagConstraints gbc_scrollPaneTraces = new GridBagConstraints();
+		gbc_scrollPaneTraces.insets = new Insets(0, 0, 5, 0);
+		gbc_scrollPaneTraces.gridwidth = 3;
+		gbc_scrollPaneTraces.fill = GridBagConstraints.BOTH;
+		gbc_scrollPaneTraces.gridx = 0;
+		gbc_scrollPaneTraces.gridy = 1;
+		panelDisplayTraceFile.add(scrollPaneTraces, gbc_scrollPaneTraces);
+		
+		JButton btnRemoveTraces = new JButton("Remove selected traces");
+		GridBagConstraints gbc_btnRemoveTraces = new GridBagConstraints();
+		gbc_btnRemoveTraces.insets = new Insets(0, 0, 0, 5);
+		gbc_btnRemoveTraces.gridx = 0;
+		gbc_btnRemoveTraces.gridy = 2;
+		panelDisplayTraceFile.add(btnRemoveTraces, gbc_btnRemoveTraces);
 		GridBagLayout gbl_panelCreateTraceFile = new GridBagLayout();
 		gbl_panelCreateTraceFile.columnWidths = new int[]{956, 0};
 		gbl_panelCreateTraceFile.rowHeights = new int[]{65, 65, 65, 0, 0};
