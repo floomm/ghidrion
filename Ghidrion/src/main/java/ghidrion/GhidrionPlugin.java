@@ -18,6 +18,7 @@ package ghidrion;
 import ghidra.app.ExamplesPluginPackage;
 import ghidra.app.plugin.PluginCategoryNames;
 import ghidra.app.plugin.ProgramPlugin;
+import ghidra.app.plugin.core.colorizer.ColorizingService;
 import ghidra.app.services.GhidraScriptService;
 import ghidra.framework.plugintool.*;
 import ghidra.framework.plugintool.util.PluginStatus;
@@ -45,6 +46,8 @@ public class GhidrionPlugin extends ProgramPlugin {
 
 	private GhidrionProvider provider;
 	private FlatProgramAPI flatAPI;
+	
+	private ColorizingService colorizingService;
 
 	/**
 	 * Plugin constructor.
@@ -72,7 +75,8 @@ public class GhidrionPlugin extends ProgramPlugin {
 		super.init();
 		this.provider.init();
 
-		// TODO: Acquire services if necessary
+		// Acquire services here
+		colorizingService = ServiceHelper.getService(tool, ColorizingService.class, this, provider.getComponent());
 	}
 	
 	@Override
@@ -83,8 +87,16 @@ public class GhidrionPlugin extends ProgramPlugin {
 		this.flatAPI = new FlatProgramAPI(program);
 	}
 	
+	public GhidrionProvider getProvider() {
+		return provider;
+	}
+	
 	public FlatProgramAPI getFlatAPI() {
 		return flatAPI;
+	}
+	
+	public ColorizingService getColorizingService() {
+		return colorizingService;
 	}
 
 }

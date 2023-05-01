@@ -67,7 +67,7 @@ public class MorionTraceFile {
 			.add(functionDetails);
 	}
 	
-	public void addEntryRegister(String name, String value, boolean isSymbolic) {
+	public void addEntryStateRegister(String name, String value, boolean isSymbolic) {
 		List<String> valueList = new ArrayList<>();
 		valueList.add(value);
 		if (isSymbolic) {
@@ -76,7 +76,7 @@ public class MorionTraceFile {
 		entryRegisters.put(name, valueList);
 	}
 	
-	public void addEntryMemory(String address, String value, boolean isSymbolic) {
+	public void addEntryStateMemory(String address, String value, boolean isSymbolic) {
 		List<String> valueList = new ArrayList<>();
 		valueList.add(value);
 		if (isSymbolic) {
