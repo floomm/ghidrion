@@ -1,5 +1,7 @@
 package view;
 
+import java.awt.GridLayout;
+
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
