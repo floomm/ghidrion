@@ -1,51 +1,29 @@
 package view;
 
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
-
-import ctrl.TraceFileController;
-import docking.ComponentProvider;
-import ghidrion.GhidrionPlugin;
-
 import javax.swing.border.EtchedBorder;
 import java.awt.Color;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
-import javax.swing.JColorChooser;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.JScrollPane;
 
-public class GhidrionProvider extends ComponentProvider {
-	private GhidrionPlugin plugin;
-	
-	private TraceFileController traceFileController;
+public class GhidrionUI {
 
-    private DefaultListModel<List<String>> hookListModel = new DefaultListModel<>();
-	private JList<List<String>> hookList = new JList<>(hookListModel);
-    private DefaultListModel<List<String>> registerListModel = new DefaultListModel<>();
-	private JList<List<String>> registerList = new JList<>(registerListModel);
-    private DefaultListModel<List<String>> memoryListModel = new DefaultListModel<>();
-	private JList<List<String>> memoryList = new JList<>(memoryListModel);
-	private DefaultListModel<String> traceListModel = new DefaultListModel<>();
-	private JList<String> traceList = new JList<>(traceListModel);
-	
-	private JPanel panel;
+	private JFrame frame;
 	private JTextField textFieldLibrary;
 	private JTextField textFieldFunction;
 	private JTextField textFieldEntry;
@@ -56,36 +34,46 @@ public class GhidrionProvider extends ComponentProvider {
 	private JTextField textFieldMemoryAddress;
 	private JTextField textFieldMemoryValue;
 
-	private Color traceColor = Color.CYAN;
-
-	public GhidrionProvider(GhidrionPlugin plugin, String pluginName, String owner) {
-		super(plugin.getTool(), pluginName, owner);
-		this.plugin = plugin;
-
-		buildPanel();
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					GhidrionUI window = new GhidrionUI();
+					window.frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 	}
-	
-	public void init() {
-		traceFileController = new TraceFileController(plugin);
+
+	/**
+	 * Create the application.
+	 */
+	public GhidrionUI() {
+		initialize();
 	}
 
-	// Customize GUI
-	private void buildPanel() {
-		panel = new JPanel();
-		setVisible(true);
-
+	/**
+	 * Initialize the contents of the frame.
+	 */
+	private void initialize() {
+		frame = new JFrame();
+		frame.setBounds(100, 100, 1000, 800);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
 		/*
-		 * ----------------------------------------------------------------------------------------------------------
-		 * WHEN UPDATING THE GhidrionUI, REPLACE FROME HERE.
-		 * ALSO, REPLACE frame.getContentPane() WITH panel AFTER PASTING THE NEW GhdrionUI
-		 * ----------------------------------------------------------------------------------------------------------
+		 * WHEN UPDATING THE UI, COPY FROM HERE
 		 */
 		JPanel panelCreateTraceFile = new JPanel();
 		panelCreateTraceFile.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Create init trace file", TitledBorder.LEADING, TitledBorder.ABOVE_TOP, null, new Color(0, 0, 0)));
 		
 		JPanel panelDisplayTraceFile = new JPanel();
 		panelDisplayTraceFile.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Display Morion trace file", TitledBorder.LEADING, TitledBorder.ABOVE_TOP, null, new Color(0, 0, 0)));
-		GroupLayout groupLayout = new GroupLayout(panel);
+		GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.TRAILING)
 				.addGroup(groupLayout.createSequentialGroup()
@@ -440,132 +428,10 @@ public class GhidrionProvider extends ComponentProvider {
 		gbc_btnCreateInitTraceFile.gridx = 0;
 		gbc_btnCreateInitTraceFile.gridy = 3;
 		panelCreateTraceFile.add(btnCreateInitTraceFile, gbc_btnCreateInitTraceFile);
+
 		/*
-		 * ----------------------------------------------------------------------------------------------------------
-		 * WHEN UPDATING THE UI, REPLACE UNTIL HERE
-		 * ----------------------------------------------------------------------------------------------------------
+		 * WHEN UPDATING THE UI, COPY UNTIL HERE
 		 */
-		
-		textFieldEntry.setDocument(new HexDocument());
-		textFieldLeave.setDocument(new HexDocument());
-		textFieldTarget.setDocument(new HexDocument());
-		textFieldRegisterValue.setDocument(new HexDocument());
-		textFieldMemoryAddress.setDocument(new HexDocument());
-		textFieldMemoryValue.setDocument(new HexDocument());
-		
-		setupBtnAddHook(btnAddHook, comboBoxHookMode);
-		scrollPaneHooks.setViewportView(hookList);
-		
-		setupBtnAddRegister(btnAddRegister, chckbxIsRegisterSymbolic);
-		scrollPaneRegisters.setViewportView(registerList);
-		
-		setupBtnAddMemory(btnAddMemory, chckbxIsMemorySymbolic);
-		scrollPaneMemory.setViewportView(memoryList);
-		
-		setupBtnCreateInitTraceFile(btnCreateInitTraceFile);
-		
-		setupBtnDisplayTrace(btnDisplayTrace);
-		scrollPaneTraces.setViewportView(traceList);
-		setupBtnChooseTraceColor(btnChooseTraceColor);
-		setupBtnRemoveTraces(btnRemoveTraces);
-
-		panel.setLayout(groupLayout);
+		frame.getContentPane().setLayout(groupLayout);
 	}
-
-	private void setupBtnRemoveTraces(JButton btnRemoveTraces) {
-		btnRemoveTraces.addActionListener(e -> {
-			List<String> selectedItems = traceList.getSelectedValuesList();
-			traceFileController.getColorizer().decolorize(selectedItems);
-
-			int[] selectedIndices = traceList.getSelectedIndices();
-			for (int i : selectedIndices) {
-				traceListModel.remove(i);
-			}
-		});
-	}
-
-	private void setupBtnDisplayTrace(JButton btnDisplayTrace) {
-		btnDisplayTrace.addActionListener(e -> {
-				String traceName = traceFileController.getColorizer().colorize(traceColor);
-				traceListModel.addElement(traceName);
-		});
-	}
-
-	private void setupBtnChooseTraceColor(JButton btnChooseTraceColor) {
-		btnChooseTraceColor.setOpaque(true);
-		btnChooseTraceColor.setBackground(traceColor);
-		btnChooseTraceColor.addActionListener(e -> {
-			Color newColor = JColorChooser.showDialog(panel, "Choose a color", traceColor);
-			if (newColor != null) {
-				traceColor = newColor;
-				btnChooseTraceColor.setBackground(traceColor);
-			}
-		});
-	}
-
-	private void setupBtnAddHook(JButton btnAddHook, JComboBox<String> comboBoxHookMode) {
-		btnAddHook.addActionListener(e -> {
-            String libraryName = textFieldLibrary.getText();
-            String functionName = textFieldFunction.getText();
-            String entryAddress = textFieldEntry.getText();
-            String leaveAddress = textFieldLeave.getText();
-            String targetAddress = textFieldTarget.getText();
-            String mode = (String) comboBoxHookMode.getSelectedItem();
-
-            List<String> hook = new ArrayList<>(
-            		Arrays.asList(libraryName, functionName, entryAddress, leaveAddress, targetAddress, mode)
-            	);
-            hookListModel.addElement(hook);
-            
-            traceFileController.addHook(libraryName, functionName, entryAddress, leaveAddress, targetAddress, mode);
-		});
-	}
-
-	private void setupBtnAddRegister(JButton btnAddRegister, JCheckBox cbIsSymbolic) {
-		btnAddRegister.addActionListener(e -> {
-        	String name = textFieldRegisterName.getText();
-        	String value = textFieldRegisterValue.getText();
-        	boolean isSymbolic = cbIsSymbolic.isSelected();
-
-            List<String> register = new ArrayList<>(
-            		Arrays.asList(name, value)
-            	);
-            if (isSymbolic) {
-            	register.add(traceFileController.getSymbolicMarker());
-            }
-            registerListModel.addElement(register);
-            
-            traceFileController.addEntryStateRegister(name, value, isSymbolic);
-		});
-	}
-
-	private void setupBtnAddMemory(JButton btnAddMemory, JCheckBox chckbxIsMemorySymbolic) {
-		btnAddMemory.addActionListener(e -> {
-        	String address = textFieldMemoryAddress.getText();
-        	String value = textFieldMemoryValue.getText();
-        	boolean isSymbolic = chckbxIsMemorySymbolic.isSelected();
-
-            List<String> memoryUnit = new ArrayList<>(
-            		Arrays.asList(address, value)
-            	);
-            if (isSymbolic) {
-            	memoryUnit.add(traceFileController.getSymbolicMarker());
-            }
-            memoryListModel.addElement(memoryUnit);
-            
-            traceFileController.addEntryStateMemory(address, value, isSymbolic);
-		});
-	}
-	
-	private void setupBtnCreateInitTraceFile(JButton btnCreateInitTraceFile) {
-		btnCreateInitTraceFile.addActionListener(e -> {
-			traceFileController.createTraceFile(panel);
-		});
-	}
-
-	@Override
-	public JComponent getComponent() {
-		return panel;
-	}
-
 }

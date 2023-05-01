@@ -55,33 +55,17 @@ public class MorionTraceFile {
 		return hooks;
 	}
 	
-	public void addHook(String libraryName, String functionName, String entry, String leave, String target, String mode) {
-		Map<String, String> functionDetails = new HashMap<>();
-		functionDetails.put("entry", entry);
-		functionDetails.put("leave", leave);
-		functionDetails.put("target", target);
-		functionDetails.put("mode", mode);
-		
+	public void addHook(String libraryName, String functionName, Map<String, String> hookDetails) {
 		hooks.computeIfAbsent(libraryName, k -> new HashMap<>())
 			.computeIfAbsent(functionName, k -> new ArrayList<>())
-			.add(functionDetails);
+			.add(hookDetails);
 	}
 	
-	public void addEntryRegister(String name, String value, boolean isSymbolic) {
-		List<String> valueList = new ArrayList<>();
-		valueList.add(value);
-		if (isSymbolic) {
-			valueList.add(SYMBOLIC);
-		}
+	public void addEntryStateRegister(String name, List<String> valueList) {
 		entryRegisters.put(name, valueList);
 	}
 	
-	public void addEntryMemory(String address, String value, boolean isSymbolic) {
-		List<String> valueList = new ArrayList<>();
-		valueList.add(value);
-		if (isSymbolic) {
-			valueList.add(SYMBOLIC);
-		}
+	public void addEntryStateMemory(String address, List<String> valueList) {
 		entryMemory.put(address, valueList);
 	}
 

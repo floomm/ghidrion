@@ -13,13 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.yaml.snakeyaml.Yaml;
 
-import ghidra.app.plugin.core.colorizer.ColorizingService;
 import ghidra.program.model.address.AddressSet;
 import ghidra.util.Msg;
 
@@ -28,16 +26,11 @@ public class MorionTraceColorizer {
 	private static final String INSTRUCTIONS_KEY = "instructions";
 	
 	private GhidrionPlugin plugin;
-	private ColorizingService colorizingService;
-	
-	private JComponent parent;
 
 	private Map<String, AddressSet> traces = new HashMap<>();
 	
-	public MorionTraceColorizer(GhidrionPlugin plugin, JComponent parent) {
+	public MorionTraceColorizer(GhidrionPlugin plugin) {
 		this.plugin = plugin;
-		this.parent = parent;
-		this.colorizingService = ServiceHelper.getService(plugin.getTool(), ColorizingService.class, this, parent);
 	}
 	
 	/**
@@ -54,11 +47,12 @@ public class MorionTraceColorizer {
 		traces.put(traceName, addresses);
 
 		// Colorize addresses
-		if (colorizingService == null) {
+		if (plugin.getColorizingService() == null) {
+			Msg.showError(this, plugin.getProvider().getComponent(), "No Colorizing Service", "Couldn't find the colorizing service");
 			return null;
 		}
 		int colorizeId = plugin.getCurrentProgram().startTransaction("Colorize " + traceName);
-        colorizingService.setBackgroundColor(addresses, color);
+        plugin.getColorizingService().setBackgroundColor(addresses, color);
         plugin.getCurrentProgram().endTransaction(colorizeId, true);
         
         // TODO: Jump to start of trace in the Listing window
@@ -77,7 +71,7 @@ public class MorionTraceColorizer {
 			
 			// Decolorize
 			int decolorizeId = plugin.getCurrentProgram().startTransaction("Decolorize " + traceName);
-			colorizingService.clearBackgroundColor(addresses);
+			plugin.getColorizingService().clearBackgroundColor(addresses);
 			plugin.getCurrentProgram().endTransaction(decolorizeId, true);
 		}
 	}
@@ -89,7 +83,7 @@ public class MorionTraceColorizer {
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("YAML files", "yaml");
 		fileChooser.setFileFilter(filter);
 
-		int returnState = fileChooser.showOpenDialog(parent);
+		int returnState = fileChooser.showOpenDialog(plugin.getProvider().getComponent());
 		if (returnState == JFileChooser.APPROVE_OPTION) {
 			Msg.info(this, "Imported file: " + fileChooser.getSelectedFile().getName());
 		}
@@ -102,7 +96,7 @@ public class MorionTraceColorizer {
 		try {
 			input = new FileInputStream(traceFile);
 		} catch (FileNotFoundException e) {
-			Msg.showError(this, parent, "No trace file", "Can't find " + traceFile.getName(), e);
+			Msg.showError(this, plugin.getProvider().getComponent(), "No trace file", "Can't find " + traceFile.getName(), e);
 			return null;
 		}
         
