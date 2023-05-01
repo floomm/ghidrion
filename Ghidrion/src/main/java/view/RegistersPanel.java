@@ -29,7 +29,7 @@ public class RegistersPanel extends JPanel {
         inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.X_AXIS));
 
         JLabel nameLabel = new JLabel("Register name: ");
-        nameField = new HexTextField(10);
+        nameField = new JTextField(10);
         inputPanel.add(nameLabel);
         inputPanel.add(nameField);
 

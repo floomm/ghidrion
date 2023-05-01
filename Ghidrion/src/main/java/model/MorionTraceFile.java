@@ -42,9 +42,9 @@ public class MorionTraceFile {
 		entryState.put("mems", entryMemory);
 		entryState.put("regs", entryRegisters);
 		states.put("leave", leaveState);
-		entryState.put("addr", leaveAddress);
-		entryState.put("mems", leaveMemory);
-		entryState.put("regs", leaveRegisters);
+		leaveState.put("addr", leaveAddress);
+		leaveState.put("mems", leaveMemory);
+		leaveState.put("regs", leaveRegisters);
 	}
 	
 	public Map<String, Object> getTraceFile() {

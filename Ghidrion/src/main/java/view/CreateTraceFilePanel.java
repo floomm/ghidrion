@@ -26,12 +26,12 @@ public class CreateTraceFilePanel extends JPanel {
 		
 		JButton createButton = new JButton("Create Morion trace file");
 		createButton.addActionListener(e -> {
-			File file = new File("tracefile.init.yaml");
 			Yaml yaml = new Yaml();
 			String content = yaml.dump(traceFile.getTraceFile());
 			
 			JFileChooser fileChooser = new JFileChooser();
 			int result = fileChooser.showSaveDialog(this.getParent());
+			File file = null;
 			if (result == JFileChooser.APPROVE_OPTION) {
 				file = fileChooser.getSelectedFile();
 			}
