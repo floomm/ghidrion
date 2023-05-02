@@ -139,3 +139,6 @@ Ghidrion/.classpath
 Ghidrion/.project
 MorionTraceColorizerScript/.classpath
 MorionTraceColorizerScript/.project
+
+### MacOS ###
+.DS_Store
