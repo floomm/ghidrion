@@ -16,6 +16,7 @@
 package ghidrion;
 
 import ghidra.app.ExamplesPluginPackage;
+import ghidra.app.decompiler.DecompilerHighlightService;
 import ghidra.app.plugin.PluginCategoryNames;
 import ghidra.app.plugin.ProgramPlugin;
 import ghidra.app.plugin.core.colorizer.ColorizingService;
@@ -48,6 +49,7 @@ public class GhidrionPlugin extends ProgramPlugin {
 	private FlatProgramAPI flatAPI;
 	
 	private ColorizingService colorizingService;
+	private DecompilerHighlightService decompilerHighlightService;
 
 	/**
 	 * Plugin constructor.
@@ -77,6 +79,7 @@ public class GhidrionPlugin extends ProgramPlugin {
 
 		// Acquire services here
 		colorizingService = ServiceHelper.getService(tool, ColorizingService.class, this, provider.getComponent());
+		decompilerHighlightService = ServiceHelper.getService(tool, DecompilerHighlightService.class, this, provider.getComponent());
 	}
 	
 	@Override
@@ -98,5 +101,8 @@ public class GhidrionPlugin extends ProgramPlugin {
 	public ColorizingService getColorizingService() {
 		return colorizingService;
 	}
-
+	
+	public DecompilerHighlightService getDecompilerHighlightService() {
+		return decompilerHighlightService;
+	}
 }

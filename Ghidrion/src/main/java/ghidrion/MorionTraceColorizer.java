@@ -18,6 +18,10 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.yaml.snakeyaml.Yaml;
 
+import ghidra.app.plugin.core.colorizer.ColorizingService;
+import ghidra.app.decompiler.CTokenHighlightMatcher;
+import ghidra.app.decompiler.ClangToken;
+import ghidra.app.decompiler.DecompilerHighlighter;
 import ghidra.program.model.address.AddressSet;
 import ghidra.util.Msg;
 
@@ -46,7 +50,7 @@ public class MorionTraceColorizer {
 		String traceName = traceFile.getName();
 		traces.put(traceName, addresses);
 
-		// Colorize addresses
+		// Colorize Listing window
 		if (plugin.getColorizingService() == null) {
 			Msg.showError(this, plugin.getProvider().getComponent(), "No Colorizing Service", "Couldn't find the colorizing service");
 			return null;
@@ -56,6 +60,10 @@ public class MorionTraceColorizer {
         plugin.getCurrentProgram().endTransaction(colorizeId, true);
         
         // TODO: Jump to start of trace in the Listing window
+        
+        // Highlight Decompiler window
+        DecompilerHighlighter decompilerHighlighter = createHighlighter(addresses, color, traceName);
+        decompilerHighlighter.applyHighlights();
         
         return traceName;
 	}
@@ -74,6 +82,8 @@ public class MorionTraceColorizer {
 			plugin.getColorizingService().clearBackgroundColor(addresses);
 			plugin.getCurrentProgram().endTransaction(decolorizeId, true);
 		}
+		
+		// TODO: Decolorize Decompiler
 	}
 	
 	private File getTraceFile() {
@@ -121,6 +131,23 @@ public class MorionTraceColorizer {
         }
 
         return addresses;
+	}
+	
+	private DecompilerHighlighter createHighlighter(AddressSet addresses, Color color, String traceName) {
+		CTokenHighlightMatcher highlightMatcher = new CTokenHighlightMatcher() {
+			@Override
+			public Color getTokenHighlight(ClangToken token) {
+				if (token.getMinAddress() == null || token.getMaxAddress() == null) {
+					return null;
+				}
+				if (addresses.contains(token.getMinAddress()) && addresses.contains(token.getMaxAddress())) {
+					return color;
+				}
+				return null;
+			}
+		};
+		DecompilerHighlighter decompilerHighlighter = plugin.getDecompilerHighlightService().createHighlighter(traceName, highlightMatcher);
+		return decompilerHighlighter;
 	}
 
 }
