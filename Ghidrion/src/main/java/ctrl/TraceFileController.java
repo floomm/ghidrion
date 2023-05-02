@@ -14,21 +14,10 @@ import javax.swing.JFileChooser;
 
 import org.yaml.snakeyaml.Yaml;
 
-import ghidrion.GhidrionPlugin;
-import ghidrion.MorionTraceColorizer;
 import model.MorionTraceFile;
 
 public class TraceFileController {
 	private MorionTraceFile traceFile = new MorionTraceFile();
-	private MorionTraceColorizer colorizer;
-	
-	public TraceFileController(GhidrionPlugin plugin) {
-		this.colorizer = new MorionTraceColorizer(plugin);
-	}
-	
-	public MorionTraceColorizer getColorizer() {
-		return colorizer;
-	}
 	
 	public String getSymbolicMarker() {
 		return MorionTraceFile.SYMBOLIC;

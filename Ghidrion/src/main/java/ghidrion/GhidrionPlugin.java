@@ -20,6 +20,7 @@ import ghidra.app.decompiler.DecompilerHighlightService;
 import ghidra.app.plugin.PluginCategoryNames;
 import ghidra.app.plugin.ProgramPlugin;
 import ghidra.app.plugin.core.colorizer.ColorizingService;
+import ghidra.app.script.GhidraState;
 import ghidra.app.services.GhidraScriptService;
 import ghidra.framework.plugintool.*;
 import ghidra.framework.plugintool.util.PluginStatus;
@@ -43,6 +44,9 @@ import view.GhidrionProvider;
 //@formatter:on
 public class GhidrionPlugin extends ProgramPlugin {
 	
+	public final TraceColorizerScript colorizerScript = new TraceColorizerScript(this);
+	public final JumpToAddressScript jumpToAddressScript = new JumpToAddressScript();
+	
 	private static final String PLUGIN_NAME = "Ghidrion";
 
 	private GhidrionProvider provider;
@@ -58,6 +62,9 @@ public class GhidrionPlugin extends ProgramPlugin {
 	 */
 	public GhidrionPlugin(PluginTool tool) {
 		super(tool);
+		GhidraState state = new GhidraState(tool, tool.getProject(), currentProgram, currentLocation, currentSelection, currentHighlight);
+		colorizerScript.set(new GhidraState(state), null, null);
+		jumpToAddressScript.set(new GhidraState(state), null, null);
 		
 		String owner = getName();
 
@@ -75,7 +82,6 @@ public class GhidrionPlugin extends ProgramPlugin {
 	@Override
 	public void init() {
 		super.init();
-		this.provider.init();
 
 		// Acquire services here
 		colorizingService = ServiceHelper.getService(tool, ColorizingService.class, this, provider.getComponent());
@@ -84,10 +90,14 @@ public class GhidrionPlugin extends ProgramPlugin {
 	
 	@Override
 	protected void programActivated(Program program) {
-		super.programActivated(program);
+		currentProgram = program;
+		flatAPI = new FlatProgramAPI(program);
 		
-		this.currentProgram = program;
-		this.flatAPI = new FlatProgramAPI(program);
+		GhidraState state = new GhidraState(tool, tool.getProject(), program, currentLocation, currentSelection, currentHighlight);
+		colorizerScript.set(state, null, null);
+		jumpToAddressScript.set(state, null, null);
+		
+		super.programActivated(program);
 	}
 	
 	public GhidrionProvider getProvider() {

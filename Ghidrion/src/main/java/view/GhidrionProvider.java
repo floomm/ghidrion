@@ -34,7 +34,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 public class GhidrionProvider extends ComponentProvider {
 	private GhidrionPlugin plugin;
 	
-	private TraceFileController traceFileController;
+	private TraceFileController traceFileController = new TraceFileController();
 
     private DefaultListModel<List<String>> hookListModel = new DefaultListModel<>();
 	private JList<List<String>> hookList = new JList<>(hookListModel);
@@ -63,10 +63,6 @@ public class GhidrionProvider extends ComponentProvider {
 		this.plugin = plugin;
 
 		buildPanel();
-	}
-	
-	public void init() {
-		traceFileController = new TraceFileController(plugin);
 	}
 
 	// Customize GUI
@@ -475,7 +471,7 @@ public class GhidrionProvider extends ComponentProvider {
 	private void setupBtnRemoveTraces(JButton btnRemoveTraces) {
 		btnRemoveTraces.addActionListener(e -> {
 			List<String> selectedItems = traceList.getSelectedValuesList();
-			traceFileController.getColorizer().decolorize(selectedItems);
+			plugin.colorizerScript.decolorize(selectedItems);
 
 			int[] selectedIndices = traceList.getSelectedIndices();
 			for (int i : selectedIndices) {
@@ -486,8 +482,10 @@ public class GhidrionProvider extends ComponentProvider {
 
 	private void setupBtnDisplayTrace(JButton btnDisplayTrace) {
 		btnDisplayTrace.addActionListener(e -> {
-				String traceName = traceFileController.getColorizer().colorize(traceColor);
+			String traceName = plugin.colorizerScript.colorize(traceColor);
+			if (traceName != null) {
 				traceListModel.addElement(traceName);
+			}
 		});
 	}
 
