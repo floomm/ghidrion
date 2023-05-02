@@ -24,7 +24,6 @@ import ghidra.app.script.GhidraState;
 import ghidra.app.services.GhidraScriptService;
 import ghidra.framework.plugintool.*;
 import ghidra.framework.plugintool.util.PluginStatus;
-import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.listing.Program;
 import ghidra.util.HelpLocation;
 import view.GhidrionProvider;
@@ -44,16 +43,17 @@ import view.GhidrionProvider;
 //@formatter:on
 public class GhidrionPlugin extends ProgramPlugin {
 	
+	// Scripts
 	public final TraceColorizerScript colorizerScript = new TraceColorizerScript(this);
 	public final JumpToAddressScript jumpToAddressScript = new JumpToAddressScript();
+	
+	// Services
+	private ColorizingService colorizingService;
+	private DecompilerHighlightService decompilerHighlightService;
 	
 	private static final String PLUGIN_NAME = "Ghidrion";
 
 	private GhidrionProvider provider;
-	private FlatProgramAPI flatAPI;
-	
-	private ColorizingService colorizingService;
-	private DecompilerHighlightService decompilerHighlightService;
 
 	/**
 	 * Plugin constructor.
@@ -68,10 +68,7 @@ public class GhidrionPlugin extends ProgramPlugin {
 		
 		String owner = getName();
 
-		this.provider = new GhidrionProvider(this, PLUGIN_NAME, owner);
-		if (currentProgram != null) {
-			this.flatAPI = new FlatProgramAPI(currentProgram);
-		}
+		provider = new GhidrionProvider(this, PLUGIN_NAME, owner);
 
 		// TODO: Customize help (or remove if help is not desired)
 		String topicName = this.getClass().getPackage().getName();
@@ -91,21 +88,13 @@ public class GhidrionPlugin extends ProgramPlugin {
 	@Override
 	protected void programActivated(Program program) {
 		currentProgram = program;
-		flatAPI = new FlatProgramAPI(program);
 		
+		// Set state of scripts
 		GhidraState state = new GhidraState(tool, tool.getProject(), program, currentLocation, currentSelection, currentHighlight);
 		colorizerScript.set(state, null, null);
 		jumpToAddressScript.set(state, null, null);
 		
 		super.programActivated(program);
-	}
-	
-	public GhidrionProvider getProvider() {
-		return provider;
-	}
-	
-	public FlatProgramAPI getFlatAPI() {
-		return flatAPI;
 	}
 	
 	public ColorizingService getColorizingService() {
