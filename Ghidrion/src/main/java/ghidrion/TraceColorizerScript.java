@@ -31,6 +31,7 @@ public class TraceColorizerScript extends GhidraScript {
 	private ColorizingService colorizingService;
 	
 	private Map<String, AddressSet> traces = new HashMap<>();
+	private Map<String, DecompilerHighlighter> highlighters = new HashMap<>();
 	
 	public TraceColorizerScript(GhidrionPlugin plugin) {
 		this.plugin = plugin;
@@ -49,6 +50,12 @@ public class TraceColorizerScript extends GhidraScript {
 		}
 		
 		String traceName = traceFile.getName();
+		
+		if (traces.containsKey(traceName)) {
+			Msg.showInfo(this, null, "Trace already exists", "A trace of file " + traceName + " already exists");
+			return null;
+		}
+		
 		AddressSet addresses = getTracedAddresses(traceFile);
 		
 		int colorizeId = currentProgram.startTransaction("Colorize " + traceName);
@@ -67,17 +74,25 @@ public class TraceColorizerScript extends GhidraScript {
 	
 	public void decolorize(List<String> traceNames) {
 		for (String traceName : traceNames) {
+			// Clear background colors in Listing window
 			AddressSet addresses = traces.get(traceName);
 			int decolorizeId = currentProgram.startTransaction("Decolorize" + traceName);
 			colorizingService.clearBackgroundColor(addresses);
 			currentProgram.endTransaction(decolorizeId, true);
+			
+			// Clear highlights in Decompiler window
+			DecompilerHighlighter decompilerHighlighter = highlighters.get(traceName);
+			int clearHighlightsId = currentProgram.startTransaction("Clear highlight" + traceName);
+			decompilerHighlighter.clearHighlights();
+			decompilerHighlighter.dispose();
+			currentProgram.endTransaction(clearHighlightsId, true);
+			highlighters.remove(traceName);
 		}
-		
-		// TODO: Clear decompiler highlights
 	}
 	
 	private void highlightDecompiler(AddressSet addresses, Color color, String traceName) {
 		DecompilerHighlighter decompilerHighlighter = createHighlighter(addresses, color, traceName);
+		highlighters.put(traceName, decompilerHighlighter);
 		decompilerHighlighter.applyHighlights();
 	}
 
