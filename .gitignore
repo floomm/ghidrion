@@ -128,3 +128,6 @@ $RECYCLE.BIN/
 .project
 build/
 dist/
+
+# Temp
+OldGhidrion/
