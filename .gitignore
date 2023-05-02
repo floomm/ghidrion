@@ -135,3 +135,12 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/java,eclipse,windows,linux
+
+.gradle/
+build/
+dist/
+.classpath
+.project
+
+# Temp
+OldGhidrion/
