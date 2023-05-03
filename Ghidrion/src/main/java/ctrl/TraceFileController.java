@@ -72,6 +72,11 @@ public class TraceFileController {
 		traceFile.addEntryStateMemory(address, valueList);
 	}
 	
+	public void removeEntryStateMemory(String address) {
+		Map<String, List<String>> entryMemory = traceFile.getEntryMemory();
+		entryMemory.remove(address);
+	}
+	
 	public void createTraceFile(Component container) {
 		Yaml yaml = new Yaml();
 		String content = yaml.dump(traceFile.getTraceFile());

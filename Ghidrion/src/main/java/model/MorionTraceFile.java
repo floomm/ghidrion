@@ -59,6 +59,10 @@ public class MorionTraceFile {
 		return entryRegisters;
 	}
 	
+	public Map<String, List<String>> getEntryMemory() {
+		return entryMemory;
+	}
+	
 	public void addHook(String libraryName, String functionName, Map<String, String> hookDetails) {
 		hooks.computeIfAbsent(libraryName, k -> new HashMap<>())
 			.computeIfAbsent(functionName, k -> new ArrayList<>())

@@ -492,6 +492,7 @@ public class GhidrionProvider extends ComponentProvider {
 		scrollPaneRegisters.setViewportView(registerList);
 		
 		setupBtnAddMemory(btnAddMemory, chckbxIsMemorySymbolic);
+		setupBtnRemoveMemory(btnRemoveMemory);
 		scrollPaneMemory.setViewportView(memoryList);
 		
 		setupBtnCreateInitTraceFile(btnCreateInitTraceFile);
@@ -598,7 +599,7 @@ public class GhidrionProvider extends ComponentProvider {
 	
 	private void setupBtnRemoveRegister(JButton btnRemoveRegister) {
 		btnRemoveRegister.addActionListener(e -> {
-			// Remove register from trace file data structure
+			// Remove registers from trace file data structure
 			List<List<String>> selectedItems = registerList.getSelectedValuesList();
 			Set<String> registerNames = new HashSet<>();
 			for (List<String> item : selectedItems) {
@@ -608,7 +609,7 @@ public class GhidrionProvider extends ComponentProvider {
 				traceFileController.removeEntryStateRegister(name);
 			}
 			
-			// Remove register from UI
+			// Remove registers from UI
 			int[] selectedIndices = registerList.getSelectedIndices();
 			for (int i = selectedIndices.length-1; i >= 0; i--) {
 				registerListModel.remove(selectedIndices[i]);
@@ -631,6 +632,26 @@ public class GhidrionProvider extends ComponentProvider {
             memoryListModel.addElement(memoryUnit);
             
             traceFileController.addEntryStateMemory(address, value, isSymbolic);
+		});
+	}
+	
+	private void setupBtnRemoveMemory(JButton btnRemoveMemory) {
+		btnRemoveMemory.addActionListener(e -> {
+			// Remove memory addresses from trace file data structure
+			List<List<String>> selectedItems = memoryList.getSelectedValuesList();
+			Set<String> memoryAddresses = new HashSet<>();
+			for (List<String> item : selectedItems) {
+				memoryAddresses.add(item.get(0));
+			}
+			for (String address : memoryAddresses) {
+				traceFileController.removeEntryStateMemory(address);
+			}
+			
+			// Remove memory addresses from UI
+			int[] selectedIndices = memoryList.getSelectedIndices();
+			for (int i = selectedIndices.length-1; i >= 0; i--) {
+				memoryListModel.remove(selectedIndices[i]);
+			}
 		});
 	}
 	
