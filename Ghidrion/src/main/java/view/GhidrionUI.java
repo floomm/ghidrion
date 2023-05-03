@@ -131,9 +131,9 @@ public class GhidrionUI {
 		panelDisplayTraceFile.add(btnRemoveTraces, gbc_btnRemoveTraces);
 		GridBagLayout gbl_panelCreateTraceFile = new GridBagLayout();
 		gbl_panelCreateTraceFile.columnWidths = new int[]{956, 0};
-		gbl_panelCreateTraceFile.rowHeights = new int[]{144, 144, 144, 23, 0};
+		gbl_panelCreateTraceFile.rowHeights = new int[]{144, 144, 144, 0, 23, 0};
 		gbl_panelCreateTraceFile.columnWeights = new double[]{0.0, Double.MIN_VALUE};
-		gbl_panelCreateTraceFile.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panelCreateTraceFile.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panelCreateTraceFile.setLayout(gbl_panelCreateTraceFile);
 		
 		JPanel panelHooks = new JPanel();
@@ -453,11 +453,18 @@ public class GhidrionUI {
 		gbc_panelMemory.gridy = 2;
 		panelCreateTraceFile.add(panelMemory, gbc_panelMemory);
 		
-		JButton btnCreateInitTraceFile = new JButton("Create");
+		JButton btnLoadInitTraceFile = new JButton("Load");
+		GridBagConstraints gbc_btnLoadInitTraceFile = new GridBagConstraints();
+		gbc_btnLoadInitTraceFile.insets = new Insets(0, 0, 5, 0);
+		gbc_btnLoadInitTraceFile.gridx = 0;
+		gbc_btnLoadInitTraceFile.gridy = 3;
+		panelCreateTraceFile.add(btnLoadInitTraceFile, gbc_btnLoadInitTraceFile);
+		
+		JButton btnCreateInitTraceFile = new JButton("Save");
 		GridBagConstraints gbc_btnCreateInitTraceFile = new GridBagConstraints();
 		gbc_btnCreateInitTraceFile.anchor = GridBagConstraints.NORTH;
 		gbc_btnCreateInitTraceFile.gridx = 0;
-		gbc_btnCreateInitTraceFile.gridy = 3;
+		gbc_btnCreateInitTraceFile.gridy = 4;
 		panelCreateTraceFile.add(btnCreateInitTraceFile, gbc_btnCreateInitTraceFile);
 
 		/*
