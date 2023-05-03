@@ -8,6 +8,7 @@ import javax.swing.border.TitledBorder;
 
 import ctrl.TraceFileController;
 import docking.ComponentProvider;
+import ghidra.util.Msg;
 import ghidrion.GhidrionPlugin;
 
 import javax.swing.border.EtchedBorder;
@@ -584,6 +585,14 @@ public class GhidrionProvider extends ComponentProvider {
         	String name = textFieldRegisterName.getText();
         	String value = textFieldRegisterValue.getText();
         	boolean isSymbolic = cbIsSymbolic.isSelected();
+        	
+        	for (int i = 0; i < registerListModel.getSize(); i++) {
+        	    List<String> register = registerListModel.getElementAt(i);
+        	    if (register.get(0).equals(name)) {
+					Msg.showError(this, panel, "Register duplicate", "Register " + name + " already exists");
+					return;
+        	    }
+        	}
 
             List<String> register = new ArrayList<>(
             		Arrays.asList(name, value)
@@ -622,6 +631,14 @@ public class GhidrionProvider extends ComponentProvider {
         	String address = textFieldMemoryAddress.getText();
         	String value = textFieldMemoryValue.getText();
         	boolean isSymbolic = chckbxIsMemorySymbolic.isSelected();
+        	
+        	for (int i = 0; i < memoryListModel.getSize(); i++) {
+        	    List<String> memory = memoryListModel.getElementAt(i);
+        	    if (memory.get(0).equals(address)) {
+					Msg.showError(this, panel, "Memory address duplicate", "Memory address " + address + " already exists");
+					return;
+        	    }
+        	}
 
             List<String> memoryUnit = new ArrayList<>(
             		Arrays.asList(address, value)
