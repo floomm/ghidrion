@@ -20,6 +20,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 
 public class GhidrionUI {
 
@@ -138,9 +139,9 @@ public class GhidrionUI {
 		JPanel panelHooks = new JPanel();
 		panelHooks.setBorder(new TitledBorder(null, "Add hook", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		GridBagLayout gbl_panelHooks = new GridBagLayout();
-		gbl_panelHooks.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_panelHooks.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_panelHooks.rowHeights = new int[]{0, 0, 75, 0};
-		gbl_panelHooks.columnWeights = new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
+		gbl_panelHooks.columnWeights = new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
 		gbl_panelHooks.rowWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
 		panelHooks.setLayout(gbl_panelHooks);
 		
@@ -250,9 +251,16 @@ public class GhidrionUI {
 		gbc_btnAddHook.gridy = 1;
 		panelHooks.add(btnAddHook, gbc_btnAddHook);
 		
+		JButton btnRemoveHook = new JButton("Remove");
+		GridBagConstraints gbc_btnRemoveHook = new GridBagConstraints();
+		gbc_btnRemoveHook.insets = new Insets(0, 0, 5, 0);
+		gbc_btnRemoveHook.gridx = 7;
+		gbc_btnRemoveHook.gridy = 1;
+		panelHooks.add(btnRemoveHook, gbc_btnRemoveHook);
+		
 		JScrollPane scrollPaneHooks = new JScrollPane();
 		GridBagConstraints gbc_scrollPaneHooks = new GridBagConstraints();
-		gbc_scrollPaneHooks.gridwidth = 7;
+		gbc_scrollPaneHooks.gridwidth = 8;
 		gbc_scrollPaneHooks.insets = new Insets(0, 0, 0, 5);
 		gbc_scrollPaneHooks.fill = GridBagConstraints.BOTH;
 		gbc_scrollPaneHooks.gridx = 0;
@@ -271,9 +279,9 @@ public class GhidrionUI {
 		JPanel panelRegisters = new JPanel();
 		panelRegisters.setBorder(new TitledBorder(null, "Add register", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		GridBagLayout gbl_panelRegisters = new GridBagLayout();
-		gbl_panelRegisters.columnWidths = new int[]{0, 0, 0, 0, 0};
+		gbl_panelRegisters.columnWidths = new int[]{0, 0, 0, 0, 0, 0};
 		gbl_panelRegisters.rowHeights = new int[]{0, 0, 75, 0};
-		gbl_panelRegisters.columnWeights = new double[]{1.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_panelRegisters.columnWeights = new double[]{1.0, 1.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
 		gbl_panelRegisters.rowWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
 		panelRegisters.setLayout(gbl_panelRegisters);
 		
@@ -331,9 +339,16 @@ public class GhidrionUI {
 		gbc_btnAddRegister.gridy = 1;
 		panelRegisters.add(btnAddRegister, gbc_btnAddRegister);
 		
+		JButton btnRemoveRegister = new JButton("Remove");
+		GridBagConstraints gbc_btnRemoveRegister = new GridBagConstraints();
+		gbc_btnRemoveRegister.insets = new Insets(0, 0, 5, 0);
+		gbc_btnRemoveRegister.gridx = 4;
+		gbc_btnRemoveRegister.gridy = 1;
+		panelRegisters.add(btnRemoveRegister, gbc_btnRemoveRegister);
+		
 		JScrollPane scrollPaneRegisters = new JScrollPane();
 		GridBagConstraints gbc_scrollPaneRegisters = new GridBagConstraints();
-		gbc_scrollPaneRegisters.gridwidth = 4;
+		gbc_scrollPaneRegisters.gridwidth = 5;
 		gbc_scrollPaneRegisters.insets = new Insets(0, 0, 0, 5);
 		gbc_scrollPaneRegisters.fill = GridBagConstraints.BOTH;
 		gbc_scrollPaneRegisters.gridx = 0;
@@ -352,9 +367,9 @@ public class GhidrionUI {
 		JPanel panelMemory = new JPanel();
 		panelMemory.setBorder(new TitledBorder(null, "Add memory", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		GridBagLayout gbl_panelMemory = new GridBagLayout();
-		gbl_panelMemory.columnWidths = new int[]{0, 0, 0, 0, 0};
+		gbl_panelMemory.columnWidths = new int[]{0, 0, 0, 0, 0, 0};
 		gbl_panelMemory.rowHeights = new int[]{0, 0, 75, 0};
-		gbl_panelMemory.columnWeights = new double[]{1.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_panelMemory.columnWeights = new double[]{1.0, 1.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
 		gbl_panelMemory.rowWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
 		panelMemory.setLayout(gbl_panelMemory);
 		
@@ -413,9 +428,16 @@ public class GhidrionUI {
 		gbc_btnAddMemory.gridy = 1;
 		panelMemory.add(btnAddMemory, gbc_btnAddMemory);
 		
+		JButton btnRemoveMemory = new JButton("Remove");
+		GridBagConstraints gbc_btnRemoveMemory = new GridBagConstraints();
+		gbc_btnRemoveMemory.insets = new Insets(0, 0, 5, 0);
+		gbc_btnRemoveMemory.gridx = 4;
+		gbc_btnRemoveMemory.gridy = 1;
+		panelMemory.add(btnRemoveMemory, gbc_btnRemoveMemory);
+		
 		JScrollPane scrollPaneMemory = new JScrollPane();
 		GridBagConstraints gbc_scrollPaneMemory = new GridBagConstraints();
-		gbc_scrollPaneMemory.gridwidth = 4;
+		gbc_scrollPaneMemory.gridwidth = 5;
 		gbc_scrollPaneMemory.insets = new Insets(0, 0, 0, 5);
 		gbc_scrollPaneMemory.fill = GridBagConstraints.BOTH;
 		gbc_scrollPaneMemory.gridx = 0;
