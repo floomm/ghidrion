@@ -57,6 +57,11 @@ public class TraceFileController {
 		}
 		traceFile.addEntryStateRegister(name, valueList);
 	}
+	
+	public void removeEntryStateRegister(String registerName) {
+		Map<String, List<String>> entryRegisters = traceFile.getEntryRegisters();
+		entryRegisters.remove(registerName);
+	}
 
 	public void addEntryStateMemory(String address, String value, boolean isSymbolic) {
 		List<String> valueList = new ArrayList<>();

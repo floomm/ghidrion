@@ -488,6 +488,7 @@ public class GhidrionProvider extends ComponentProvider {
 		scrollPaneHooks.setViewportView(hookList);
 		
 		setupBtnAddRegister(btnAddRegister, chckbxIsRegisterSymbolic);
+		setupBtnRemoveRegister(btnRemoveRegister);
 		scrollPaneRegisters.setViewportView(registerList);
 		
 		setupBtnAddMemory(btnAddMemory, chckbxIsMemorySymbolic);
@@ -559,16 +560,17 @@ public class GhidrionProvider extends ComponentProvider {
 	
 	private void setupBtnRemoveHook(JButton btnRemoveHook) {
 		btnRemoveHook.addActionListener(e -> {
+			// Remove hook from trace file data structure
 			List<Map<Long, List<String>>> selectedItems = hookList.getSelectedValuesList();
 			Set<Long> hookIds = new HashSet<>();
 			for (Map<Long, List<String>> item : selectedItems) {
 				hookIds.addAll(item.keySet());
 			}
-			
 			for (long hookId : hookIds) {
 				traceFileController.removeHook(hookId);
 			}
 			
+			// Remove hook from UI
 			int[] selectedIndices = hookList.getSelectedIndices();
 			for (int i = selectedIndices.length-1; i >= 0; i--) {
 				hookListModel.remove(selectedIndices[i]);
@@ -591,6 +593,26 @@ public class GhidrionProvider extends ComponentProvider {
             registerListModel.addElement(register);
             
             traceFileController.addEntryStateRegister(name, value, isSymbolic);
+		});
+	}
+	
+	private void setupBtnRemoveRegister(JButton btnRemoveRegister) {
+		btnRemoveRegister.addActionListener(e -> {
+			// Remove register from trace file data structure
+			List<List<String>> selectedItems = registerList.getSelectedValuesList();
+			Set<String> registerNames = new HashSet<>();
+			for (List<String> item : selectedItems) {
+				registerNames.add(item.get(0));
+			}
+			for (String name : registerNames) {
+				traceFileController.removeEntryStateRegister(name);
+			}
+			
+			// Remove register from UI
+			int[] selectedIndices = registerList.getSelectedIndices();
+			for (int i = selectedIndices.length-1; i >= 0; i--) {
+				registerListModel.remove(selectedIndices[i]);
+			}
 		});
 	}
 
