@@ -14,6 +14,7 @@ import javax.swing.JFileChooser;
 
 import org.yaml.snakeyaml.Yaml;
 
+import ghidra.util.Msg;
 import model.MorionTraceFile;
 
 public class TraceFileController {
@@ -40,13 +41,40 @@ public class TraceFileController {
 	
 	public void removeHook(long hookId) {
 		Map<String, String> hookDetails = hookDetailsMap.get(hookId);
-
+		
+		// lib, function, hookdetails
 		Map<String, Map<String, List<Map<String, String>>>> hooks = traceFile.getHooks();
-		for (Map<String, List<Map<String, String>>> function : hooks.values()) {
-	        for (List<Map<String, String>> functionDetails : function.values()) {
-	        	functionDetails.remove(hookDetails);
-	        }
-	    }
+		var hooksIter = hooks.entrySet().iterator();
+		while(hooksIter.hasNext()) {
+			var library = hooksIter.next();
+			var libraryIter = library.getValue().entrySet().iterator();
+			while (libraryIter.hasNext()) {
+				var function = libraryIter.next();
+				var functionIter = function.getValue().iterator();
+				while (functionIter.hasNext()) {
+					var functionDetails = functionIter.next();
+					if (functionDetails == hookDetails) {
+						String entry = functionDetails.get("entry");
+						String leave = functionDetails.get("leave");
+						String target = functionDetails.get("target");
+						String mode = functionDetails.get("mode");
+						String message = String.format("Removed hook {id=%d, lib=%s, func=%s, entry=%s, leave=%s, target=%s, mode=%s}", hookId, library.getKey(), function.getKey(), entry, leave, target, mode);
+						Msg.info(this, message);
+						functionIter.remove();
+					}
+				}
+				if (function.getValue().isEmpty()) {
+					String message = String.format("Removed function {lib=%s, func=%s}", library.getKey(), function.getKey());
+					Msg.info(this, message);
+					libraryIter.remove();
+				}
+			}
+			if (library.getValue().isEmpty()) {
+				String message = String.format("Removed library %s", library.getKey());
+				Msg.info(this, message);
+				hooksIter.remove();
+			}
+		}
 	}
 	
 	public void addEntryStateRegister(String name, String value, boolean isSymbolic) {
