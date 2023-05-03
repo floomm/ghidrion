@@ -17,7 +17,11 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -36,8 +40,8 @@ public class GhidrionProvider extends ComponentProvider {
 	
 	private TraceFileController traceFileController = new TraceFileController();
 
-    private DefaultListModel<List<String>> hookListModel = new DefaultListModel<>();
-	private JList<List<String>> hookList = new JList<>(hookListModel);
+    private DefaultListModel<Map<Long,List<String>>> hookListModel = new DefaultListModel<>();
+	private JList<Map<Long, List<String>>> hookList = new JList<>(hookListModel);
     private DefaultListModel<List<String>> registerListModel = new DefaultListModel<>();
 	private JList<List<String>> registerList = new JList<>(registerListModel);
     private DefaultListModel<List<String>> memoryListModel = new DefaultListModel<>();
@@ -480,6 +484,7 @@ public class GhidrionProvider extends ComponentProvider {
 		textFieldMemoryValue.setDocument(new HexDocument());
 		
 		setupBtnAddHook(btnAddHook, comboBoxHookMode);
+		setupBtnRemoveHook(btnRemoveHook);
 		scrollPaneHooks.setViewportView(hookList);
 		
 		setupBtnAddRegister(btnAddRegister, chckbxIsRegisterSymbolic);
@@ -502,10 +507,10 @@ public class GhidrionProvider extends ComponentProvider {
 		btnRemoveTraces.addActionListener(e -> {
 			List<String> selectedItems = traceList.getSelectedValuesList();
 			plugin.colorizerScript.decolorize(selectedItems);
-
+			
 			int[] selectedIndices = traceList.getSelectedIndices();
-			for (int i : selectedIndices) {
-				traceListModel.remove(i);
+			for (int i = selectedIndices.length-1; i >= 0; i--) {
+				traceListModel.remove(selectedIndices[i]);
 			}
 		});
 	}
@@ -540,12 +545,34 @@ public class GhidrionProvider extends ComponentProvider {
             String targetAddress = textFieldTarget.getText();
             String mode = (String) comboBoxHookMode.getSelectedItem();
 
-            List<String> hook = new ArrayList<>(
+            Map<Long, List<String>> hook = new HashMap<>();
+            List<String> hookDetails = new ArrayList<>(
             		Arrays.asList(libraryName, functionName, entryAddress, leaveAddress, targetAddress, mode)
             	);
+            long hookId = TraceFileController.generateHookId();
+            hook.put(hookId, hookDetails);
             hookListModel.addElement(hook);
             
-            traceFileController.addHook(libraryName, functionName, entryAddress, leaveAddress, targetAddress, mode);
+            traceFileController.addHook(libraryName, functionName, hookId, entryAddress, leaveAddress, targetAddress, mode);
+		});
+	}
+	
+	private void setupBtnRemoveHook(JButton btnRemoveHook) {
+		btnRemoveHook.addActionListener(e -> {
+			List<Map<Long, List<String>>> selectedItems = hookList.getSelectedValuesList();
+			Set<Long> hookIds = new HashSet<>();
+			for (Map<Long, List<String>> item : selectedItems) {
+				hookIds.addAll(item.keySet());
+			}
+			
+			for (long hookId : hookIds) {
+				traceFileController.removeHook(hookId);
+			}
+			
+			int[] selectedIndices = hookList.getSelectedIndices();
+			for (int i = selectedIndices.length-1; i >= 0; i--) {
+				hookListModel.remove(selectedIndices[i]);
+			}
 		});
 	}
 

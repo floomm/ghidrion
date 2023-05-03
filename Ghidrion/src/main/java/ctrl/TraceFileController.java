@@ -17,13 +17,17 @@ import org.yaml.snakeyaml.Yaml;
 import model.MorionTraceFile;
 
 public class TraceFileController {
+
 	private MorionTraceFile traceFile = new MorionTraceFile();
+	private Map<Long, Map<String, String>> hookDetailsMap = new HashMap<>();
+	
+	private static long hookCounter = 0;
 	
 	public String getSymbolicMarker() {
 		return MorionTraceFile.SYMBOLIC;
 	}
 	
-	public void addHook(String libraryName, String functionName, String entry, String leave, String target, String mode) {
+	public void addHook(String libraryName, String functionName, long hookId, String entry, String leave, String target, String mode) {
 		Map<String, String> hookDetails = new HashMap<>();
 		hookDetails.put("entry", entry);
 		hookDetails.put("leave", leave);
@@ -31,8 +35,20 @@ public class TraceFileController {
 		hookDetails.put("mode", mode);
 		
 		traceFile.addHook(libraryName, functionName, hookDetails);
+		hookDetailsMap.put(hookId, hookDetails);
 	}
+	
+	public void removeHook(long hookId) {
+		Map<String, String> hookDetails = hookDetailsMap.get(hookId);
 
+		Map<String, Map<String, List<Map<String, String>>>> hooks = traceFile.getHooks();
+		for (Map<String, List<Map<String, String>>> function : hooks.values()) {
+	        for (List<Map<String, String>> functionDetails : function.values()) {
+	        	functionDetails.remove(hookDetails);
+	        }
+	    }
+	}
+	
 	public void addEntryStateRegister(String name, String value, boolean isSymbolic) {
 		List<String> valueList = new ArrayList<>();
 		valueList.add(value);
@@ -72,5 +88,9 @@ public class TraceFileController {
 				e1.printStackTrace();
 			}
 		}
+	}
+	
+	public static synchronized long generateHookId() {
+		return hookCounter++;
 	}
 }
