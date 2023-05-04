@@ -146,9 +146,9 @@ public class GhidrionProvider extends ComponentProvider {
 		panelDisplayTraceFile.add(btnRemoveTraces, gbc_btnRemoveTraces);
 		GridBagLayout gbl_panelCreateTraceFile = new GridBagLayout();
 		gbl_panelCreateTraceFile.columnWidths = new int[]{956, 0};
-		gbl_panelCreateTraceFile.rowHeights = new int[]{144, 144, 144, 0, 23, 0};
-		gbl_panelCreateTraceFile.columnWeights = new double[]{0.0, Double.MIN_VALUE};
-		gbl_panelCreateTraceFile.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panelCreateTraceFile.rowHeights = new int[]{144, 144, 144, 0, 0};
+		gbl_panelCreateTraceFile.columnWeights = new double[]{1.0, Double.MIN_VALUE};
+		gbl_panelCreateTraceFile.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		panelCreateTraceFile.setLayout(gbl_panelCreateTraceFile);
 		
 		JPanel panelHooks = new JPanel();
@@ -465,19 +465,21 @@ public class GhidrionProvider extends ComponentProvider {
 		gbc_panelMemory.gridy = 2;
 		panelCreateTraceFile.add(panelMemory, gbc_panelMemory);
 		
-		JButton btnLoadInitTraceFile = new JButton("Load");
-		GridBagConstraints gbc_btnLoadInitTraceFile = new GridBagConstraints();
-		gbc_btnLoadInitTraceFile.insets = new Insets(0, 0, 5, 0);
-		gbc_btnLoadInitTraceFile.gridx = 0;
-		gbc_btnLoadInitTraceFile.gridy = 3;
-		panelCreateTraceFile.add(btnLoadInitTraceFile, gbc_btnLoadInitTraceFile);
+		JPanel panelButtons = new JPanel();
+		GridBagConstraints gbc_panelButtons = new GridBagConstraints();
+		gbc_panelButtons.fill = GridBagConstraints.BOTH;
+		gbc_panelButtons.gridx = 0;
+		gbc_panelButtons.gridy = 3;
+		panelCreateTraceFile.add(panelButtons, gbc_panelButtons);
 		
-		JButton btnCreateInitTraceFile = new JButton("Save");
-		GridBagConstraints gbc_btnCreateInitTraceFile = new GridBagConstraints();
-		gbc_btnCreateInitTraceFile.anchor = GridBagConstraints.NORTH;
-		gbc_btnCreateInitTraceFile.gridx = 0;
-		gbc_btnCreateInitTraceFile.gridy = 4;
-		panelCreateTraceFile.add(btnCreateInitTraceFile, gbc_btnCreateInitTraceFile);
+		JButton btnLoadTraceFile = new JButton("Load");
+		panelButtons.add(btnLoadTraceFile);
+		
+		JButton btnCreateTraceFile = new JButton("Save As");
+		panelButtons.add(btnCreateTraceFile);
+		
+		JButton btnClearTraceFile = new JButton("Clear");
+		panelButtons.add(btnClearTraceFile);
 		/*
 		 * ----------------------------------------------------------------------------------------------------------
 		 * WHEN UPDATING THE UI, REPLACE UNTIL HERE
@@ -503,8 +505,9 @@ public class GhidrionProvider extends ComponentProvider {
 		setupBtnRemoveMemory(btnRemoveMemory);
 		scrollPaneMemory.setViewportView(memoryList);
 		
-		setupBtnLoadInitTraceFile(btnLoadInitTraceFile);
-		setupBtnCreateInitTraceFile(btnCreateInitTraceFile);
+		setupBtnLoadTraceFile(btnLoadTraceFile);
+		setupBtnCreateTraceFile(btnCreateTraceFile);
+		setupBtnClearTraceFile(btnClearTraceFile);
 		
 		setupBtnDisplayTrace(btnDisplayTrace);
 		scrollPaneTraces.setViewportView(traceList);
@@ -680,19 +683,25 @@ public class GhidrionProvider extends ComponentProvider {
 		});
 	}
 	
-	private void setupBtnCreateInitTraceFile(JButton btnCreateInitTraceFile) {
-		btnCreateInitTraceFile.addActionListener(e -> {
+	private void setupBtnLoadTraceFile(JButton btnLoadTraceFile) {
+		btnLoadTraceFile.addActionListener(e -> {
+			clearTraceFile();
+		});
+	}
+	
+	private void setupBtnCreateTraceFile(JButton btnCreateTraceFile) {
+		btnCreateTraceFile.addActionListener(e -> {
 			traceFileController.createTraceFile(panel);
 		});
 	}
 	
-	private void setupBtnLoadInitTraceFile(JButton btnLoadInitTraceFile) {
-		btnLoadInitTraceFile.addActionListener(e -> {
-			clearInitTraceFile();
+	private void setupBtnClearTraceFile(JButton btnClearTraceFile) {
+		btnClearTraceFile.addActionListener(e -> {
+			clearTraceFile();
 		});
 	}
 	
-	private void clearInitTraceFile() {
+	private void clearTraceFile() {
 		// Clear hooks
 		textFieldLibrary.setText("");
 		textFieldFunction.setText("");
