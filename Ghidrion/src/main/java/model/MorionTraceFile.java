@@ -55,12 +55,36 @@ public class MorionTraceFile {
 		return hooks;
 	}
 	
-	public Map<String, List<String>> getEntryRegisters() {
-		return entryRegisters;
+	public Map<String, String> getInfo() {
+		return info;
+	}
+	
+	public List<List<String>> getInstructions() {
+		return instructions;
 	}
 	
 	public Map<String, List<String>> getEntryMemory() {
 		return entryMemory;
+	}
+	
+	public Map<String, List<String>> getEntryRegisters() {
+		return entryRegisters;
+	}
+	
+	public Map<String, List<String>> getLeaveMemory() {
+		return leaveMemory;
+	}
+	
+	public Map<String, List<String>> getLeaveRegisters() {
+		return leaveRegisters;
+	}
+	
+	public void setEntryAddress(String entryAddress) {
+		this.entryAddress = entryAddress;
+	}
+	
+	public void setLeaveAddress(String leaveAddress) {
+		this.leaveAddress = leaveAddress;
 	}
 	
 	public void addHook(String libraryName, String functionName, Map<String, String> hookDetails) {

@@ -56,10 +56,13 @@ public class GhidrionProvider extends ComponentProvider {
 	private JTextField textFieldEntry;
 	private JTextField textFieldLeave;
 	private JTextField textFieldTarget;
+	private JComboBox<String> comboBoxHookMode = new JComboBox<>();
 	private JTextField textFieldRegisterName;
 	private JTextField textFieldRegisterValue;
+	private JCheckBox chckbxIsRegisterSymbolic = new JCheckBox("");
 	private JTextField textFieldMemoryAddress;
 	private JTextField textFieldMemoryValue;
+	private JCheckBox chckbxIsMemorySymbolic = new JCheckBox("");
 
 	private Color traceColor = Color.CYAN;
 
@@ -247,8 +250,7 @@ public class GhidrionProvider extends ComponentProvider {
 		panelHooks.add(textFieldTarget, gbc_textFieldTarget);
 		textFieldTarget.setColumns(10);
 		
-		JComboBox comboBoxHookMode = new JComboBox();
-		comboBoxHookMode.setModel(new DefaultComboBoxModel(new String[] {"model", "skip", "taint"}));
+		comboBoxHookMode.setModel(new DefaultComboBoxModel<String>(new String[] {"model", "skip", "taint"}));
 		GridBagConstraints gbc_comboBoxHookMode = new GridBagConstraints();
 		gbc_comboBoxHookMode.insets = new Insets(0, 0, 5, 5);
 		gbc_comboBoxHookMode.fill = GridBagConstraints.HORIZONTAL;
@@ -337,7 +339,6 @@ public class GhidrionProvider extends ComponentProvider {
 		panelRegisters.add(textFieldRegisterValue, gbc_textFieldRegisterValue);
 		textFieldRegisterValue.setColumns(10);
 		
-		JCheckBox chckbxIsRegisterSymbolic = new JCheckBox("");
 		GridBagConstraints gbc_chckbxIsRegisterSymbolic = new GridBagConstraints();
 		gbc_chckbxIsRegisterSymbolic.insets = new Insets(0, 0, 5, 5);
 		gbc_chckbxIsRegisterSymbolic.gridx = 2;
@@ -426,7 +427,6 @@ public class GhidrionProvider extends ComponentProvider {
 		panelMemory.add(textFieldMemoryValue, gbc_textFieldMemoryValue);
 		textFieldMemoryValue.setColumns(10);
 		
-		JCheckBox chckbxIsMemorySymbolic = new JCheckBox("");
 		GridBagConstraints gbc_chckbxIsMemorySymbolic = new GridBagConstraints();
 		gbc_chckbxIsMemorySymbolic.insets = new Insets(0, 0, 5, 5);
 		gbc_chckbxIsMemorySymbolic.gridx = 2;
@@ -503,6 +503,7 @@ public class GhidrionProvider extends ComponentProvider {
 		setupBtnRemoveMemory(btnRemoveMemory);
 		scrollPaneMemory.setViewportView(memoryList);
 		
+		setupBtnLoadInitTraceFile(btnLoadInitTraceFile);
 		setupBtnCreateInitTraceFile(btnCreateInitTraceFile);
 		
 		setupBtnDisplayTrace(btnDisplayTrace);
@@ -683,6 +684,37 @@ public class GhidrionProvider extends ComponentProvider {
 		btnCreateInitTraceFile.addActionListener(e -> {
 			traceFileController.createTraceFile(panel);
 		});
+	}
+	
+	private void setupBtnLoadInitTraceFile(JButton btnLoadInitTraceFile) {
+		btnLoadInitTraceFile.addActionListener(e -> {
+			clearInitTraceFile();
+		});
+	}
+	
+	private void clearInitTraceFile() {
+		// Clear hooks
+		textFieldLibrary.setText("");
+		textFieldFunction.setText("");
+		textFieldEntry.setDocument(new HexDocument());
+		textFieldLeave.setDocument(new HexDocument());
+		textFieldTarget.setDocument(new HexDocument());
+		hookListModel.clear();
+		
+		// Clear registers
+		textFieldRegisterName.setText("");
+		textFieldRegisterValue.setDocument(new HexDocument());
+		chckbxIsRegisterSymbolic.setSelected(false);
+		registerListModel.clear();
+		
+		// Clear memory
+		textFieldMemoryAddress.setDocument(new HexDocument());
+		textFieldMemoryValue.setDocument(new HexDocument());
+		chckbxIsMemorySymbolic.setSelected(false);
+		memoryListModel.clear();
+		
+		// Clear data structure
+		traceFileController.clearTraceFile();
 	}
 
 	@Override

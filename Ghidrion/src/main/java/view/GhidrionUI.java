@@ -20,7 +20,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
 
 public class GhidrionUI {
 
@@ -30,10 +29,13 @@ public class GhidrionUI {
 	private JTextField textFieldEntry;
 	private JTextField textFieldLeave;
 	private JTextField textFieldTarget;
+	private JComboBox<String> comboBoxHookMode = new JComboBox<>();
 	private JTextField textFieldRegisterName;
 	private JTextField textFieldRegisterValue;
+	private JCheckBox chckbxIsRegisterSymbolic = new JCheckBox("");
 	private JTextField textFieldMemoryAddress;
 	private JTextField textFieldMemoryValue;
+	private JCheckBox chckbxIsMemorySymbolic = new JCheckBox("");
 
 	/**
 	 * Launch the application.
@@ -235,8 +237,7 @@ public class GhidrionUI {
 		panelHooks.add(textFieldTarget, gbc_textFieldTarget);
 		textFieldTarget.setColumns(10);
 		
-		JComboBox comboBoxHookMode = new JComboBox();
-		comboBoxHookMode.setModel(new DefaultComboBoxModel(new String[] {"model", "skip", "taint"}));
+		comboBoxHookMode.setModel(new DefaultComboBoxModel<String>(new String[] {"model", "skip", "taint"}));
 		GridBagConstraints gbc_comboBoxHookMode = new GridBagConstraints();
 		gbc_comboBoxHookMode.insets = new Insets(0, 0, 5, 5);
 		gbc_comboBoxHookMode.fill = GridBagConstraints.HORIZONTAL;
@@ -325,7 +326,6 @@ public class GhidrionUI {
 		panelRegisters.add(textFieldRegisterValue, gbc_textFieldRegisterValue);
 		textFieldRegisterValue.setColumns(10);
 		
-		JCheckBox chckbxIsRegisterSymbolic = new JCheckBox("");
 		GridBagConstraints gbc_chckbxIsRegisterSymbolic = new GridBagConstraints();
 		gbc_chckbxIsRegisterSymbolic.insets = new Insets(0, 0, 5, 5);
 		gbc_chckbxIsRegisterSymbolic.gridx = 2;
@@ -414,7 +414,6 @@ public class GhidrionUI {
 		panelMemory.add(textFieldMemoryValue, gbc_textFieldMemoryValue);
 		textFieldMemoryValue.setColumns(10);
 		
-		JCheckBox chckbxIsMemorySymbolic = new JCheckBox("");
 		GridBagConstraints gbc_chckbxIsMemorySymbolic = new GridBagConstraints();
 		gbc_chckbxIsMemorySymbolic.insets = new Insets(0, 0, 5, 5);
 		gbc_chckbxIsMemorySymbolic.gridx = 2;

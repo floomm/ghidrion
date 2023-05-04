@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -128,7 +129,34 @@ public class TraceFileController {
 		}
 	}
 	
+	public void clearTraceFile() {
+		traceFile.getHooks().clear();
+		traceFile.getInfo().clear();
+		traceFile.getInstructions().clear();
+		traceFile.setEntryAddress(null);
+		traceFile.getEntryMemory().clear();
+		traceFile.getEntryRegisters().clear();
+		traceFile.setLeaveAddress(null);
+		traceFile.getLeaveMemory().clear();
+		traceFile.getLeaveRegisters().clear();
+	}
+	
 	public static synchronized long generateHookId() {
 		return hookCounter++;
+	}
+	
+	private File askTraceFile() {
+		JFileChooser fileChooser = new JFileChooser();
+
+		// Filter for yaml files
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("YAML files", "yaml");
+		fileChooser.setFileFilter(filter);
+
+		int returnState = fileChooser.showOpenDialog(null);
+		if (returnState == JFileChooser.APPROVE_OPTION) {
+			Msg.info(this, "Imported file: " + fileChooser.getSelectedFile().getName());
+		}
+		
+		return fileChooser.getSelectedFile();
 	}
 }
