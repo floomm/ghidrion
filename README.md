@@ -6,7 +6,7 @@ There are a few requirements:
 
 - Java 17
 - [Ghidra 10.2.3](https://github.com/NationalSecurityAgency/ghidra/releases/tag/Ghidra_10.2.3_build)
-- Eclipse IDE with GhidraDev extension
+- Eclipse IDE with GhidraDev and [WindowBuilder](https://www.eclipse.org/windowbuilder/) extension
 
 1. `git clone https://github.com/silvan-flum/ghidrion.git`
 2. In Eclipse, import the cloned Ghidrion project:
