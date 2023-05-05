@@ -1,19 +1,13 @@
 package view;
 
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.border.TitledBorder;
 
 import ctrl.TraceFileController;
 import docking.ComponentProvider;
 import ghidra.util.Msg;
 import ghidrion.GhidrionPlugin;
 
-import javax.swing.border.EtchedBorder;
 import java.awt.Color;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,18 +17,18 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JTextField;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 
 public class GhidrionProvider extends ComponentProvider {
 	private GhidrionPlugin plugin;
+	
+	private JPanel panel;
+	private GhidrionUI ui = new GhidrionUI();
 	
 	private TraceFileController traceFileController = new TraceFileController();
 
@@ -46,22 +40,8 @@ public class GhidrionProvider extends ComponentProvider {
 	private JList<List<String>> memoryList = new JList<>(memoryListModel);
 	private DefaultListModel<String> traceListModel = new DefaultListModel<>();
 	private JList<String> traceList = new JList<>(traceListModel);
-	
-	private JPanel panel;
-	private JTextField textFieldLibrary;
-	private JTextField textFieldFunction;
-	private JTextField textFieldEntry;
-	private JTextField textFieldLeave;
-	private JTextField textFieldTarget;
-	private JComboBox<String> comboBoxHookMode = new JComboBox<>();
-	private JTextField textFieldRegisterName;
-	private JTextField textFieldRegisterValue;
-	private JCheckBox chckbxIsRegisterSymbolic = new JCheckBox("");
-	private JTextField textFieldMemoryAddress;
-	private JTextField textFieldMemoryValue;
-	private JCheckBox chckbxIsMemorySymbolic = new JCheckBox("");
 
-	private Color traceColor = Color.CYAN;
+	private Color traceColor = Color.GREEN;
 
 	public GhidrionProvider(GhidrionPlugin plugin, String pluginName, String owner) {
 		super(plugin.getTool(), pluginName, owner);
@@ -74,13 +54,14 @@ public class GhidrionProvider extends ComponentProvider {
 	private void buildPanel() {
 		panel = new JPanel();
 		setVisible(true);
+		
+		panel.add(ui.getContentPane());
 
 		/*
 		 * ----------------------------------------------------------------------------------------------------------
 		 * WHEN UPDATING THE GhidrionUI, REPLACE FROME HERE.
 		 * ALSO, REPLACE frame.getContentPane() WITH panel AFTER PASTING THE NEW GhdrionUI
 		 * ----------------------------------------------------------------------------------------------------------
-		 */
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] {0, 0};
 		gridBagLayout.rowHeights = new int[] {0, 0, 0};
@@ -480,35 +461,33 @@ public class GhidrionProvider extends ComponentProvider {
 		 * ----------------------------------------------------------------------------------------------------------
 		 */
 		
-		textFieldEntry.setDocument(new HexDocument());
-		textFieldLeave.setDocument(new HexDocument());
-		textFieldTarget.setDocument(new HexDocument());
-		textFieldRegisterValue.setDocument(new HexDocument());
-		textFieldMemoryAddress.setDocument(new HexDocument());
-		textFieldMemoryValue.setDocument(new HexDocument());
+		ui.textFieldEntry.setDocument(new HexDocument());
+		ui.textFieldLeave.setDocument(new HexDocument());
+		ui.textFieldTarget.setDocument(new HexDocument());
+		ui.textFieldRegisterValue.setDocument(new HexDocument());
+		ui.textFieldMemoryAddress.setDocument(new HexDocument());
+		ui.textFieldMemoryValue.setDocument(new HexDocument());
 		
-		setupBtnAddHook(btnAddHook, comboBoxHookMode);
-		setupBtnRemoveHook(btnRemoveHook);
-		scrollPaneHooks.setViewportView(hookList);
+		setupBtnAddHook(ui.btnAddHook, ui.comboBoxHookMode);
+		setupBtnRemoveHook(ui.btnRemoveHook);
+		ui.scrollPaneHooks.setViewportView(hookList);
 		
-		setupBtnAddRegister(btnAddRegister, chckbxIsRegisterSymbolic);
-		setupBtnRemoveRegister(btnRemoveRegister);
-		scrollPaneRegisters.setViewportView(registerList);
+		setupBtnAddRegister(ui.btnAddRegister, ui.chckbxIsRegisterSymbolic);
+		setupBtnRemoveRegister(ui.btnRemoveRegister);
+		ui.scrollPaneRegisters.setViewportView(registerList);
 		
-		setupBtnAddMemory(btnAddMemory, chckbxIsMemorySymbolic);
-		setupBtnRemoveMemory(btnRemoveMemory);
-		scrollPaneMemory.setViewportView(memoryList);
+		setupBtnAddMemory(ui.btnAddMemory, ui.chckbxIsMemorySymbolic);
+		setupBtnRemoveMemory(ui.btnRemoveMemory);
+		ui.scrollPaneMemory.setViewportView(memoryList);
 		
-		setupBtnLoadTraceFile(btnLoadTraceFile);
-		setupBtnCreateTraceFile(btnCreateTraceFile);
-		setupBtnClearTraceFile(btnClearTraceFile);
+		setupBtnLoadTraceFile(ui.btnLoadTraceFile);
+		setupBtnCreateTraceFile(ui.btnCreateTraceFile);
+		setupBtnClearTraceFile(ui.btnClearTraceFile);
 		
-		setupBtnDisplayTrace(btnDisplayTrace);
-		scrollPaneTraces.setViewportView(traceList);
-		setupBtnChooseTraceColor(btnChooseTraceColor);
-		setupBtnRemoveTraces(btnRemoveTraces);
-		panel.add(panelDisplayTraceFile, gbc_panelDisplayTraceFile);
-		//panel.setLayout(groupLayout);
+		setupBtnDisplayTrace(ui.btnDisplayTrace);
+		ui.scrollPaneTraces.setViewportView(traceList);
+		setupBtnChooseTraceColor(ui.btnChooseTraceColor);
+		setupBtnRemoveTraces(ui.btnRemoveTraces);
 	}
 
 	private void setupBtnRemoveTraces(JButton btnRemoveTraces) {
@@ -546,11 +525,11 @@ public class GhidrionProvider extends ComponentProvider {
 
 	private void setupBtnAddHook(JButton btnAddHook, JComboBox<String> comboBoxHookMode) {
 		btnAddHook.addActionListener(e -> {
-            String libraryName = textFieldLibrary.getText();
-            String functionName = textFieldFunction.getText();
-            String entryAddress = textFieldEntry.getText();
-            String leaveAddress = textFieldLeave.getText();
-            String targetAddress = textFieldTarget.getText();
+            String libraryName = ui.textFieldLibrary.getText();
+            String functionName = ui.textFieldFunction.getText();
+            String entryAddress = ui.textFieldEntry.getText();
+            String leaveAddress = ui.textFieldLeave.getText();
+            String targetAddress = ui.textFieldTarget.getText();
             String mode = (String) comboBoxHookMode.getSelectedItem();
 
             Map<Long, List<String>> hook = new HashMap<>();
@@ -587,8 +566,8 @@ public class GhidrionProvider extends ComponentProvider {
 
 	private void setupBtnAddRegister(JButton btnAddRegister, JCheckBox cbIsSymbolic) {
 		btnAddRegister.addActionListener(e -> {
-        	String name = textFieldRegisterName.getText();
-        	String value = textFieldRegisterValue.getText();
+        	String name = ui.textFieldRegisterName.getText();
+        	String value = ui.textFieldRegisterValue.getText();
         	boolean isSymbolic = cbIsSymbolic.isSelected();
         	
         	for (int i = 0; i < registerListModel.getSize(); i++) {
@@ -633,8 +612,8 @@ public class GhidrionProvider extends ComponentProvider {
 
 	private void setupBtnAddMemory(JButton btnAddMemory, JCheckBox chckbxIsMemorySymbolic) {
 		btnAddMemory.addActionListener(e -> {
-        	String address = textFieldMemoryAddress.getText();
-        	String value = textFieldMemoryValue.getText();
+        	String address = ui.textFieldMemoryAddress.getText();
+        	String value = ui.textFieldMemoryValue.getText();
         	boolean isSymbolic = chckbxIsMemorySymbolic.isSelected();
         	
         	for (int i = 0; i < memoryListModel.getSize(); i++) {
@@ -697,23 +676,23 @@ public class GhidrionProvider extends ComponentProvider {
 	
 	private void clearTraceFile() {
 		// Clear hooks
-		textFieldLibrary.setText("");
-		textFieldFunction.setText("");
-		textFieldEntry.setDocument(new HexDocument());
-		textFieldLeave.setDocument(new HexDocument());
-		textFieldTarget.setDocument(new HexDocument());
+		ui.textFieldLibrary.setText("");
+		ui.textFieldFunction.setText("");
+		ui.textFieldEntry.setDocument(new HexDocument());
+		ui.textFieldLeave.setDocument(new HexDocument());
+		ui.textFieldTarget.setDocument(new HexDocument());
 		hookListModel.clear();
 		
 		// Clear registers
-		textFieldRegisterName.setText("");
-		textFieldRegisterValue.setDocument(new HexDocument());
-		chckbxIsRegisterSymbolic.setSelected(false);
+		ui.textFieldRegisterName.setText("");
+		ui.textFieldRegisterValue.setDocument(new HexDocument());
+		ui.chckbxIsRegisterSymbolic.setSelected(false);
 		registerListModel.clear();
 		
 		// Clear memory
-		textFieldMemoryAddress.setDocument(new HexDocument());
-		textFieldMemoryValue.setDocument(new HexDocument());
-		chckbxIsMemorySymbolic.setSelected(false);
+		ui.textFieldMemoryAddress.setDocument(new HexDocument());
+		ui.textFieldMemoryValue.setDocument(new HexDocument());
+		ui.chckbxIsMemorySymbolic.setSelected(false);
 		memoryListModel.clear();
 		
 		// Clear data structure

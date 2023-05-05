@@ -3,12 +3,12 @@ package view;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
+
 import javax.swing.border.EtchedBorder;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
@@ -19,23 +19,38 @@ import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
 
 public class GhidrionUI {
 
 	private JFrame frame;
-	private JTextField textFieldLibrary;
-	private JTextField textFieldFunction;
-	private JTextField textFieldEntry;
-	private JTextField textFieldLeave;
-	private JTextField textFieldTarget;
-	private JComboBox<String> comboBoxHookMode = new JComboBox<>();
-	private JTextField textFieldRegisterName;
-	private JTextField textFieldRegisterValue;
-	private JCheckBox chckbxIsRegisterSymbolic = new JCheckBox("");
-	private JTextField textFieldMemoryAddress;
-	private JTextField textFieldMemoryValue;
-	private JCheckBox chckbxIsMemorySymbolic = new JCheckBox("");
+	protected JTextField textFieldLibrary;
+	protected JTextField textFieldFunction;
+	protected JTextField textFieldEntry;
+	protected JTextField textFieldLeave;
+	protected JTextField textFieldTarget;
+	protected JButton btnAddHook = new JButton("Add");
+	protected JButton btnRemoveHook = new JButton("Remove");
+	protected JScrollPane scrollPaneHooks = new JScrollPane();
+	protected JComboBox<String> comboBoxHookMode = new JComboBox<>();
+	protected JTextField textFieldRegisterName;
+	protected JTextField textFieldRegisterValue;
+	protected JCheckBox chckbxIsRegisterSymbolic = new JCheckBox("");
+	protected JButton btnAddRegister = new JButton("Add");
+	protected JButton btnRemoveRegister = new JButton("Remove");
+	protected JScrollPane scrollPaneRegisters = new JScrollPane();
+	protected JTextField textFieldMemoryAddress;
+	protected JTextField textFieldMemoryValue;
+	protected JCheckBox chckbxIsMemorySymbolic = new JCheckBox("");
+	protected JButton btnAddMemory = new JButton("Add");
+	protected JButton btnRemoveMemory = new JButton("Remove");
+	protected JScrollPane scrollPaneMemory = new JScrollPane();
+	protected JButton btnLoadTraceFile = new JButton("Load");
+	protected JButton btnCreateTraceFile = new JButton("Save As");
+	protected JButton btnClearTraceFile = new JButton("Clear");
+	protected JButton btnDisplayTrace = new JButton("Import and Display");
+	protected JButton btnChooseTraceColor = new JButton("Color");
+	protected JScrollPane scrollPaneTraces = new JScrollPane();
+	protected JButton btnRemoveTraces = new JButton("Remove selected traces");
 
 	/**
 	 * Launch the application.
@@ -58,6 +73,10 @@ public class GhidrionUI {
 	 */
 	public GhidrionUI() {
 		initialize();
+	}
+	
+	public Container getContentPane() {
+		return frame.getContentPane();
 	}
 
 	/**
@@ -193,21 +212,18 @@ public class GhidrionUI {
 		gbc_comboBoxHookMode.gridy = 1;
 		panelHooks.add(comboBoxHookMode, gbc_comboBoxHookMode);
 		
-		JButton btnAddHook = new JButton("Add");
 		GridBagConstraints gbc_btnAddHook = new GridBagConstraints();
 		gbc_btnAddHook.insets = new Insets(0, 0, 5, 5);
 		gbc_btnAddHook.gridx = 6;
 		gbc_btnAddHook.gridy = 1;
 		panelHooks.add(btnAddHook, gbc_btnAddHook);
 		
-		JButton btnRemoveHook = new JButton("Remove");
 		GridBagConstraints gbc_btnRemoveHook = new GridBagConstraints();
 		gbc_btnRemoveHook.insets = new Insets(0, 0, 5, 0);
 		gbc_btnRemoveHook.gridx = 7;
 		gbc_btnRemoveHook.gridy = 1;
 		panelHooks.add(btnRemoveHook, gbc_btnRemoveHook);
 		
-		JScrollPane scrollPaneHooks = new JScrollPane();
 		GridBagConstraints gbc_scrollPaneHooks = new GridBagConstraints();
 		gbc_scrollPaneHooks.gridwidth = 8;
 		gbc_scrollPaneHooks.insets = new Insets(0, 0, 0, 5);
@@ -280,21 +296,18 @@ public class GhidrionUI {
 		gbc_chckbxIsRegisterSymbolic.gridy = 1;
 		panelRegisters.add(chckbxIsRegisterSymbolic, gbc_chckbxIsRegisterSymbolic);
 		
-		JButton btnAddRegister = new JButton("Add");
 		GridBagConstraints gbc_btnAddRegister = new GridBagConstraints();
 		gbc_btnAddRegister.insets = new Insets(0, 0, 5, 5);
 		gbc_btnAddRegister.gridx = 3;
 		gbc_btnAddRegister.gridy = 1;
 		panelRegisters.add(btnAddRegister, gbc_btnAddRegister);
 		
-		JButton btnRemoveRegister = new JButton("Remove");
 		GridBagConstraints gbc_btnRemoveRegister = new GridBagConstraints();
 		gbc_btnRemoveRegister.insets = new Insets(0, 0, 5, 0);
 		gbc_btnRemoveRegister.gridx = 4;
 		gbc_btnRemoveRegister.gridy = 1;
 		panelRegisters.add(btnRemoveRegister, gbc_btnRemoveRegister);
 		
-		JScrollPane scrollPaneRegisters = new JScrollPane();
 		GridBagConstraints gbc_scrollPaneRegisters = new GridBagConstraints();
 		gbc_scrollPaneRegisters.gridwidth = 5;
 		gbc_scrollPaneRegisters.insets = new Insets(0, 0, 0, 5);
@@ -368,21 +381,18 @@ public class GhidrionUI {
 		gbc_chckbxIsMemorySymbolic.gridy = 1;
 		panelMemory.add(chckbxIsMemorySymbolic, gbc_chckbxIsMemorySymbolic);
 		
-		JButton btnAddMemory = new JButton("Add");
 		GridBagConstraints gbc_btnAddMemory = new GridBagConstraints();
 		gbc_btnAddMemory.insets = new Insets(0, 0, 5, 5);
 		gbc_btnAddMemory.gridx = 3;
 		gbc_btnAddMemory.gridy = 1;
 		panelMemory.add(btnAddMemory, gbc_btnAddMemory);
 		
-		JButton btnRemoveMemory = new JButton("Remove");
 		GridBagConstraints gbc_btnRemoveMemory = new GridBagConstraints();
 		gbc_btnRemoveMemory.insets = new Insets(0, 0, 5, 0);
 		gbc_btnRemoveMemory.gridx = 4;
 		gbc_btnRemoveMemory.gridy = 1;
 		panelMemory.add(btnRemoveMemory, gbc_btnRemoveMemory);
 		
-		JScrollPane scrollPaneMemory = new JScrollPane();
 		GridBagConstraints gbc_scrollPaneMemory = new GridBagConstraints();
 		gbc_scrollPaneMemory.gridwidth = 5;
 		gbc_scrollPaneMemory.insets = new Insets(0, 0, 0, 5);
@@ -407,13 +417,10 @@ public class GhidrionUI {
 		gbc_panelButtons.gridy = 3;
 		panelCreateTraceFile.add(panelButtons, gbc_panelButtons);
 		
-		JButton btnLoadTraceFile = new JButton("Load");
 		panelButtons.add(btnLoadTraceFile);
 		
-		JButton btnCreateTraceFile = new JButton("Save As");
 		panelButtons.add(btnCreateTraceFile);
 		
-		JButton btnClearTraceFile = new JButton("Clear");
 		panelButtons.add(btnClearTraceFile);
 		GridBagConstraints gbc_panelCreateTraceFile = new GridBagConstraints();
 		gbc_panelCreateTraceFile.anchor = GridBagConstraints.NORTHWEST;
@@ -431,21 +438,18 @@ public class GhidrionUI {
 		gbl_panelDisplayTraceFile.rowWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
 		panelDisplayTraceFile.setLayout(gbl_panelDisplayTraceFile);
 		
-		JButton btnDisplayTrace = new JButton("Import and Display");
 		GridBagConstraints gbc_btnDisplayTrace = new GridBagConstraints();
 		gbc_btnDisplayTrace.insets = new Insets(0, 0, 5, 5);
 		gbc_btnDisplayTrace.gridx = 0;
 		gbc_btnDisplayTrace.gridy = 0;
 		panelDisplayTraceFile.add(btnDisplayTrace, gbc_btnDisplayTrace);
 		
-		JButton btnChooseTraceColor = new JButton("Color");
 		GridBagConstraints gbc_btnChooseTraceColor = new GridBagConstraints();
 		gbc_btnChooseTraceColor.insets = new Insets(0, 0, 5, 5);
 		gbc_btnChooseTraceColor.gridx = 1;
 		gbc_btnChooseTraceColor.gridy = 0;
 		panelDisplayTraceFile.add(btnChooseTraceColor, gbc_btnChooseTraceColor);
 		
-		JScrollPane scrollPaneTraces = new JScrollPane();
 		GridBagConstraints gbc_scrollPaneTraces = new GridBagConstraints();
 		gbc_scrollPaneTraces.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPaneTraces.gridwidth = 3;
@@ -454,7 +458,6 @@ public class GhidrionUI {
 		gbc_scrollPaneTraces.gridy = 1;
 		panelDisplayTraceFile.add(scrollPaneTraces, gbc_scrollPaneTraces);
 		
-		JButton btnRemoveTraces = new JButton("Remove selected traces");
 		GridBagConstraints gbc_btnRemoveTraces = new GridBagConstraints();
 		gbc_btnRemoveTraces.insets = new Insets(0, 0, 0, 5);
 		gbc_btnRemoveTraces.gridx = 0;
