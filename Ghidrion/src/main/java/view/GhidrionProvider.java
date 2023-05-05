@@ -1,7 +1,5 @@
 package view;
 
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
@@ -34,7 +32,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
-import javax.swing.LayoutStyle.ComponentPlacement;
 
 public class GhidrionProvider extends ComponentProvider {
 	private GhidrionPlugin plugin;
@@ -84,69 +81,17 @@ public class GhidrionProvider extends ComponentProvider {
 		 * ALSO, REPLACE frame.getContentPane() WITH panel AFTER PASTING THE NEW GhdrionUI
 		 * ----------------------------------------------------------------------------------------------------------
 		 */
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		gridBagLayout.columnWidths = new int[] {0, 0};
+		gridBagLayout.rowHeights = new int[] {0, 0, 0};
+		gridBagLayout.columnWeights = new double[]{0.0, Double.MIN_VALUE};
+		gridBagLayout.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		panel.setLayout(gridBagLayout);
 		JPanel panelCreateTraceFile = new JPanel();
 		panelCreateTraceFile.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Create init trace file", TitledBorder.LEADING, TitledBorder.ABOVE_TOP, null, new Color(0, 0, 0)));
-		
-		JPanel panelDisplayTraceFile = new JPanel();
-		panelDisplayTraceFile.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Display Morion trace file", TitledBorder.LEADING, TitledBorder.ABOVE_TOP, null, new Color(0, 0, 0)));
-		GroupLayout groupLayout = new GroupLayout(panel);
-		groupLayout.setHorizontalGroup(
-			groupLayout.createParallelGroup(Alignment.TRAILING)
-				.addGroup(groupLayout.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-						.addComponent(panelCreateTraceFile, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 968, Short.MAX_VALUE)
-						.addComponent(panelDisplayTraceFile, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 968, Short.MAX_VALUE))
-					.addContainerGap())
-		);
-		groupLayout.setVerticalGroup(
-			groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
-					.addContainerGap()
-					.addComponent(panelCreateTraceFile, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED, 54, Short.MAX_VALUE)
-					.addComponent(panelDisplayTraceFile, GroupLayout.PREFERRED_SIZE, 195, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap())
-		);
-		GridBagLayout gbl_panelDisplayTraceFile = new GridBagLayout();
-		gbl_panelDisplayTraceFile.columnWidths = new int[]{0, 0, 0, 0};
-		gbl_panelDisplayTraceFile.rowHeights = new int[]{0, 0, 0, 0};
-		gbl_panelDisplayTraceFile.columnWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
-		gbl_panelDisplayTraceFile.rowWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
-		panelDisplayTraceFile.setLayout(gbl_panelDisplayTraceFile);
-		
-		JButton btnDisplayTrace = new JButton("Import and Display");
-		GridBagConstraints gbc_btnDisplayTrace = new GridBagConstraints();
-		gbc_btnDisplayTrace.insets = new Insets(0, 0, 5, 5);
-		gbc_btnDisplayTrace.gridx = 0;
-		gbc_btnDisplayTrace.gridy = 0;
-		panelDisplayTraceFile.add(btnDisplayTrace, gbc_btnDisplayTrace);
-		
-		JButton btnChooseTraceColor = new JButton("Color");
-		GridBagConstraints gbc_btnChooseTraceColor = new GridBagConstraints();
-		gbc_btnChooseTraceColor.insets = new Insets(0, 0, 5, 5);
-		gbc_btnChooseTraceColor.gridx = 1;
-		gbc_btnChooseTraceColor.gridy = 0;
-		panelDisplayTraceFile.add(btnChooseTraceColor, gbc_btnChooseTraceColor);
-		
-		JScrollPane scrollPaneTraces = new JScrollPane();
-		GridBagConstraints gbc_scrollPaneTraces = new GridBagConstraints();
-		gbc_scrollPaneTraces.insets = new Insets(0, 0, 5, 0);
-		gbc_scrollPaneTraces.gridwidth = 3;
-		gbc_scrollPaneTraces.fill = GridBagConstraints.BOTH;
-		gbc_scrollPaneTraces.gridx = 0;
-		gbc_scrollPaneTraces.gridy = 1;
-		panelDisplayTraceFile.add(scrollPaneTraces, gbc_scrollPaneTraces);
-		
-		JButton btnRemoveTraces = new JButton("Remove selected traces");
-		GridBagConstraints gbc_btnRemoveTraces = new GridBagConstraints();
-		gbc_btnRemoveTraces.insets = new Insets(0, 0, 0, 5);
-		gbc_btnRemoveTraces.gridx = 0;
-		gbc_btnRemoveTraces.gridy = 2;
-		panelDisplayTraceFile.add(btnRemoveTraces, gbc_btnRemoveTraces);
 		GridBagLayout gbl_panelCreateTraceFile = new GridBagLayout();
 		gbl_panelCreateTraceFile.columnWidths = new int[]{956, 0};
-		gbl_panelCreateTraceFile.rowHeights = new int[]{144, 144, 144, 0, 0};
+		gbl_panelCreateTraceFile.rowHeights = new int[] {0, 0, 0, 0, 0};
 		gbl_panelCreateTraceFile.columnWeights = new double[]{1.0, Double.MIN_VALUE};
 		gbl_panelCreateTraceFile.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		panelCreateTraceFile.setLayout(gbl_panelCreateTraceFile);
@@ -155,7 +100,7 @@ public class GhidrionProvider extends ComponentProvider {
 		panelHooks.setBorder(new TitledBorder(null, "Add hook", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		GridBagLayout gbl_panelHooks = new GridBagLayout();
 		gbl_panelHooks.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
-		gbl_panelHooks.rowHeights = new int[]{0, 0, 75, 0};
+		gbl_panelHooks.rowHeights = new int[] {0, 0, 50, 0};
 		gbl_panelHooks.columnWeights = new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
 		gbl_panelHooks.rowWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
 		panelHooks.setLayout(gbl_panelHooks);
@@ -294,7 +239,7 @@ public class GhidrionProvider extends ComponentProvider {
 		panelRegisters.setBorder(new TitledBorder(null, "Add register", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		GridBagLayout gbl_panelRegisters = new GridBagLayout();
 		gbl_panelRegisters.columnWidths = new int[]{0, 0, 0, 0, 0, 0};
-		gbl_panelRegisters.rowHeights = new int[]{0, 0, 75, 0};
+		gbl_panelRegisters.rowHeights = new int[] {0, 0, 50, 0};
 		gbl_panelRegisters.columnWeights = new double[]{1.0, 1.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
 		gbl_panelRegisters.rowWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
 		panelRegisters.setLayout(gbl_panelRegisters);
@@ -381,7 +326,7 @@ public class GhidrionProvider extends ComponentProvider {
 		panelMemory.setBorder(new TitledBorder(null, "Add memory", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		GridBagLayout gbl_panelMemory = new GridBagLayout();
 		gbl_panelMemory.columnWidths = new int[]{0, 0, 0, 0, 0, 0};
-		gbl_panelMemory.rowHeights = new int[]{0, 0, 75, 0};
+		gbl_panelMemory.rowHeights = new int[] {0, 0, 50, 0};
 		gbl_panelMemory.columnWeights = new double[]{1.0, 1.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
 		gbl_panelMemory.rowWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
 		panelMemory.setLayout(gbl_panelMemory);
@@ -480,6 +425,55 @@ public class GhidrionProvider extends ComponentProvider {
 		
 		JButton btnClearTraceFile = new JButton("Clear");
 		panelButtons.add(btnClearTraceFile);
+		GridBagConstraints gbc_panelCreateTraceFile = new GridBagConstraints();
+		gbc_panelCreateTraceFile.anchor = GridBagConstraints.NORTHWEST;
+		gbc_panelCreateTraceFile.insets = new Insets(0, 0, 5, 0);
+		gbc_panelCreateTraceFile.gridx = 0;
+		gbc_panelCreateTraceFile.gridy = 0;
+		panel.add(panelCreateTraceFile, gbc_panelCreateTraceFile);
+		
+		JPanel panelDisplayTraceFile = new JPanel();
+		panelDisplayTraceFile.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Display Morion trace file", TitledBorder.LEADING, TitledBorder.ABOVE_TOP, null, new Color(0, 0, 0)));
+		GridBagLayout gbl_panelDisplayTraceFile = new GridBagLayout();
+		gbl_panelDisplayTraceFile.columnWidths = new int[]{0, 0, 0, 0};
+		gbl_panelDisplayTraceFile.rowHeights = new int[] {0, 50, 0, 0};
+		gbl_panelDisplayTraceFile.columnWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_panelDisplayTraceFile.rowWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
+		panelDisplayTraceFile.setLayout(gbl_panelDisplayTraceFile);
+		
+		JButton btnDisplayTrace = new JButton("Import and Display");
+		GridBagConstraints gbc_btnDisplayTrace = new GridBagConstraints();
+		gbc_btnDisplayTrace.insets = new Insets(0, 0, 5, 5);
+		gbc_btnDisplayTrace.gridx = 0;
+		gbc_btnDisplayTrace.gridy = 0;
+		panelDisplayTraceFile.add(btnDisplayTrace, gbc_btnDisplayTrace);
+		
+		JButton btnChooseTraceColor = new JButton("Color");
+		GridBagConstraints gbc_btnChooseTraceColor = new GridBagConstraints();
+		gbc_btnChooseTraceColor.insets = new Insets(0, 0, 5, 5);
+		gbc_btnChooseTraceColor.gridx = 1;
+		gbc_btnChooseTraceColor.gridy = 0;
+		panelDisplayTraceFile.add(btnChooseTraceColor, gbc_btnChooseTraceColor);
+		
+		JScrollPane scrollPaneTraces = new JScrollPane();
+		GridBagConstraints gbc_scrollPaneTraces = new GridBagConstraints();
+		gbc_scrollPaneTraces.insets = new Insets(0, 0, 5, 0);
+		gbc_scrollPaneTraces.gridwidth = 3;
+		gbc_scrollPaneTraces.fill = GridBagConstraints.BOTH;
+		gbc_scrollPaneTraces.gridx = 0;
+		gbc_scrollPaneTraces.gridy = 1;
+		panelDisplayTraceFile.add(scrollPaneTraces, gbc_scrollPaneTraces);
+		
+		JButton btnRemoveTraces = new JButton("Remove selected traces");
+		GridBagConstraints gbc_btnRemoveTraces = new GridBagConstraints();
+		gbc_btnRemoveTraces.insets = new Insets(0, 0, 0, 5);
+		gbc_btnRemoveTraces.gridx = 0;
+		gbc_btnRemoveTraces.gridy = 2;
+		panelDisplayTraceFile.add(btnRemoveTraces, gbc_btnRemoveTraces);
+		GridBagConstraints gbc_panelDisplayTraceFile = new GridBagConstraints();
+		gbc_panelDisplayTraceFile.fill = GridBagConstraints.BOTH;
+		gbc_panelDisplayTraceFile.gridx = 0;
+		gbc_panelDisplayTraceFile.gridy = 1;
 		/*
 		 * ----------------------------------------------------------------------------------------------------------
 		 * WHEN UPDATING THE UI, REPLACE UNTIL HERE
@@ -513,8 +507,8 @@ public class GhidrionProvider extends ComponentProvider {
 		scrollPaneTraces.setViewportView(traceList);
 		setupBtnChooseTraceColor(btnChooseTraceColor);
 		setupBtnRemoveTraces(btnRemoveTraces);
-
-		panel.setLayout(groupLayout);
+		panel.add(panelDisplayTraceFile, gbc_panelDisplayTraceFile);
+		//panel.setLayout(groupLayout);
 	}
 
 	private void setupBtnRemoveTraces(JButton btnRemoveTraces) {
