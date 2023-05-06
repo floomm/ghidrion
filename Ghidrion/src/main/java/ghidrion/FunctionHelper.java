@@ -1,12 +1,12 @@
 package ghidrion;
 
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.common.collect.Lists;
 
@@ -22,35 +22,40 @@ public class FunctionHelper {
 	private final Program p;
 
 	public FunctionHelper(Program p) {
-		if (p == null) throw new IllegalArgumentException();
+		if (p == null)
+			throw new IllegalArgumentException();
 		this.p = p;
 	}
 
-	public Set<Address> getAddressesForFunction(String functionName) {
-		return getFunctions().get(functionName);
+	public Set<Address> getAddresses(Collection<String> functionNames, Collection<String> blockNames) {
+		return getFunctions()
+				.entrySet()
+				.stream()
+				.filter(e -> functionNames.contains(e.getKey()))
+				.flatMap(e -> e.getValue().stream())
+				.filter(a -> getBlockStream(blockNames).anyMatch(b -> b.contains(a)))
+				.collect(Collectors.toSet());
 	}
 
-	public Set<Address> getAddressesForFunction(String functionName, String blockName) {
-		MemoryBlock b = p.getMemory().getBlock(blockName);
-		return getAddressesForFunction(functionName).stream().filter(e -> b.contains(e)).collect(Collectors.toSet());
+	public Set<String> getBlockNames(Collection<String> functionNames) {
+		return getFunctions()
+				.entrySet()
+				.stream()
+				.filter(f -> functionNames.contains(f.getKey()))
+				.flatMap(f -> f.getValue().stream())
+				.map(a -> p.getMemory().getBlock(a))
+				.map(b -> b.getName())
+				.collect(Collectors.toSet());
 	}
 
-	public Set<String> getAllBlocks() {
-		return Arrays.stream(p.getMemory().getBlocks()).map(MemoryBlock::getName).collect(Collectors.toSet());
+	private Stream<MemoryBlock> getBlockStream(Collection<String> blockNames) {
+		return blockNames
+				.stream()
+				.map(e -> p.getMemory().getBlock(e));
 	}
 
 	public Set<String> getFunctionNames() {
 		return getFunctions().keySet();
-	}
-
-	public Set<String> getFunctionNames(String blockName) {
-		MemoryBlock b = p.getMemory().getBlock(blockName);
-		Set<String> res = new HashSet<>();
-		for (Entry<String, Set<Address>> entry : getFunctions().entrySet()) {
-			if (entry.getValue().stream().filter(e -> b.contains(e)).count() > 0)
-				res.add(entry.getKey());
-		}
-		return res;
 	}
 
 	private Map<String, Set<Address>> getFunctions() {
