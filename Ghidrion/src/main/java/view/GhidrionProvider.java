@@ -32,7 +32,7 @@ public class GhidrionProvider extends ComponentProvider {
 	private JPanel panel;
 	private GhidrionUI ui = new GhidrionUI();
 
-	private TraceFileController traceFileController = new TraceFileController();
+	private TraceFileController traceFileController;
 	private FunctionHelper functionHelper;
 
 	private DefaultListModel<List<String>> registerListModel = new DefaultListModel<>();
@@ -47,6 +47,7 @@ public class GhidrionProvider extends ComponentProvider {
 	public GhidrionProvider(GhidrionPlugin plugin, String pluginName, String owner) {
 		super(plugin.getTool(), pluginName, owner);
 		this.plugin = plugin;
+		traceFileController = new TraceFileController(plugin);
 
 		buildPanel();
 	}
@@ -159,9 +160,6 @@ public class GhidrionProvider extends ComponentProvider {
 				String entryAddress = "0x" + a.toString();
 				String leaveAddress = "0x" + a.next().toString();
 				String mode = (String) ui.comboBoxHookMode.getSelectedItem();
-				List<String> hook = new ArrayList<>(
-						Arrays.asList(libraryName, functionName, entryAddress, leaveAddress,
-								mode));
 
 				traceFileController.addHook(libraryName, functionName, entryAddress, leaveAddress, mode);
 			}

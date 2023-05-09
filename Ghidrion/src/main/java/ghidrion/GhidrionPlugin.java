@@ -29,6 +29,7 @@ import ghidra.app.services.GhidraScriptService;
 import ghidra.framework.plugintool.PluginInfo;
 import ghidra.framework.plugintool.PluginTool;
 import ghidra.framework.plugintool.util.PluginStatus;
+import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.listing.Program;
 import ghidra.util.HelpLocation;
 import view.GhidrionProvider;
@@ -60,6 +61,7 @@ public class GhidrionPlugin extends ProgramPlugin {
 	private static final String PLUGIN_NAME = "Ghidrion";
 
 	private GhidrionProvider provider;
+	private FlatProgramAPI flatAPI;
 
 	/**
 	 * Plugin constructor.
@@ -76,6 +78,10 @@ public class GhidrionPlugin extends ProgramPlugin {
 		String owner = getName();
 
 		provider = new GhidrionProvider(this, PLUGIN_NAME, owner);
+		
+		if (currentProgram != null) {
+			this.flatAPI = new FlatProgramAPI(currentProgram);
+		}
 
 		// TODO: Customize help (or remove if help is not desired)
 		String topicName = this.getClass().getPackage().getName();
@@ -96,6 +102,7 @@ public class GhidrionPlugin extends ProgramPlugin {
 	@Override
 	protected void programActivated(Program program) {
 		currentProgram = program;
+		flatAPI = new FlatProgramAPI(program);
 
 		// Set state of scripts
 		GhidraState state = new GhidraState(tool, tool.getProject(), program, currentLocation, currentSelection,
@@ -126,5 +133,9 @@ public class GhidrionPlugin extends ProgramPlugin {
 
 	public DecompilerHighlightService getDecompilerHighlightService() {
 		return decompilerHighlightService;
+	}
+	
+	public FlatProgramAPI getFlatAPI() {
+		return flatAPI;
 	}
 }

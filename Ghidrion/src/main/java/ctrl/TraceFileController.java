@@ -16,7 +16,9 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.yaml.snakeyaml.Yaml;
 
+import ghidra.program.model.address.Address;
 import ghidra.util.Msg;
+import ghidrion.GhidrionPlugin;
 import model.Hook;
 import model.Hook.Mode;
 import model.MorionTraceFile;
@@ -24,18 +26,27 @@ import model.MorionTraceFile;
 public class TraceFileController {
 
 	private MorionTraceFile traceFile = new MorionTraceFile();
+	private GhidrionPlugin plugin;
+	
+	public TraceFileController(GhidrionPlugin plugin) {
+		this.plugin = plugin;
+	}
 	
 	public String getSymbolicMarker() {
 		return MorionTraceFile.SYMBOLIC;
 	}
 	
-	public void addHook(String libraryName, String functionName, String entryAddress, String leaveAddress, String mode) {
+	public void addHook(String libraryName, String functionName, String entry, String leave, String mode) {
+		Address entryAddress = plugin.getFlatAPI().toAddr(entry);
+		Address leaveAddress = plugin.getFlatAPI().toAddr(leave);
 		Hook hook = new Hook(libraryName, functionName, entryAddress, leaveAddress, Mode.fromValue(mode));
 		removeHook(hook); // Possibly, hook has to be replaced
 		traceFile.addHook(hook);
 	}
 	
-	public void removeHook(String libraryName, String functionName, String entryAddress, String leaveAddress, String mode) {
+	public void removeHook(String libraryName, String functionName, String entry, String leave, String mode) {
+		Address entryAddress = plugin.getFlatAPI().toAddr(entry);
+		Address leaveAddress = plugin.getFlatAPI().toAddr(leave);
 		Hook hook = new Hook(libraryName, functionName, entryAddress, leaveAddress, Mode.fromValue(mode));
 		removeHook(hook);
 	}
@@ -128,8 +139,8 @@ public class TraceFileController {
 		
 		for (Hook hook : traceFile.getHooks()) {
 			Map<String, String> hookDetails = new HashMap<>();
-			hookDetails.put(MorionTraceFile.HOOK_ENTRY, hook.getEntryAddress());
-			hookDetails.put(MorionTraceFile.HOOK_LEAVE, hook.getLeaveAddress());
+			hookDetails.put(MorionTraceFile.HOOK_ENTRY, "0x" + hook.getEntryAddress().toString());
+			hookDetails.put(MorionTraceFile.HOOK_LEAVE, "0x" + hook.getLeaveAddress().toString());
 			hookDetails.put(MorionTraceFile.HOOK_TARGET, hook.getTargetAddress());
 			hookDetails.put(MorionTraceFile.HOOK_MODE, hook.getMode().getValue());
 			

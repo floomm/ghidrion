@@ -2,6 +2,8 @@ package model;
 
 import java.util.Objects;
 
+import ghidra.program.model.address.Address;
+
 public class Hook {
 	private static final long TARGET_ADDRESS_STEP = 0x100;
 
@@ -9,12 +11,12 @@ public class Hook {
 
 	private String libraryName;
 	private String functionName;
-	private String entryAddress;
-	private String leaveAddress;
+	private Address entryAddress;
+	private Address leaveAddress;
 	private String targetAddress;
 	private Mode mode;
 	
-	public Hook(String libraryName, String functionName, String entryAddress, String leaveAddress, Mode mode) {
+	public Hook(String libraryName, String functionName, Address entryAddress, Address leaveAddress, Mode mode) {
 		this.libraryName = libraryName;
 		this.functionName = functionName;
 		this.entryAddress = entryAddress;
@@ -31,11 +33,11 @@ public class Hook {
 		return functionName;
 	}
 	
-	public String getEntryAddress() {
+	public Address getEntryAddress() {
 		return entryAddress;
 	}
 	
-	public String getLeaveAddress() {
+	public Address getLeaveAddress() {
 		return leaveAddress;
 	}
 	
