@@ -82,11 +82,6 @@ public class GhidrionPlugin extends ProgramPlugin {
 		if (currentProgram != null) {
 			this.flatAPI = new FlatProgramAPI(currentProgram);
 		}
-
-		// TODO: Customize help (or remove if help is not desired)
-		String topicName = this.getClass().getPackage().getName();
-		String anchorName = "HelpAnchor";
-		provider.setHelpLocation(new HelpLocation(topicName, anchorName));
 	}
 
 	@Override
