@@ -11,10 +11,8 @@ import ghidrion.GhidrionPlugin;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -36,7 +34,6 @@ public class GhidrionProvider extends ComponentProvider {
 
 	private TraceFileController traceFileController = new TraceFileController();
 	private FunctionHelper functionHelper;
-	private long targetAddress = 0;
 
 	private DefaultListModel<List<String>> registerListModel = new DefaultListModel<>();
 	private JList<List<String>> registerList = new JList<>(registerListModel);
@@ -161,17 +158,12 @@ public class GhidrionProvider extends ComponentProvider {
 			for (Address a : ui.listFunctionAddress.getSelectedValuesList()) {
 				String entryAddress = "0x" + a.toString();
 				String leaveAddress = "0x" + a.next().toString();
-				String targetAddress = "0x" + Long.toHexString(this.targetAddress += 0x100);
 				String mode = (String) ui.comboBoxHookMode.getSelectedItem();
-				List<String> hookDetails = new ArrayList<>(
+				List<String> hook = new ArrayList<>(
 						Arrays.asList(libraryName, functionName, entryAddress, leaveAddress,
-								targetAddress, mode));
-				Map<Long, List<String>> hook = new HashMap<>();
-				long hookId = TraceFileController.generateHookId();
-				hook.put(hookId, hookDetails);
+								mode));
 
-				traceFileController.addHook(libraryName, functionName, hookId, entryAddress, leaveAddress,
-						targetAddress, mode);
+				traceFileController.addHook(libraryName, functionName, entryAddress, leaveAddress, mode);
 			}
 		});
 	}

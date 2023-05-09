@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -16,66 +17,26 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.yaml.snakeyaml.Yaml;
 
 import ghidra.util.Msg;
+import model.Hook;
 import model.MorionTraceFile;
 
 public class TraceFileController {
 
 	private MorionTraceFile traceFile = new MorionTraceFile();
-	private Map<Long, Map<String, String>> hookDetailsMap = new HashMap<>();
-	
-	private static long hookCounter = 0;
 	
 	public String getSymbolicMarker() {
 		return MorionTraceFile.SYMBOLIC;
 	}
 	
-	public void addHook(String libraryName, String functionName, long hookId, String entry, String leave, String target, String mode) {
-		Map<String, String> hookDetails = new HashMap<>();
-		hookDetails.put("entry", entry);
-		hookDetails.put("leave", leave);
-		hookDetails.put("target", target);
-		hookDetails.put("mode", mode);
-		
-		traceFile.addHook(libraryName, functionName, hookDetails);
-		hookDetailsMap.put(hookId, hookDetails);
+	public void addHook(String libraryName, String functionName, String entryAddress, String leaveAddress, String mode) {
+		Hook hook = new Hook(libraryName, functionName, entryAddress, leaveAddress, mode);
+		removeHook(hook); // Possibly, hook has to be replaced
+		traceFile.addHook(hook);
 	}
 	
-	public void removeHook(long hookId) {
-		Map<String, String> hookDetails = hookDetailsMap.get(hookId);
-		
-		// lib, function, hookdetails
-		Map<String, Map<String, List<Map<String, String>>>> hooks = traceFile.getHooks();
-		var hooksIter = hooks.entrySet().iterator();
-		while(hooksIter.hasNext()) {
-			var library = hooksIter.next();
-			var libraryIter = library.getValue().entrySet().iterator();
-			while (libraryIter.hasNext()) {
-				var function = libraryIter.next();
-				var functionIter = function.getValue().iterator();
-				while (functionIter.hasNext()) {
-					var functionDetails = functionIter.next();
-					if (functionDetails == hookDetails) {
-						String entry = functionDetails.get("entry");
-						String leave = functionDetails.get("leave");
-						String target = functionDetails.get("target");
-						String mode = functionDetails.get("mode");
-						String message = String.format("Removed hook {id=%d, lib=%s, func=%s, entry=%s, leave=%s, target=%s, mode=%s}", hookId, library.getKey(), function.getKey(), entry, leave, target, mode);
-						Msg.info(this, message);
-						functionIter.remove();
-					}
-				}
-				if (function.getValue().isEmpty()) {
-					String message = String.format("Removed function {lib=%s, func=%s}", library.getKey(), function.getKey());
-					Msg.info(this, message);
-					libraryIter.remove();
-				}
-			}
-			if (library.getValue().isEmpty()) {
-				String message = String.format("Removed library %s", library.getKey());
-				Msg.info(this, message);
-				hooksIter.remove();
-			}
-		}
+	public void removeHook(String libraryName, String functionName, String entryAddress, String leaveAddress, String mode) {
+		Hook hook = new Hook(libraryName, functionName, entryAddress, leaveAddress, mode);
+		removeHook(hook);
 	}
 	
 	public void addEntryStateRegister(String name, String value, boolean isSymbolic) {
@@ -108,7 +69,14 @@ public class TraceFileController {
 	
 	public void createTraceFile(Component container) {
 		Yaml yaml = new Yaml();
-		String content = yaml.dump(traceFile.getTraceFile());
+		
+		Map<String, Object> traceFileDump = new HashMap<>();
+		traceFileDump.put("hooks", createHooksDump());
+		traceFileDump.put("info", traceFile.getInfo());
+		traceFileDump.put("instructions", traceFile.getInstructions());
+		traceFileDump.put("states", traceFile.getStates());
+		
+		String content = yaml.dump(traceFileDump);
 		
 		JFileChooser fileChooser = new JFileChooser();
 		int result = fileChooser.showSaveDialog(container);
@@ -141,8 +109,31 @@ public class TraceFileController {
 		traceFile.getLeaveRegisters().clear();
 	}
 	
-	public static synchronized long generateHookId() {
-		return hookCounter++;
+	private void removeHook(Hook hook) {
+		Iterator<Hook> hooksIter = traceFile.getHooks().iterator();
+		while (hooksIter.hasNext()) {
+			if (hook.equals(hooksIter.next())) {
+				hooksIter.remove();
+			}
+		}
+	}
+	
+	private Map<String, Map<String, List<Map<String, String>>>> createHooksDump() {
+		Map<String, Map<String, List<Map<String, String>>>> hooksDump = new HashMap<>();
+		
+		for (Hook hook : traceFile.getHooks()) {
+			Map<String, String> hookDetails = new HashMap<>();
+			hookDetails.put("entry", hook.getEntryAddress());
+			hookDetails.put("leave", hook.getLeaveAddress());
+			hookDetails.put("target", hook.getTargetAddress());
+			hookDetails.put("mode", hook.getMode());
+			
+			hooksDump.computeIfAbsent(hook.getLibraryName(), k -> new HashMap<>())
+				.computeIfAbsent(hook.getFunctionName(), k -> new ArrayList<>())
+				.add(hookDetails);
+		}
+		
+		return hooksDump;
 	}
 	
 	private File askTraceFile() {

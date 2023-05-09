@@ -8,11 +8,8 @@ import java.util.Map;
 public class MorionTraceFile {
 	
 	public static final String SYMBOLIC = "$$";
-	
-	// Keys: "hooks", "info", "instructions", "states"
-	private Map<String, Object> traceFile = new HashMap<>();
 
-	private Map<String, Map<String, List<Map<String, String>>>> hooks = new HashMap<>();
+	private List<Hook> hooks = new ArrayList<>();
 	private Map<String, String> info = new HashMap<>();
 	private List<List<String>> instructions = new ArrayList<>();
 	private Map<String, Object> states = new HashMap<>();
@@ -26,17 +23,6 @@ public class MorionTraceFile {
 	private Map<String, List<String>> leaveRegisters = new HashMap<>();
 	
 	public MorionTraceFile() {
-		// hooks
-		traceFile.put("hooks", hooks);
-		
-		// info
-		traceFile.put("info", info);
-		
-		// instructions
-		traceFile.put("instructions", instructions);
-
-		// states
-		traceFile.put("states", states);
 		states.put("entry", entryState);
 		entryState.put("addr", entryAddress);
 		entryState.put("mems", entryMemory);
@@ -47,11 +33,7 @@ public class MorionTraceFile {
 		leaveState.put("regs", leaveRegisters);
 	}
 	
-	public Map<String, Object> getTraceFile() {
-		return traceFile;
-	}
-	
-	public Map<String, Map<String, List<Map<String, String>>>> getHooks() {
+	public List<Hook> getHooks() {
 		return hooks;
 	}
 	
@@ -61,6 +43,10 @@ public class MorionTraceFile {
 	
 	public List<List<String>> getInstructions() {
 		return instructions;
+	}
+	
+	public Map<String, Object> getStates() {
+		return states;
 	}
 	
 	public Map<String, List<String>> getEntryMemory() {
@@ -87,10 +73,8 @@ public class MorionTraceFile {
 		this.leaveAddress = leaveAddress;
 	}
 	
-	public void addHook(String libraryName, String functionName, Map<String, String> hookDetails) {
-		hooks.computeIfAbsent(libraryName, k -> new HashMap<>())
-			.computeIfAbsent(functionName, k -> new ArrayList<>())
-			.add(hookDetails);
+	public void addHook(Hook hook) {
+		hooks.add(hook);
 	}
 	
 	public void addEntryStateRegister(String name, List<String> valueList) {
