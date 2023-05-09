@@ -18,6 +18,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import ghidra.util.Msg;
 import model.Hook;
+import model.Hook.Mode;
 import model.MorionTraceFile;
 
 public class TraceFileController {
@@ -29,13 +30,13 @@ public class TraceFileController {
 	}
 	
 	public void addHook(String libraryName, String functionName, String entryAddress, String leaveAddress, String mode) {
-		Hook hook = new Hook(libraryName, functionName, entryAddress, leaveAddress, mode);
+		Hook hook = new Hook(libraryName, functionName, entryAddress, leaveAddress, Mode.fromValue(mode));
 		removeHook(hook); // Possibly, hook has to be replaced
 		traceFile.addHook(hook);
 	}
 	
 	public void removeHook(String libraryName, String functionName, String entryAddress, String leaveAddress, String mode) {
-		Hook hook = new Hook(libraryName, functionName, entryAddress, leaveAddress, mode);
+		Hook hook = new Hook(libraryName, functionName, entryAddress, leaveAddress, Mode.fromValue(mode));
 		removeHook(hook);
 	}
 	
@@ -130,7 +131,7 @@ public class TraceFileController {
 			hookDetails.put(MorionTraceFile.HOOK_ENTRY, hook.getEntryAddress());
 			hookDetails.put(MorionTraceFile.HOOK_LEAVE, hook.getLeaveAddress());
 			hookDetails.put(MorionTraceFile.HOOK_TARGET, hook.getTargetAddress());
-			hookDetails.put(MorionTraceFile.HOOK_MODE, hook.getMode());
+			hookDetails.put(MorionTraceFile.HOOK_MODE, hook.getMode().getValue());
 			
 			hooksDump.computeIfAbsent(hook.getLibraryName(), k -> new HashMap<>())
 				.computeIfAbsent(hook.getFunctionName(), k -> new ArrayList<>())

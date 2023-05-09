@@ -12,9 +12,9 @@ public class Hook {
 	private String entryAddress;
 	private String leaveAddress;
 	private String targetAddress;
-	private String mode;
+	private Mode mode;
 	
-	public Hook(String libraryName, String functionName, String entryAddress, String leaveAddress, String mode) {
+	public Hook(String libraryName, String functionName, String entryAddress, String leaveAddress, Mode mode) {
 		this.libraryName = libraryName;
 		this.functionName = functionName;
 		this.entryAddress = entryAddress;
@@ -43,7 +43,7 @@ public class Hook {
 		return targetAddress;
 	}
 	
-	public String getMode() {
+	public Mode getMode() {
 		return mode;
 	}
 	
@@ -66,4 +66,28 @@ public class Hook {
 		return "0x" + Long.toHexString(newTargetAddress);
 	}
 	
+	public enum Mode {
+		MODEL("model"),
+		SKIP("skip"),
+		TAINT("taint");
+
+		private final String value;
+
+		Mode(String value) {
+			this.value = value;
+		}
+
+		public String getValue() {
+			return value;
+		}
+		
+		public static Mode fromValue(String value) {
+	        for (Mode mode : values()) {
+	            if (mode.value.equalsIgnoreCase(value)) {
+	                return mode;
+	            }
+	        }
+	        throw new IllegalArgumentException("Invalid Mode value: " + value);
+	    }
+	}
 }
