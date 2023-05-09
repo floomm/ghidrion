@@ -1,73 +1,77 @@
 package model;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import ghidra.program.model.address.Address;
 
-public class Hook {
-	private static final long TARGET_ADDRESS_STEP = 0x100;
+public class Hook implements Comparable<Hook> {
+	private final String libraryName = "libc";
+	private final String functionName;
+	private final Address entryAddress;
+	private final Mode mode;
 
-	private static long targetAddressCounter = 0;
-
-	private String libraryName;
-	private String functionName;
-	private Address entryAddress;
-	private Address leaveAddress;
-	private String targetAddress;
-	private Mode mode;
-	
-	public Hook(String libraryName, String functionName, Address entryAddress, Address leaveAddress, Mode mode) {
-		this.libraryName = libraryName;
-		this.functionName = functionName;
-		this.entryAddress = entryAddress;
-		this.leaveAddress = leaveAddress;
-		this.targetAddress = generateTargetAddress();
-		this.mode = mode;
+	public Hook(String functionName, Address entryAddress, Mode mode) {
+		this.functionName = Objects.requireNonNull(functionName);
+		this.entryAddress = Objects.requireNonNull(entryAddress);
+		this.mode = Objects.requireNonNull(mode);
 	}
-	
+
 	public String getLibraryName() {
 		return libraryName;
 	}
-	
+
 	public String getFunctionName() {
 		return functionName;
 	}
-	
+
 	public Address getEntryAddress() {
 		return entryAddress;
 	}
-	
+
 	public Address getLeaveAddress() {
-		return leaveAddress;
+		return entryAddress.next();
 	}
-	
-	public String getTargetAddress() {
-		return targetAddress;
-	}
-	
+
 	public Mode getMode() {
 		return mode;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
+		if (this == obj)
 			return true;
-		}
-		if (obj == null || getClass() != obj.getClass()) {
+		if (obj == null || getClass() != obj.getClass())
 			return false;
-		}
 		Hook other = (Hook) obj;
 		return Objects.equals(libraryName, other.libraryName)
 				&& Objects.equals(functionName, other.functionName)
 				&& Objects.equals(entryAddress, other.entryAddress);
 	}
 
-	private static synchronized String generateTargetAddress() {
-		long newTargetAddress = ++targetAddressCounter * TARGET_ADDRESS_STEP;
-		return "0x" + Long.toHexString(newTargetAddress);
+	@Override
+	public int hashCode() {
+		return libraryName.hashCode() * 3 + functionName.hashCode() * 5 + entryAddress.hashCode() * 7;
 	}
-	
+
+	@Override
+	public int compareTo(Hook o) {
+		if (this.libraryName != o.libraryName)
+			return this.libraryName.compareTo(o.libraryName);
+		if (this.functionName != o.functionName)
+			return this.functionName.compareTo(o.functionName);
+		return this.entryAddress.compareTo(o.entryAddress);
+	}
+
+	@Override
+	public String toString() {
+		StringJoiner sj = new StringJoiner("      ");
+		sj.add(libraryName);
+		sj.add(functionName);
+		sj.add(entryAddress.toString());
+		return sj.toString();
+	}
+
 	public enum Mode {
 		MODEL("model"),
 		SKIP("skip"),
@@ -76,20 +80,26 @@ public class Hook {
 		private final String value;
 
 		Mode(String value) {
-			this.value = value;
+			this.value = Objects.requireNonNull(value);
 		}
 
 		public String getValue() {
 			return value;
 		}
-		
+
 		public static Mode fromValue(String value) {
-	        for (Mode mode : values()) {
-	            if (mode.value.equalsIgnoreCase(value)) {
-	                return mode;
-	            }
-	        }
-	        throw new IllegalArgumentException("Invalid Mode value: " + value);
-	    }
+			for (Mode mode : values()) {
+				if (mode.value.equalsIgnoreCase(value)) {
+					return mode;
+				}
+			}
+			throw new IllegalArgumentException("Invalid Mode value: " + value);
+		}
+
+		@Override
+		public String toString() {
+			return this.value;
+		}
 	}
+
 }

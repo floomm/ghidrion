@@ -31,7 +31,6 @@ import ghidra.framework.plugintool.PluginTool;
 import ghidra.framework.plugintool.util.PluginStatus;
 import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.listing.Program;
-import ghidra.util.HelpLocation;
 import view.GhidrionProvider;
 
 /**
@@ -78,7 +77,7 @@ public class GhidrionPlugin extends ProgramPlugin {
 		String owner = getName();
 
 		provider = new GhidrionProvider(this, PLUGIN_NAME, owner);
-		
+
 		if (currentProgram != null) {
 			this.flatAPI = new FlatProgramAPI(currentProgram);
 		}
@@ -129,7 +128,7 @@ public class GhidrionPlugin extends ProgramPlugin {
 	public DecompilerHighlightService getDecompilerHighlightService() {
 		return decompilerHighlightService;
 	}
-	
+
 	public FlatProgramAPI getFlatAPI() {
 		return flatAPI;
 	}

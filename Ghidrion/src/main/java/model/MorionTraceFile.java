@@ -1,101 +1,98 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import util.ObservableSet;
 
 public class MorionTraceFile {
-	
-	public static final String HOOKS = "hooks";
-	public static final String HOOK_ENTRY = "entry";
-	public static final String HOOK_LEAVE = "leave";
-	public static final String HOOK_TARGET = "target";
-	public static final String HOOK_MODE = "mode";
-	public static final String INFO = "info";
-	public static final String INSTRUCTIONS = "instructions";
-	public static final String STATES = "states";
-	public static final String ENTRY_STATE = "entry";
-	public static final String LEAVE_STATE = "leave";
-	public static final String STATE_ADDRESS = "addr";
-	public static final String STATE_MEMORY = "mems";
-	public static final String STATE_REGISTERS = "regs";
-	public static final String SYMBOLIC = "$$";
+	private final ObservableSet<Hook> hooks = new ObservableSet<>();
+	private final Map<String, String> info = new HashMap<>();
+	private final List<List<String>> instructions = new ArrayList<>();
+	private final Map<String, Object> states = new HashMap<>();
+	private final ObservableSet<MemoryEntry> entryMemory = new ObservableSet<>();
+	private final ObservableSet<MemoryEntry> entryRegisters = new ObservableSet<>();
+	private final ObservableSet<MemoryEntry> leaveMemory = new ObservableSet<>();
+	private final ObservableSet<MemoryEntry> leaveRegisters = new ObservableSet<>();
 
-	private List<Hook> hooks = new ArrayList<>();
-	private Map<String, String> info = new HashMap<>();
-	private List<List<String>> instructions = new ArrayList<>();
-	private Map<String, Object> states = new HashMap<>();
-	private Map<String, Object> entryState = new HashMap<>();
-	private String entryAddress;
-	private Map<String, List<String>> entryMemory = new HashMap<>();
-	private Map<String, List<String>> entryRegisters = new HashMap<>();
-	private Map<String, Object> leaveState = new HashMap<>();
-	private String leaveAddress;
-	private Map<String, List<String>> leaveMemory = new HashMap<>();
-	private Map<String, List<String>> leaveRegisters = new HashMap<>();
-	
-	public MorionTraceFile() {
-		states.put(ENTRY_STATE, entryState);
-		entryState.put(STATE_ADDRESS, entryAddress);
-		entryState.put(STATE_MEMORY, entryMemory);
-		entryState.put(STATE_REGISTERS, entryRegisters);
-		states.put(LEAVE_STATE, leaveState);
-		leaveState.put(STATE_ADDRESS, leaveAddress);
-		leaveState.put(STATE_MEMORY, leaveMemory);
-		leaveState.put(STATE_REGISTERS, leaveRegisters);
-	}
-	
-	public List<Hook> getHooks() {
-		return hooks;
-	}
-	
 	public Map<String, String> getInfo() {
-		return info;
-	}
-	
-	public List<List<String>> getInstructions() {
-		return instructions;
-	}
-	
-	public Map<String, Object> getStates() {
-		return states;
-	}
-	
-	public Map<String, List<String>> getEntryMemory() {
-		return entryMemory;
-	}
-	
-	public Map<String, List<String>> getEntryRegisters() {
-		return entryRegisters;
-	}
-	
-	public Map<String, List<String>> getLeaveMemory() {
-		return leaveMemory;
-	}
-	
-	public Map<String, List<String>> getLeaveRegisters() {
-		return leaveRegisters;
-	}
-	
-	public void setEntryAddress(String entryAddress) {
-		this.entryAddress = entryAddress;
-	}
-	
-	public void setLeaveAddress(String leaveAddress) {
-		this.leaveAddress = leaveAddress;
-	}
-	
-	public void addHook(Hook hook) {
-		hooks.add(hook);
-	}
-	
-	public void addEntryStateRegister(String name, List<String> valueList) {
-		entryRegisters.put(name, valueList);
-	}
-	
-	public void addEntryStateMemory(String address, List<String> valueList) {
-		entryMemory.put(address, valueList);
+		return this.info;
 	}
 
+	public List<List<String>> getInstructions() {
+		return this.instructions;
+	}
+
+	public Map<String, Object> getStates() {
+		return this.states;
+	}
+
+	public Set<MemoryEntry> getEntryMemory() {
+		return this.entryMemory.getSet();
+	}
+
+	public void addEntryStateMemory(MemoryEntry m) {
+		this.entryMemory.add(m);
+	}
+
+	public void removeEntryMemoryEntries(Collection<MemoryEntry> memoryEntries) {
+		this.entryMemory.removeAll(memoryEntries);
+	}
+
+	public ObservableSet<MemoryEntry> getEntryMemoryObservable() {
+		return this.entryMemory;
+	}
+
+	public Set<MemoryEntry> getEntryRegisters() {
+		return this.entryRegisters.getSet();
+	}
+
+	public void addEntryStateRegister(MemoryEntry register) {
+		this.entryRegisters.add(register);
+	}
+
+	public void removeEntryRegisters(Collection<MemoryEntry> registers) {
+		this.entryRegisters.removeAll(registers);
+	}
+
+	public ObservableSet<MemoryEntry> getEntryRegistersObservable() {
+		return this.entryRegisters;
+	}
+
+	public Set<MemoryEntry> getLeaveMemory() {
+		return this.leaveMemory.getSet();
+	}
+
+	public Set<MemoryEntry> getLeaveRegisters() {
+		return this.leaveRegisters.getSet();
+	}
+
+	public Set<Hook> getHooks() {
+		return this.hooks.getSet();
+	}
+
+	public void addHooks(Collection<Hook> hook) {
+		this.hooks.addAll(hook);
+	}
+
+	public void removeHooks(Collection<Hook> hooks) {
+		this.hooks.removeAll(hooks);
+	}
+
+	public ObservableSet<Hook> getHookObservable() {
+		return this.hooks;
+	}
+
+	public void clear() {
+		this.hooks.clear();
+		this.info.clear();
+		this.instructions.clear();
+		this.entryMemory.clear();
+		this.entryRegisters.clear();
+		this.leaveMemory.clear();
+		this.leaveRegisters.clear();
+	}
 }

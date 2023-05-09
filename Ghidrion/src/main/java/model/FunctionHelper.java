@@ -1,4 +1,4 @@
-package ghidrion;
+package model;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,6 +17,7 @@ import ghidra.program.model.listing.Program;
 import ghidra.program.model.mem.MemoryBlock;
 import ghidra.program.model.symbol.Reference;
 import ghidra.program.model.symbol.ReferenceManager;
+import model.Hook.Mode;
 
 public class FunctionHelper {
 	private final Program p;
@@ -27,8 +28,11 @@ public class FunctionHelper {
 		this.p = p;
 	}
 
-	public Set<Address> getAddresses(Collection<String> functionNames, Collection<String> blockNames) {
-		return getFunctions()
+	public Set<Address> getAddresses(
+			Collection<Hook> alreadyHooked,
+			Collection<String> functionNames,
+			Collection<String> blockNames) {
+		return getFunctions(alreadyHooked)
 				.entrySet()
 				.stream()
 				.filter(e -> functionNames.contains(e.getKey()))
@@ -37,8 +41,8 @@ public class FunctionHelper {
 				.collect(Collectors.toSet());
 	}
 
-	public Set<String> getBlockNames(Collection<String> functionNames) {
-		return getFunctions()
+	public Set<String> getBlockNames(Collection<Hook> alreadyHooked, Collection<String> functionNames) {
+		return getFunctions(alreadyHooked)
 				.entrySet()
 				.stream()
 				.filter(f -> functionNames.contains(f.getKey()))
@@ -54,11 +58,11 @@ public class FunctionHelper {
 				.map(e -> p.getMemory().getBlock(e));
 	}
 
-	public Set<String> getFunctionNames() {
-		return getFunctions().keySet();
+	public Set<String> getFunctionNames(Collection<Hook> alreadyHooked) {
+		return getFunctions(alreadyHooked).keySet();
 	}
 
-	private Map<String, Set<Address>> getFunctions() {
+	private Map<String, Set<Address>> getFunctions(Collection<Hook> alreadyHooked) {
 		FunctionManager fm = p.getFunctionManager();
 		ReferenceManager rm = p.getReferenceManager();
 		Map<String, Set<Address>> res = new HashMap<>();
@@ -66,8 +70,13 @@ public class FunctionHelper {
 			Set<Address> thunkAddresses = new HashSet<>(Lists.newArrayList(f.getFunctionThunkAddresses(true)));
 			for (Address a : thunkAddresses) {
 				String name = fm.getFunctionAt(a).getName();
-				res.putIfAbsent(name, new HashSet<>());
 				for (Reference r : rm.getReferencesTo(a)) {
+					Address fromAddress = r.getFromAddress();
+
+					if (alreadyHooked.contains(new Hook(name, fromAddress, Mode.values()[0]))) {
+						continue;
+					}
+					res.putIfAbsent(name, new HashSet<>());
 					res.get(name).add(r.getFromAddress());
 				}
 			}

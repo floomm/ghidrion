@@ -9,11 +9,11 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import javax.swing.JTabbedPane;
 
-import ctrl.TraceFileController;
 import ghidrion.GhidrionPlugin;
+import model.MorionTraceFile;
 
 public class GhidrionUI {
-	
+
 	private JFrame frame;
 	private JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	private JPanel panelCreateTraceFile;
@@ -34,21 +34,22 @@ public class GhidrionUI {
 			}
 		});
 	}
-	
+
 	public GhidrionUI() {
 		initialize();
 	}
 
 	/**
 	 * Create the application.
-	 * @param plugin 
+	 * 
+	 * @param plugin
 	 */
-	public GhidrionUI(GhidrionPlugin plugin, TraceFileController traceFileController) {
-		this.panelCreateTraceFile = new CreateTraceFilePanel(plugin, traceFileController);
+	public GhidrionUI(GhidrionPlugin plugin, MorionTraceFile traceFile) {
+		this.panelCreateTraceFile = new CreateTraceFilePanel(plugin, traceFile);
 		this.panelDisplayTraceFile = new DisplayTraceFilePanel(plugin);
 		initialize();
 	}
-	
+
 	public JTabbedPane getTabbedPane() {
 		return tabbedPane;
 	}
@@ -67,7 +68,7 @@ public class GhidrionUI {
 		gridBagLayout.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
 		gridBagLayout.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
 		frame.getContentPane().setLayout(gridBagLayout);
-		
+
 		GridBagConstraints gbc_tabbedPane = new GridBagConstraints();
 		gbc_tabbedPane.fill = GridBagConstraints.BOTH;
 		gbc_tabbedPane.gridx = 0;

@@ -7,91 +7,48 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.yaml.snakeyaml.Yaml;
 
-import ghidra.program.model.address.Address;
-import ghidra.util.Msg;
-import ghidrion.GhidrionPlugin;
 import model.Hook;
-import model.Hook.Mode;
 import model.MorionTraceFile;
 
 public class TraceFileController {
 
-	private MorionTraceFile traceFile = new MorionTraceFile();
-	private GhidrionPlugin plugin;
-	
-	public TraceFileController(GhidrionPlugin plugin) {
-		this.plugin = plugin;
-	}
-	
-	public String getSymbolicMarker() {
-		return MorionTraceFile.SYMBOLIC;
-	}
-	
-	public void addHook(String libraryName, String functionName, String entry, String leave, String mode) {
-		Address entryAddress = plugin.getFlatAPI().toAddr(entry);
-		Address leaveAddress = plugin.getFlatAPI().toAddr(leave);
-		Hook hook = new Hook(libraryName, functionName, entryAddress, leaveAddress, Mode.fromValue(mode));
-		removeHook(hook); // Possibly, hook has to be replaced
-		traceFile.addHook(hook);
-	}
-	
-	public void removeHook(String libraryName, String functionName, String entry, String leave, String mode) {
-		Address entryAddress = plugin.getFlatAPI().toAddr(entry);
-		Address leaveAddress = plugin.getFlatAPI().toAddr(leave);
-		Hook hook = new Hook(libraryName, functionName, entryAddress, leaveAddress, Mode.fromValue(mode));
-		removeHook(hook);
-	}
-	
-	public void addEntryStateRegister(String name, String value, boolean isSymbolic) {
-		List<String> valueList = new ArrayList<>();
-		valueList.add(value);
-		if (isSymbolic) {
-			valueList.add(MorionTraceFile.SYMBOLIC);
-		}
-		traceFile.addEntryStateRegister(name, valueList);
-	}
-	
-	public void removeEntryStateRegister(String registerName) {
-		Map<String, List<String>> entryRegisters = traceFile.getEntryRegisters();
-		entryRegisters.remove(registerName);
-	}
+	private static final long TARGET_ADDRESS_STEP = 0x100;
+	private static long targetAddressCounter = 0;
 
-	public void addEntryStateMemory(String address, String value, boolean isSymbolic) {
-		List<String> valueList = new ArrayList<>();
-		valueList.add(value);
-		if (isSymbolic) {
-			valueList.add(MorionTraceFile.SYMBOLIC);
-		}
-		traceFile.addEntryStateMemory(address, valueList);
-	}
-	
-	public void removeEntryStateMemory(String address) {
-		Map<String, List<String>> entryMemory = traceFile.getEntryMemory();
-		entryMemory.remove(address);
-	}
-	
-	public void createTraceFile(Component parent) {
+	public static final String HOOKS = "hooks";
+	public static final String HOOK_ENTRY = "entry";
+	public static final String HOOK_LEAVE = "leave";
+	public static final String HOOK_TARGET = "target";
+	public static final String HOOK_MODE = "mode";
+	public static final String INFO = "info";
+	public static final String INSTRUCTIONS = "instructions";
+	public static final String STATES = "states";
+	public static final String ENTRY_STATE = "entry";
+	public static final String LEAVE_STATE = "leave";
+	public static final String STATE_ADDRESS = "addr";
+	public static final String STATE_MEMORY = "mems";
+	public static final String STATE_REGISTERS = "regs";
+	public static final String SYMBOLIC = "$$";
+
+	public static void writeTraceFile(Component parent, MorionTraceFile traceFile) {
 		Yaml yaml = new Yaml();
-		
-		
-		String content = yaml.dump(buildTraceFileDump());
-		
+
+		String content = yaml.dump(buildTraceFileDump(traceFile));
+
 		JFileChooser fileChooser = new JFileChooser();
 		int result = fileChooser.showSaveDialog(parent);
 		File file = null;
 		if (result == JFileChooser.APPROVE_OPTION) {
 			file = fileChooser.getSelectedFile();
 		}
-		
+
 		if (file != null) {
 			try (FileOutputStream fos = new FileOutputStream(file)) {
 				fos.write(content.getBytes());
@@ -103,67 +60,36 @@ public class TraceFileController {
 			}
 		}
 	}
-	
-	public void clearTraceFile() {
-		traceFile.getHooks().clear();
-		traceFile.getInfo().clear();
-		traceFile.getInstructions().clear();
-		traceFile.setEntryAddress(null);
-		traceFile.getEntryMemory().clear();
-		traceFile.getEntryRegisters().clear();
-		traceFile.setLeaveAddress(null);
-		traceFile.getLeaveMemory().clear();
-		traceFile.getLeaveRegisters().clear();
-	}
-	
-	private void removeHook(Hook hook) {
-		Iterator<Hook> hooksIter = traceFile.getHooks().iterator();
-		while (hooksIter.hasNext()) {
-			if (hook.equals(hooksIter.next())) {
-				hooksIter.remove();
-			}
-		}
-	}
-	
-	private Map<String, Object> buildTraceFileDump() {
+
+	private static Map<String, Object> buildTraceFileDump(MorionTraceFile traceFile) {
 		Map<String, Object> traceFileDump = new HashMap<>();
-		traceFileDump.put(MorionTraceFile.HOOKS, buildHooksDump());
-		traceFileDump.put(MorionTraceFile.INFO, traceFile.getInfo());
-		traceFileDump.put(MorionTraceFile.INSTRUCTIONS, traceFile.getInstructions());
-		traceFileDump.put(MorionTraceFile.STATES, traceFile.getStates());
+		traceFileDump.put(HOOKS, buildHooksDump(traceFile));
+		traceFileDump.put(INFO, traceFile.getInfo());
+		traceFileDump.put(INSTRUCTIONS, traceFile.getInstructions());
+		traceFileDump.put(STATES, traceFile.getStates());
 		return traceFileDump;
 	}
-	
-	private Map<String, Map<String, List<Map<String, String>>>> buildHooksDump() {
+
+	private static synchronized String generateTargetAddress() {
+		long newTargetAddress = ++targetAddressCounter * TARGET_ADDRESS_STEP;
+		return "0x" + Long.toHexString(newTargetAddress);
+	}
+
+	private static Map<String, Map<String, List<Map<String, String>>>> buildHooksDump(MorionTraceFile traceFile) {
 		Map<String, Map<String, List<Map<String, String>>>> hooksDump = new HashMap<>();
-		
+
 		for (Hook hook : traceFile.getHooks()) {
 			Map<String, String> hookDetails = new HashMap<>();
-			hookDetails.put(MorionTraceFile.HOOK_ENTRY, "0x" + hook.getEntryAddress().toString());
-			hookDetails.put(MorionTraceFile.HOOK_LEAVE, "0x" + hook.getLeaveAddress().toString());
-			hookDetails.put(MorionTraceFile.HOOK_TARGET, hook.getTargetAddress());
-			hookDetails.put(MorionTraceFile.HOOK_MODE, hook.getMode().getValue());
-			
+			hookDetails.put(HOOK_ENTRY, "0x" + hook.getEntryAddress().toString());
+			hookDetails.put(HOOK_LEAVE, "0x" + hook.getLeaveAddress().toString());
+			hookDetails.put(HOOK_TARGET, generateTargetAddress());
+			hookDetails.put(HOOK_MODE, hook.getMode().getValue());
+
 			hooksDump.computeIfAbsent(hook.getLibraryName(), k -> new HashMap<>())
-				.computeIfAbsent(hook.getFunctionName(), k -> new ArrayList<>())
-				.add(hookDetails);
+					.computeIfAbsent(hook.getFunctionName(), k -> new ArrayList<>())
+					.add(hookDetails);
 		}
-		
+
 		return hooksDump;
-	}
-	
-	private File askTraceFile() {
-		JFileChooser fileChooser = new JFileChooser();
-
-		// Filter for yaml files
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("YAML files", "yaml");
-		fileChooser.setFileFilter(filter);
-
-		int returnState = fileChooser.showOpenDialog(null);
-		if (returnState == JFileChooser.APPROVE_OPTION) {
-			Msg.info(this, "Imported file: " + fileChooser.getSelectedFile().getName());
-		}
-		
-		return fileChooser.getSelectedFile();
 	}
 }
