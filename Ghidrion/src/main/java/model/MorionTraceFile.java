@@ -7,6 +7,19 @@ import java.util.Map;
 
 public class MorionTraceFile {
 	
+	public static final String HOOKS = "hooks";
+	public static final String HOOK_ENTRY = "entry";
+	public static final String HOOK_LEAVE = "leave";
+	public static final String HOOK_TARGET = "target";
+	public static final String HOOK_MODE = "mode";
+	public static final String INFO = "info";
+	public static final String INSTRUCTIONS = "instructions";
+	public static final String STATES = "states";
+	public static final String ENTRY_STATE = "entry";
+	public static final String LEAVE_STATE = "leave";
+	public static final String STATE_ADDRESS = "addr";
+	public static final String STATE_MEMORY = "mems";
+	public static final String STATE_REGISTERS = "regs";
 	public static final String SYMBOLIC = "$$";
 
 	private List<Hook> hooks = new ArrayList<>();
@@ -23,14 +36,14 @@ public class MorionTraceFile {
 	private Map<String, List<String>> leaveRegisters = new HashMap<>();
 	
 	public MorionTraceFile() {
-		states.put("entry", entryState);
-		entryState.put("addr", entryAddress);
-		entryState.put("mems", entryMemory);
-		entryState.put("regs", entryRegisters);
-		states.put("leave", leaveState);
-		leaveState.put("addr", leaveAddress);
-		leaveState.put("mems", leaveMemory);
-		leaveState.put("regs", leaveRegisters);
+		states.put(ENTRY_STATE, entryState);
+		entryState.put(STATE_ADDRESS, entryAddress);
+		entryState.put(STATE_MEMORY, entryMemory);
+		entryState.put(STATE_REGISTERS, entryRegisters);
+		states.put(LEAVE_STATE, leaveState);
+		leaveState.put(STATE_ADDRESS, leaveAddress);
+		leaveState.put(STATE_MEMORY, leaveMemory);
+		leaveState.put(STATE_REGISTERS, leaveRegisters);
 	}
 	
 	public List<Hook> getHooks() {

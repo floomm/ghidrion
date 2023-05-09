@@ -67,19 +67,14 @@ public class TraceFileController {
 		entryMemory.remove(address);
 	}
 	
-	public void createTraceFile(Component container) {
+	public void createTraceFile(Component parent) {
 		Yaml yaml = new Yaml();
 		
-		Map<String, Object> traceFileDump = new HashMap<>();
-		traceFileDump.put("hooks", createHooksDump());
-		traceFileDump.put("info", traceFile.getInfo());
-		traceFileDump.put("instructions", traceFile.getInstructions());
-		traceFileDump.put("states", traceFile.getStates());
 		
-		String content = yaml.dump(traceFileDump);
+		String content = yaml.dump(buildTraceFileDump());
 		
 		JFileChooser fileChooser = new JFileChooser();
-		int result = fileChooser.showSaveDialog(container);
+		int result = fileChooser.showSaveDialog(parent);
 		File file = null;
 		if (result == JFileChooser.APPROVE_OPTION) {
 			file = fileChooser.getSelectedFile();
@@ -118,15 +113,24 @@ public class TraceFileController {
 		}
 	}
 	
-	private Map<String, Map<String, List<Map<String, String>>>> createHooksDump() {
+	private Map<String, Object> buildTraceFileDump() {
+		Map<String, Object> traceFileDump = new HashMap<>();
+		traceFileDump.put(MorionTraceFile.HOOKS, buildHooksDump());
+		traceFileDump.put(MorionTraceFile.INFO, traceFile.getInfo());
+		traceFileDump.put(MorionTraceFile.INSTRUCTIONS, traceFile.getInstructions());
+		traceFileDump.put(MorionTraceFile.STATES, traceFile.getStates());
+		return traceFileDump;
+	}
+	
+	private Map<String, Map<String, List<Map<String, String>>>> buildHooksDump() {
 		Map<String, Map<String, List<Map<String, String>>>> hooksDump = new HashMap<>();
 		
 		for (Hook hook : traceFile.getHooks()) {
 			Map<String, String> hookDetails = new HashMap<>();
-			hookDetails.put("entry", hook.getEntryAddress());
-			hookDetails.put("leave", hook.getLeaveAddress());
-			hookDetails.put("target", hook.getTargetAddress());
-			hookDetails.put("mode", hook.getMode());
+			hookDetails.put(MorionTraceFile.HOOK_ENTRY, hook.getEntryAddress());
+			hookDetails.put(MorionTraceFile.HOOK_LEAVE, hook.getLeaveAddress());
+			hookDetails.put(MorionTraceFile.HOOK_TARGET, hook.getTargetAddress());
+			hookDetails.put(MorionTraceFile.HOOK_MODE, hook.getMode());
 			
 			hooksDump.computeIfAbsent(hook.getLibraryName(), k -> new HashMap<>())
 				.computeIfAbsent(hook.getFunctionName(), k -> new ArrayList<>())
