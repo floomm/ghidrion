@@ -39,10 +39,15 @@ public class TraceFileController {
 	public static final String STATE_REGISTERS = "regs";
 	public static final String SYMBOLIC = "$$";
 
+	/**
+	 * Write the information in the @param tracefile to a `.yaml` file on disk.
+	 * 
+	 * @param parent    to show the Save As dialog from
+	 * @param traceFile to write to disk
+	 */
 	public static void writeTraceFile(Component parent, MorionTraceFile traceFile) {
-		Yaml yaml = new Yaml();
 
-		String content = yaml.dump(buildTraceFileDump(traceFile));
+		String content = new Yaml().dump(buildTraceFileDump(traceFile));
 
 		JFileChooser fileChooser = new JFileChooser();
 		int result = fileChooser.showSaveDialog(parent);
@@ -82,7 +87,8 @@ public class TraceFileController {
 	private static Map<String, List<String>> memoryEntriesToMap(Collection<MemoryEntry> ms) {
 		return ms
 				.stream()
-				.map(m -> new Pair<>(m.name, m.symbolic ? List.of(m.value, SYMBOLIC) : List.of(m.value)))
+				.map(m -> new Pair<>(m.getName(),
+						m.isSymbolic() ? List.of(m.getValue(), SYMBOLIC) : List.of(m.getValue())))
 				.collect(Collectors.toMap(Pair::getA, Pair::getB));
 	}
 
@@ -98,20 +104,13 @@ public class TraceFileController {
 	private static Map<String, Map<String, List<Map<String, String>>>> getHooksMap(MorionTraceFile traceFile) {
 		return traceFile.getHooks()
 				.stream()
-				.collect(Collectors.groupingBy(Hook::getLibraryName, Collectors.toList()))
-				.entrySet()
-				.stream()
-				.map(e -> new Pair<>(e.getKey(), getHooksByFunctionName(e.getValue())))
-				.collect(Collectors.toMap(e -> e.getA(), e -> e.getB()));
+				.collect(
+						Collectors.groupingBy(Hook::getLibraryName,
+								Collectors.groupingBy(Hook::getFunctionName,
+										Collectors.mapping(TraceFileController::hookToMap, Collectors.toList()))));
 	}
 
-	private static Map<String, List<Map<String, String>>> getHooksByFunctionName(Collection<Hook> hooks) {
-		return hooks.stream()
-				.collect(Collectors.groupingBy(e -> e.getFunctionName(),
-						Collectors.mapping(TraceFileController::getHookMap, Collectors.toList())));
-	}
-
-	private static Map<String, String> getHookMap(Hook hook) {
+	private static Map<String, String> hookToMap(Hook hook) {
 		Map<String, String> hookMap = new HashMap<>();
 		hookMap.put(HOOK_ENTRY, prependHex(hook.getEntryAddress()));
 		hookMap.put(HOOK_LEAVE, prependHex(hook.getLeaveAddress()));

@@ -181,13 +181,13 @@ public class HookPanel extends JPanel {
             Mode mode = (Mode) comboBoxHookMode.getSelectedItem();
             List<Hook> toAdd = listFunctionAddress.getSelectedValuesList().stream().map(
                     a -> new Hook(functionName, a, mode)).collect(Collectors.toList());
-            traceFile.addHooks(toAdd);
+            traceFile.getHooks().addAll(toAdd);
             updateAddingSection();
         });
     }
 
     private void setupListAddedHooks() {
-        traceFile.getHookObservable().addObserver(newSet -> {
+        traceFile.getHooks().addObserver(newSet -> {
             DefaultListModel<Hook> listModel = new DefaultListModel<>();
             listModel.addAll(newSet.stream().sorted().collect(Collectors.toList()));
             listAddedHooks.setModel(listModel);
@@ -196,7 +196,7 @@ public class HookPanel extends JPanel {
 
     private void setupBtnDeleteHook() {
         btnDeleteHook.addActionListener(e -> {
-            traceFile.removeHooks(listAddedHooks.getSelectedValuesList());
+            traceFile.getHooks().removeAll(listAddedHooks.getSelectedValuesList());
             listAddedHooks.setSelectedIndex(0);
             updateAddingSection();
         });

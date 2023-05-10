@@ -1,14 +1,26 @@
 package model;
 
 public class MemoryEntry implements Comparable<MemoryEntry> {
-    public final String name;
-    public final String value;
-    public final boolean symbolic;
+    private final String name;
+    private final String value;
+    private final boolean symbolic;
 
     public MemoryEntry(String name, String value, boolean symbolic) {
         this.name = name;
         this.value = value;
         this.symbolic = symbolic;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public boolean isSymbolic() {
+        return symbolic;
     }
 
     @Override

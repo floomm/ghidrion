@@ -2,56 +2,96 @@ package util;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
-import java.util.function.Consumer;
 
-public class ObservableSet<E extends Comparable<E>> implements Observable<Set<E>> {
-
+public class ObservableSet<E extends Comparable<E>> extends Observable<Set<E>> implements Set<E> {
     private final Set<E> s = new HashSet<>();
-    private final Set<Consumer<Set<E>>> observers = new HashSet<>();
 
     @Override
-    public void addObserver(Consumer<Set<E>> observer) {
-        observers.add(observer);
+    public int size() {
+        return s.size();
     }
 
     @Override
-    public void removeObserver(Consumer<Set<E>> observer) {
-        observers.remove(observer);
+    public boolean isEmpty() {
+        return s.isEmpty();
     }
 
-    public void add(E e) {
-        s.remove(e);
-        s.add(e);
-        notifyObservers();
+    @Override
+    public boolean contains(Object o) {
+        return s.contains(o);
     }
 
-    public void addAll(Collection<E> es) {
-        s.removeAll(es);
-        s.addAll(es);
-        notifyObservers();
+    @Override
+    public Iterator<E> iterator() {
+        Iterator<E> sI = s.iterator();
+        return new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                return sI.hasNext();
+            }
+
+            @Override
+            public E next() {
+                return sI.next();
+            }
+        };
     }
 
-    public void remove(E e) {
-        s.remove(e);
-        notifyObservers();
+    @Override
+    public Object[] toArray() {
+        return s.toArray();
     }
 
-    public void removeAll(Collection<E> es) {
-        s.removeAll(es);
-        notifyObservers();
+    @Override
+    public <T> T[] toArray(T[] a) {
+        return s.toArray(a);
     }
 
+    @Override
+    public boolean add(E e) {
+        boolean r = s.add(e);
+        notifyObservers(s);
+        return r;
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        boolean r = s.remove(o);
+        notifyObservers(s);
+        return r;
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        return s.containsAll(c);
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends E> c) {
+        boolean r = s.addAll(c);
+        notifyObservers(s);
+        return r;
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        boolean r = s.retainAll(c);
+        notifyObservers(s);
+        return r;
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        boolean r = s.removeAll(c);
+        notifyObservers(s);
+        return r;
+    }
+
+    @Override
     public void clear() {
         s.clear();
-        notifyObservers();
-    }
-
-    public Set<E> getSet() {
-        return new HashSet<>(s);
-    }
-
-    private void notifyObservers() {
-        observers.forEach(observer -> observer.accept(new HashSet<>(s)));
+        notifyObservers(s);
     }
 }
