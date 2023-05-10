@@ -51,16 +51,17 @@ public class GhidrionPlugin extends ProgramPlugin {
 	// Scripts
 	public final TraceColorizerScript colorizerScript = new TraceColorizerScript(this);
 	public final JumpToAddressScript jumpToAddressScript = new JumpToAddressScript();
-	private final List<Consumer<Program>> programOpenedListeners = new ArrayList<>();
 
 	// Services
 	private ColorizingService colorizingService;
 	private DecompilerHighlightService decompilerHighlightService;
 
-	private static final String PLUGIN_NAME = "Ghidrion";
-
 	private GhidrionProvider provider;
 	private FlatProgramAPI flatAPI;
+
+	private final List<Consumer<Program>> programOpenedListeners = new ArrayList<>();
+
+	private static final String PLUGIN_NAME = "Ghidrion";
 
 	/**
 	 * Plugin constructor.
