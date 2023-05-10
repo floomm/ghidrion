@@ -2,15 +2,29 @@ package view;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.yaml.snakeyaml.Yaml;
 
 import ctrl.TraceFileController;
+import ghidra.program.model.address.Address;
+import ghidra.util.Msg;
 import ghidrion.GhidrionPlugin;
+import model.Hook;
+import model.Hook.Mode;
 import model.MemoryEntry;
 import model.MorionTraceFile;
 
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.swing.JButton;
@@ -18,11 +32,14 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JScrollPane;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 
 public class CreateTraceFilePanel extends JPanel {
+	private final GhidrionPlugin plugin;
 	private final MorionTraceFile traceFile;
 	private final HookPanel panelHooks;
 
@@ -47,6 +64,7 @@ public class CreateTraceFilePanel extends JPanel {
 	private final JPanel panelData = new JPanel();
 
 	public CreateTraceFilePanel(GhidrionPlugin plugin, MorionTraceFile traceFile) {
+		this.plugin = plugin;
 		this.traceFile = traceFile;
 		this.panelHooks = new HookPanel(plugin, traceFile);
 
@@ -318,8 +336,71 @@ public class CreateTraceFilePanel extends JPanel {
 
 	private void setupBtnLoadTraceFile() {
 		btnLoadTraceFile.addActionListener(e -> {
+			// Warn user that current trace file gets cleared
+			String warning = "Are you sure you want to proceed? The current editor entries are cleared.";
+			int warningResult = JOptionPane.showConfirmDialog(this, warning, "Confirmation", JOptionPane.OK_CANCEL_OPTION);
+			if (warningResult != JOptionPane.OK_OPTION) {
+				return;
+			}
+			
 			clearTraceFile();
+			JFileChooser fileChooser = new JFileChooser();
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("YAML files", "yaml");
+			fileChooser.setFileFilter(filter);
+			int chooseResult = fileChooser.showOpenDialog(this);
+			if (chooseResult != JFileChooser.APPROVE_OPTION) {
+				return;
+			}
+			File selectedTraceFile = fileChooser.getSelectedFile();
+			InputStream input;
+			try {
+				input = new FileInputStream(selectedTraceFile);
+			} catch (FileNotFoundException ex) {
+				Msg.showError(this, this, "No trace file", "Couldn't find trace file");
+				ex.printStackTrace();
+				return;
+			}
+
+			Map<String, Object> newTraceFile = new Yaml().load(input);
+
+			// Load hooks
+			Map<String, Map<String, List<Map<String, String>>>> hookMap = (Map<String, Map<String, List<Map<String, String>>>>) newTraceFile.get(TraceFileController.HOOKS);
+			traceFile.getHooks().addAll(buildHooks(hookMap));
+			
+			// Load states
+			Map<String, Map<String, Map<String, List<String>>>> stateMap = (Map<String, Map<String, Map<String, List<String>>>>) newTraceFile.get(TraceFileController.STATES);
+			Map<String, Map<String, List<String>>> entryStates = stateMap.get(TraceFileController.ENTRY_STATE);
+
+			// Load registers
+			Map<String, List<String>> entryRegMap = entryStates.get(TraceFileController.STATE_REGISTERS);
+			traceFile.getEntryRegisters().addAll(buildMemoryEntries(entryRegMap));
+			Map<String, List<String>> entryMemMap = entryStates.get(TraceFileController.STATE_MEMORY);
+			traceFile.getEntryMemory().addAll(buildMemoryEntries(entryMemMap));
 		});
+	}
+	
+	private List<Hook> buildHooks(Map<String, Map<String, List<Map<String, String>>>> hookMap) {
+		List<Hook> hooks = new ArrayList<>();
+		Map<String, List<Map<String, String>>> functions = hookMap.get("libc"); // Libc is hardcoded for now
+		for (String functionName : functions.keySet()) {
+			for (Map<String, String> hookDetails : functions.get(functionName)) {
+				String entry = hookDetails.get(TraceFileController.HOOK_ENTRY);
+				Address entryAddress = plugin.getCurrentProgram().getAddressFactory().getAddress(entry);
+				Mode mode = Mode.fromValue(hookDetails.get(TraceFileController.HOOK_MODE));
+				hooks.add(new Hook(functionName, entryAddress, mode));
+			}
+		}
+		return hooks;
+	}
+	
+	private List<MemoryEntry> buildMemoryEntries(Map<String, List<String>> entryMap) {
+		List<MemoryEntry> entries = new ArrayList<>();
+		for (String name : entryMap.keySet()) {
+			String value = entryMap.get(name).get(0);
+			boolean symbolic = (entryMap.get(name).size() > 1);
+			entries.add(new MemoryEntry(name, value, symbolic));
+		}
+		return entries;
 	}
 
 	private void setupBtnCreateTraceFile() {
