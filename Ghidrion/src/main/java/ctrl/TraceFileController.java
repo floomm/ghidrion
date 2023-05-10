@@ -5,118 +5,57 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.yaml.snakeyaml.Yaml;
 
-import ghidra.util.Msg;
+import model.Hook;
+import model.MemoryEntry;
 import model.MorionTraceFile;
 
 public class TraceFileController {
 
-	private MorionTraceFile traceFile = new MorionTraceFile();
-	private Map<Long, Map<String, String>> hookDetailsMap = new HashMap<>();
-	
-	private static long hookCounter = 0;
-	
-	public String getSymbolicMarker() {
-		return MorionTraceFile.SYMBOLIC;
-	}
-	
-	public void addHook(String libraryName, String functionName, long hookId, String entry, String leave, String target, String mode) {
-		Map<String, String> hookDetails = new HashMap<>();
-		hookDetails.put("entry", entry);
-		hookDetails.put("leave", leave);
-		hookDetails.put("target", target);
-		hookDetails.put("mode", mode);
-		
-		traceFile.addHook(libraryName, functionName, hookDetails);
-		hookDetailsMap.put(hookId, hookDetails);
-	}
-	
-	public void removeHook(long hookId) {
-		Map<String, String> hookDetails = hookDetailsMap.get(hookId);
-		
-		// lib, function, hookdetails
-		Map<String, Map<String, List<Map<String, String>>>> hooks = traceFile.getHooks();
-		var hooksIter = hooks.entrySet().iterator();
-		while(hooksIter.hasNext()) {
-			var library = hooksIter.next();
-			var libraryIter = library.getValue().entrySet().iterator();
-			while (libraryIter.hasNext()) {
-				var function = libraryIter.next();
-				var functionIter = function.getValue().iterator();
-				while (functionIter.hasNext()) {
-					var functionDetails = functionIter.next();
-					if (functionDetails == hookDetails) {
-						String entry = functionDetails.get("entry");
-						String leave = functionDetails.get("leave");
-						String target = functionDetails.get("target");
-						String mode = functionDetails.get("mode");
-						String message = String.format("Removed hook {id=%d, lib=%s, func=%s, entry=%s, leave=%s, target=%s, mode=%s}", hookId, library.getKey(), function.getKey(), entry, leave, target, mode);
-						Msg.info(this, message);
-						functionIter.remove();
-					}
-				}
-				if (function.getValue().isEmpty()) {
-					String message = String.format("Removed function {lib=%s, func=%s}", library.getKey(), function.getKey());
-					Msg.info(this, message);
-					libraryIter.remove();
-				}
-			}
-			if (library.getValue().isEmpty()) {
-				String message = String.format("Removed library %s", library.getKey());
-				Msg.info(this, message);
-				hooksIter.remove();
-			}
-		}
-	}
-	
-	public void addEntryStateRegister(String name, String value, boolean isSymbolic) {
-		List<String> valueList = new ArrayList<>();
-		valueList.add(value);
-		if (isSymbolic) {
-			valueList.add(MorionTraceFile.SYMBOLIC);
-		}
-		traceFile.addEntryStateRegister(name, valueList);
-	}
-	
-	public void removeEntryStateRegister(String registerName) {
-		Map<String, List<String>> entryRegisters = traceFile.getEntryRegisters();
-		entryRegisters.remove(registerName);
-	}
+	private static final long TARGET_ADDRESS_STEP = 0x100;
+	private static long targetAddressCounter = 0;
 
-	public void addEntryStateMemory(String address, String value, boolean isSymbolic) {
-		List<String> valueList = new ArrayList<>();
-		valueList.add(value);
-		if (isSymbolic) {
-			valueList.add(MorionTraceFile.SYMBOLIC);
-		}
-		traceFile.addEntryStateMemory(address, valueList);
-	}
-	
-	public void removeEntryStateMemory(String address) {
-		Map<String, List<String>> entryMemory = traceFile.getEntryMemory();
-		entryMemory.remove(address);
-	}
-	
-	public void createTraceFile(Component container) {
-		Yaml yaml = new Yaml();
-		String content = yaml.dump(traceFile.getTraceFile());
-		
+	public static final String HOOKS = "hooks";
+	public static final String HOOK_ENTRY = "entry";
+	public static final String HOOK_LEAVE = "leave";
+	public static final String HOOK_TARGET = "target";
+	public static final String HOOK_MODE = "mode";
+	public static final String INFO = "info";
+	public static final String INSTRUCTIONS = "instructions";
+	public static final String STATES = "states";
+	public static final String ENTRY_STATE = "entry";
+	public static final String LEAVE_STATE = "leave";
+	public static final String STATE_ADDRESS = "addr";
+	public static final String STATE_MEMORY = "mems";
+	public static final String STATE_REGISTERS = "regs";
+	public static final String SYMBOLIC = "$$";
+
+	/**
+	 * Write the information in the @param tracefile to a `.yaml` file on disk.
+	 * 
+	 * @param parent    to show the Save As dialog from
+	 * @param traceFile to write to disk
+	 */
+	public static void writeTraceFile(Component parent, MorionTraceFile traceFile) {
+
+		String content = new Yaml().dump(buildTraceFileDump(traceFile));
+
 		JFileChooser fileChooser = new JFileChooser();
-		int result = fileChooser.showSaveDialog(container);
+		int result = fileChooser.showSaveDialog(parent);
 		File file = null;
 		if (result == JFileChooser.APPROVE_OPTION) {
 			file = fileChooser.getSelectedFile();
 		}
-		
+
 		if (file != null) {
 			try (FileOutputStream fos = new FileOutputStream(file)) {
 				fos.write(content.getBytes());
@@ -128,35 +67,73 @@ public class TraceFileController {
 			}
 		}
 	}
-	
-	public void clearTraceFile() {
-		traceFile.getHooks().clear();
-		traceFile.getInfo().clear();
-		traceFile.getInstructions().clear();
-		traceFile.setEntryAddress(null);
-		traceFile.getEntryMemory().clear();
-		traceFile.getEntryRegisters().clear();
-		traceFile.setLeaveAddress(null);
-		traceFile.getLeaveMemory().clear();
-		traceFile.getLeaveRegisters().clear();
-	}
-	
-	public static synchronized long generateHookId() {
-		return hookCounter++;
-	}
-	
-	private File askTraceFile() {
-		JFileChooser fileChooser = new JFileChooser();
 
-		// Filter for yaml files
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("YAML files", "yaml");
-		fileChooser.setFileFilter(filter);
+	private static Map<String, Object> buildTraceFileDump(MorionTraceFile traceFile) {
+		Map<String, Object> traceFileDump = new HashMap<>();
+		traceFileDump.put(HOOKS, getHooksMap(traceFile));
+		traceFileDump.put(STATES, getStatesMap(traceFile));
+		// traceFileDump.put(INFO, traceFile.getInfo());
+		// traceFileDump.put(INSTRUCTIONS, traceFile.getInstructions());
+		return traceFileDump;
+	}
 
-		int returnState = fileChooser.showOpenDialog(null);
-		if (returnState == JFileChooser.APPROVE_OPTION) {
-			Msg.info(this, "Imported file: " + fileChooser.getSelectedFile().getName());
+	private static Map<String, Map<String, Map<String, List<String>>>> getStatesMap(MorionTraceFile traceFile) {
+		return Map.of(ENTRY_STATE,
+				Map.of(
+						STATE_REGISTERS, memoryEntriesToMap(traceFile.getEntryRegisters()),
+						STATE_MEMORY, memoryEntriesToMap(traceFile.getEntryMemory())));
+	}
+
+	private static Map<String, List<String>> memoryEntriesToMap(Collection<MemoryEntry> ms) {
+		return ms
+				.stream()
+				.map(m -> new Pair<>(m.getName(),
+						m.isSymbolic() ? List.of(m.getValue(), SYMBOLIC) : List.of(m.getValue())))
+				.collect(Collectors.toMap(Pair::getA, Pair::getB));
+	}
+
+	private static synchronized String generateTargetAddress() {
+		long newTargetAddress = ++targetAddressCounter * TARGET_ADDRESS_STEP;
+		return prependHex(Long.toHexString(newTargetAddress));
+	}
+
+	private static String prependHex(Object s) {
+		return "0x" + s.toString();
+	}
+
+	private static Map<String, Map<String, List<Map<String, String>>>> getHooksMap(MorionTraceFile traceFile) {
+		return traceFile.getHooks()
+				.stream()
+				.collect(
+						Collectors.groupingBy(Hook::getLibraryName,
+								Collectors.groupingBy(Hook::getFunctionName,
+										Collectors.mapping(TraceFileController::hookToMap, Collectors.toList()))));
+	}
+
+	private static Map<String, String> hookToMap(Hook hook) {
+		Map<String, String> hookMap = new HashMap<>();
+		hookMap.put(HOOK_ENTRY, prependHex(hook.getEntryAddress()));
+		hookMap.put(HOOK_LEAVE, prependHex(hook.getLeaveAddress()));
+		hookMap.put(HOOK_TARGET, generateTargetAddress());
+		hookMap.put(HOOK_MODE, hook.getMode().getValue());
+		return hookMap;
+	}
+
+	public static class Pair<A, B> {
+		private final A a;
+		private final B b;
+
+		public Pair(A a, B b) {
+			this.a = a;
+			this.b = b;
 		}
-		
-		return fileChooser.getSelectedFile();
+
+		public A getA() {
+			return a;
+		}
+
+		public B getB() {
+			return b;
+		}
 	}
 }
