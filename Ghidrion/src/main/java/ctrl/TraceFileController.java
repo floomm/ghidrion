@@ -5,16 +5,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.swing.JFileChooser;
 
 import org.yaml.snakeyaml.Yaml;
 
 import model.Hook;
+import model.MemoryEntry;
 import model.MorionTraceFile;
 
 public class TraceFileController {
@@ -63,33 +65,76 @@ public class TraceFileController {
 
 	private static Map<String, Object> buildTraceFileDump(MorionTraceFile traceFile) {
 		Map<String, Object> traceFileDump = new HashMap<>();
-		traceFileDump.put(HOOKS, buildHooksDump(traceFile));
-		traceFileDump.put(INFO, traceFile.getInfo());
-		traceFileDump.put(INSTRUCTIONS, traceFile.getInstructions());
-		traceFileDump.put(STATES, traceFile.getStates());
+		traceFileDump.put(HOOKS, getHooksMap(traceFile));
+		traceFileDump.put(STATES, getStatesMap(traceFile));
+		// traceFileDump.put(INFO, traceFile.getInfo());
+		// traceFileDump.put(INSTRUCTIONS, traceFile.getInstructions());
 		return traceFileDump;
+	}
+
+	private static Map<String, Map<String, Map<String, List<String>>>> getStatesMap(MorionTraceFile traceFile) {
+		return Map.of(ENTRY_STATE,
+				Map.of(
+						STATE_REGISTERS, memoryEntriesToMap(traceFile.getEntryRegisters()),
+						STATE_MEMORY, memoryEntriesToMap(traceFile.getEntryMemory())));
+	}
+
+	private static Map<String, List<String>> memoryEntriesToMap(Collection<MemoryEntry> ms) {
+		return ms
+				.stream()
+				.map(m -> new Pair<>(m.name, m.symbolic ? List.of(m.value, SYMBOLIC) : List.of(m.value)))
+				.collect(Collectors.toMap(Pair::getA, Pair::getB));
 	}
 
 	private static synchronized String generateTargetAddress() {
 		long newTargetAddress = ++targetAddressCounter * TARGET_ADDRESS_STEP;
-		return "0x" + Long.toHexString(newTargetAddress);
+		return prependHex(Long.toHexString(newTargetAddress));
 	}
 
-	private static Map<String, Map<String, List<Map<String, String>>>> buildHooksDump(MorionTraceFile traceFile) {
-		Map<String, Map<String, List<Map<String, String>>>> hooksDump = new HashMap<>();
+	private static String prependHex(Object s) {
+		return "0x" + s.toString();
+	}
 
-		for (Hook hook : traceFile.getHooks()) {
-			Map<String, String> hookDetails = new HashMap<>();
-			hookDetails.put(HOOK_ENTRY, "0x" + hook.getEntryAddress().toString());
-			hookDetails.put(HOOK_LEAVE, "0x" + hook.getLeaveAddress().toString());
-			hookDetails.put(HOOK_TARGET, generateTargetAddress());
-			hookDetails.put(HOOK_MODE, hook.getMode().getValue());
+	private static Map<String, Map<String, List<Map<String, String>>>> getHooksMap(MorionTraceFile traceFile) {
+		return traceFile.getHooks()
+				.stream()
+				.collect(Collectors.groupingBy(Hook::getLibraryName, Collectors.toList()))
+				.entrySet()
+				.stream()
+				.map(e -> new Pair<>(e.getKey(), getHooksByFunctionName(e.getValue())))
+				.collect(Collectors.toMap(e -> e.getA(), e -> e.getB()));
+	}
 
-			hooksDump.computeIfAbsent(hook.getLibraryName(), k -> new HashMap<>())
-					.computeIfAbsent(hook.getFunctionName(), k -> new ArrayList<>())
-					.add(hookDetails);
+	private static Map<String, List<Map<String, String>>> getHooksByFunctionName(Collection<Hook> hooks) {
+		return hooks.stream()
+				.collect(Collectors.groupingBy(e -> e.getFunctionName(),
+						Collectors.mapping(TraceFileController::getHookMap, Collectors.toList())));
+	}
+
+	private static Map<String, String> getHookMap(Hook hook) {
+		Map<String, String> hookMap = new HashMap<>();
+		hookMap.put(HOOK_ENTRY, prependHex(hook.getEntryAddress()));
+		hookMap.put(HOOK_LEAVE, prependHex(hook.getLeaveAddress()));
+		hookMap.put(HOOK_TARGET, generateTargetAddress());
+		hookMap.put(HOOK_MODE, hook.getMode().getValue());
+		return hookMap;
+	}
+
+	public static class Pair<A, B> {
+		private final A a;
+		private final B b;
+
+		public Pair(A a, B b) {
+			this.a = a;
+			this.b = b;
 		}
 
-		return hooksDump;
+		public A getA() {
+			return a;
+		}
+
+		public B getB() {
+			return b;
+		}
 	}
 }
