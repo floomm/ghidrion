@@ -79,9 +79,9 @@ public class CreateTraceFilePanel extends JPanel {
 		this.panelHooks = new HookPanel(plugin, traceFile);
 		tabbedPane.addTab("Hooks", null, panelHooks, null);
 		GridBagLayout gbl_panelData = new GridBagLayout();
-		gbl_panelData.columnWidths = new int[] { 522, 0 };
+		gbl_panelData.columnWidths = new int[] { 522 };
 		gbl_panelData.rowHeights = new int[] { 211, 211, 0 };
-		gbl_panelData.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
+		gbl_panelData.columnWeights = new double[] { 0.0 };
 		gbl_panelData.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
 		tabbedPane.addTab("Data", null, panelData, null);
 		panelData.setLayout(gbl_panelData);
