@@ -1,7 +1,6 @@
 package model;
 
 import java.util.Objects;
-import java.util.StringJoiner;
 
 import ghidra.program.model.address.Address;
 
@@ -61,15 +60,6 @@ public class Hook implements Comparable<Hook> {
 		if (this.functionName != o.functionName)
 			return this.functionName.compareTo(o.functionName);
 		return this.entryAddress.compareTo(o.entryAddress);
-	}
-
-	@Override
-	public String toString() {
-		StringJoiner sj = new StringJoiner("      ");
-		sj.add(libraryName);
-		sj.add(functionName);
-		sj.add(entryAddress.toString());
-		return sj.toString();
 	}
 
 	public enum Mode {

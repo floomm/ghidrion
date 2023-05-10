@@ -7,20 +7,21 @@ import ctrl.TraceFileController;
 import ghidrion.GhidrionPlugin;
 import model.MemoryEntry;
 import model.MorionTraceFile;
+import util.MemoryEntryTableModel;
 
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JScrollPane;
-import javax.swing.JList;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 
 public class CreateTraceFilePanel extends JPanel {
 	private final MorionTraceFile traceFile;
@@ -41,8 +42,8 @@ public class CreateTraceFilePanel extends JPanel {
 	private final JButton btnLoadTraceFile = new JButton("Load");
 	private final JButton btnCreateTraceFile = new JButton("Save As");
 	private final JButton btnClearTraceFile = new JButton("Clear");
-	private final JList<MemoryEntry> registerList = new JList<>();
-	private final JList<MemoryEntry> memoryList = new JList<>();
+	private final JTable tableRegister = new JTable();
+	private final JTable tableMemory = new JTable();
 	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	private final JPanel panelData = new JPanel();
 
@@ -256,12 +257,12 @@ public class CreateTraceFilePanel extends JPanel {
 		setupListRegister();
 		setupBtnAddRegister();
 		setupBtnRemoveRegister();
-		scrollPaneRegisters.setViewportView(registerList);
+		scrollPaneRegisters.setViewportView(tableRegister);
 
 		setupListMemory();
 		setupBtnAddMemory();
 		setupBtnRemoveMemory();
-		scrollPaneMemory.setViewportView(memoryList);
+		scrollPaneMemory.setViewportView(tableMemory);
 
 		setupBtnLoadTraceFile();
 		setupBtnCreateTraceFile();
@@ -270,9 +271,10 @@ public class CreateTraceFilePanel extends JPanel {
 
 	private void setupListRegister() {
 		traceFile.getEntryRegisters().addObserver(newList -> {
-			DefaultListModel<MemoryEntry> listModel = new DefaultListModel<>();
-			listModel.addAll(newList.stream().sorted().collect(Collectors.toList()));
-			registerList.setModel(listModel);
+			List<MemoryEntry> entries = newList.stream().sorted().collect(Collectors.toList());
+			MemoryEntryTableModel model = new MemoryEntryTableModel(entries);
+			tableRegister.setModel(model);
+			model.setColumnHeaders(tableRegister.getColumnModel());
 		});
 	}
 
@@ -287,16 +289,19 @@ public class CreateTraceFilePanel extends JPanel {
 
 	private void setupBtnRemoveRegister() {
 		btnRemoveRegister.addActionListener(e -> {
-			traceFile.getEntryRegisters().removeAll(registerList.getSelectedValuesList());
-			registerList.setSelectedIndex(0);
+			MemoryEntryTableModel model = (MemoryEntryTableModel) tableRegister.getModel();
+			List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableRegister.getSelectedRows());
+			traceFile.getEntryRegisters().removeAll(toDelete);
+			tableRegister.getSelectionModel().setSelectionInterval(0, 0);
 		});
 	}
 
 	private void setupListMemory() {
 		traceFile.getEntryMemory().addObserver(newList -> {
-			DefaultListModel<MemoryEntry> listModel = new DefaultListModel<>();
-			listModel.addAll(newList.stream().sorted().collect(Collectors.toList()));
-			memoryList.setModel(listModel);
+			List<MemoryEntry> entries = newList.stream().sorted().collect(Collectors.toList());
+			MemoryEntryTableModel model = new MemoryEntryTableModel(entries);
+			tableMemory.setModel(model);
+			model.setColumnHeaders(tableMemory.getColumnModel());
 		});
 	}
 
@@ -311,8 +316,10 @@ public class CreateTraceFilePanel extends JPanel {
 
 	private void setupBtnRemoveMemory() {
 		btnRemoveMemory.addActionListener(e -> {
-			traceFile.getEntryMemory().removeAll(memoryList.getSelectedValuesList());
-			memoryList.setSelectedIndex(0);
+			MemoryEntryTableModel model = (MemoryEntryTableModel) tableMemory.getModel();
+			List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableMemory.getSelectedRows());
+			traceFile.getEntryMemory().removeAll(toDelete);
+			tableMemory.getSelectionModel().setSelectionInterval(0, 0);
 		});
 	}
 
