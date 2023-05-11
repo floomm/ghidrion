@@ -20,7 +20,7 @@ import model.Hook;
 import model.MemoryEntry;
 import model.MorionTraceFile;
 
-public class TraceFileController {
+public class EditorController {
 	private final GhidrionPlugin plugin;
 	private final MorionTraceFile traceFile = new MorionTraceFile();
 
@@ -42,7 +42,7 @@ public class TraceFileController {
 	public static final String STATE_REGISTERS = "regs";
 	public static final String SYMBOLIC = "$$";
 	
-	public TraceFileController(GhidrionPlugin plugin) {
+	public EditorController(GhidrionPlugin plugin) {
 		this.plugin = plugin;
 	}
 
@@ -122,7 +122,7 @@ public class TraceFileController {
 				.collect(
 						Collectors.groupingBy(Hook::getLibraryName,
 								Collectors.groupingBy(Hook::getFunctionName,
-										Collectors.mapping(TraceFileController::hookToMap, Collectors.toList()))));
+										Collectors.mapping(EditorController::hookToMap, Collectors.toList()))));
 	}
 
 	private static Map<String, String> hookToMap(Hook hook) {

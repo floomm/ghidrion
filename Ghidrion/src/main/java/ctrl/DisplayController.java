@@ -2,10 +2,10 @@ package ctrl;
 
 import ghidrion.GhidrionPlugin;
 
-public class DisplayTraceFileController {
+public class DisplayController {
 	private final GhidrionPlugin plugin;
 
-	public DisplayTraceFileController(GhidrionPlugin plugin) {
+	public DisplayController(GhidrionPlugin plugin) {
 		this.plugin = plugin;
 	}
 	

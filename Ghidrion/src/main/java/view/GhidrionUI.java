@@ -8,15 +8,15 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import javax.swing.JTabbedPane;
 
-import ctrl.DisplayTraceFileController;
-import ctrl.TraceFileController;
+import ctrl.DisplayController;
+import ctrl.EditorController;
 
 public class GhidrionUI {
 
 	private JFrame frame;
 	private JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-	private CreateTraceFilePanel panelCreateTraceFile;
-	private DisplayTraceFilePanel panelDisplayTraceFile;
+	private EditorPanel panelEditor;
+	private DisplayPanel panelDisplay;
 
 	/**
 	 * Launch the application.
@@ -39,19 +39,19 @@ public class GhidrionUI {
 	 * Do NOT use for the plugin.
 	 */
 	public GhidrionUI() {
-		this.panelCreateTraceFile = new CreateTraceFilePanel();
-		this.panelDisplayTraceFile = new DisplayTraceFilePanel();
+		this.panelEditor = new EditorPanel();
+		this.panelDisplay = new DisplayPanel();
 		initialize();
 	}
 
 	/**
 	 * Create the application.
-	 * @param traceFileController 
-	 * @param displayTraceFileController 
+	 * @param editorController 
+	 * @param displayController 
 	 */
-	public GhidrionUI(TraceFileController traceFileController, DisplayTraceFileController displayTraceFileController) {
-		this.panelCreateTraceFile = new CreateTraceFilePanel(traceFileController);
-		this.panelDisplayTraceFile = new DisplayTraceFilePanel(displayTraceFileController);
+	public GhidrionUI(EditorController editorController, DisplayController displayController) {
+		this.panelEditor = new EditorPanel(editorController);
+		this.panelDisplay = new DisplayPanel(displayController);
 		initialize();
 	}
 
@@ -80,8 +80,8 @@ public class GhidrionUI {
 		gbc_tabbedPane.gridy = 0;
 		frame.getContentPane().add(tabbedPane, gbc_tabbedPane);
 
-		tabbedPane.addTab("Create", null, panelCreateTraceFile, null);
+		tabbedPane.addTab("Create", null, panelEditor, null);
 
-		tabbedPane.addTab("Display", null, panelDisplayTraceFile, null);
+		tabbedPane.addTab("Display", null, panelDisplay, null);
 	}
 }

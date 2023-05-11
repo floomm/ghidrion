@@ -3,7 +3,7 @@ package view;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
-import ctrl.TraceFileController;
+import ctrl.EditorController;
 import model.MemoryEntry;
 import util.MemoryEntryTableModel;
 
@@ -21,8 +21,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 
-public class CreateTraceFilePanel extends JPanel {
-	private final TraceFileController controller;
+public class EditorPanel extends JPanel {
+	private final EditorController controller;
 	private final HookPanel panelHooks;
 
 	private final JTextField textFieldRegisterName = new JTextField();
@@ -45,7 +45,7 @@ public class CreateTraceFilePanel extends JPanel {
 	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	private final JPanel panelData = new JPanel();
 
-	public CreateTraceFilePanel(TraceFileController controller) {
+	public EditorPanel(EditorController controller) {
 		this.controller = controller;
 		this.panelHooks = new HookPanel(controller);
 
@@ -57,7 +57,7 @@ public class CreateTraceFilePanel extends JPanel {
 	 * This constructor is solely for debugging the UI.
 	 * Do NOT use for the plugin.
 	 */
-	public CreateTraceFilePanel() {
+	public EditorPanel() {
 		this.controller = null;
 		this.panelHooks = new HookPanel();
 		init();

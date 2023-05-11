@@ -3,7 +3,7 @@ package view;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
-import ctrl.DisplayTraceFileController;
+import ctrl.DisplayController;
 
 import javax.swing.border.EtchedBorder;
 import java.awt.Color;
@@ -18,8 +18,8 @@ import javax.swing.JColorChooser;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 
-public class DisplayTraceFilePanel extends JPanel {
-	private final DisplayTraceFileController controller;
+public class DisplayPanel extends JPanel {
+	private final DisplayController controller;
 	
 	private final JButton btnDisplayTrace = new JButton("Import and Display");
 	private final JButton btnChooseTraceColor = new JButton("Color");
@@ -30,7 +30,7 @@ public class DisplayTraceFilePanel extends JPanel {
 
 	private Color traceColor = Color.GREEN;
 	
-	public DisplayTraceFilePanel(DisplayTraceFileController controller) {
+	public DisplayPanel(DisplayController controller) {
 		this.controller = controller;
 		init();
 		setupComponents();
@@ -40,7 +40,7 @@ public class DisplayTraceFilePanel extends JPanel {
 	 * This constructor is solely for debugging the UI.
 	 * Do NOT use for the plugin.
 	 */
-	public DisplayTraceFilePanel() {
+	public DisplayPanel() {
 		this.controller = null;
 		init();
 	}
