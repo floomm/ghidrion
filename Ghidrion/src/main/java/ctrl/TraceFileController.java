@@ -15,11 +15,14 @@ import javax.swing.JFileChooser;
 
 import org.yaml.snakeyaml.Yaml;
 
+import ghidrion.GhidrionPlugin;
 import model.Hook;
 import model.MemoryEntry;
 import model.MorionTraceFile;
 
 public class TraceFileController {
+	private final GhidrionPlugin plugin;
+	private final MorionTraceFile traceFile = new MorionTraceFile();
 
 	private static final long TARGET_ADDRESS_STEP = 0x100;
 	private static long targetAddressCounter = 0;
@@ -38,6 +41,10 @@ public class TraceFileController {
 	public static final String STATE_MEMORY = "mems";
 	public static final String STATE_REGISTERS = "regs";
 	public static final String SYMBOLIC = "$$";
+	
+	public TraceFileController(GhidrionPlugin plugin) {
+		this.plugin = plugin;
+	}
 
 	/**
 	 * Write the information in the @param tracefile to a `.yaml` file on disk.
@@ -45,7 +52,7 @@ public class TraceFileController {
 	 * @param parent    to show the Save As dialog from
 	 * @param traceFile to write to disk
 	 */
-	public static void writeTraceFile(Component parent, MorionTraceFile traceFile) {
+	public void writeTraceFile(Component parent) {
 
 		String content = new Yaml().dump(buildTraceFileDump(traceFile));
 
@@ -66,6 +73,14 @@ public class TraceFileController {
 				e1.printStackTrace();
 			}
 		}
+	}
+	
+	public GhidrionPlugin getPlugin() {
+		return plugin;
+	}
+	
+	public MorionTraceFile getTraceFile() {
+		return traceFile;
 	}
 
 	private static Map<String, Object> buildTraceFileDump(MorionTraceFile traceFile) {
@@ -136,4 +151,5 @@ public class TraceFileController {
 			return b;
 		}
 	}
+
 }

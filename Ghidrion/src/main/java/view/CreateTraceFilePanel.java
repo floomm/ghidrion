@@ -4,9 +4,7 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
 import ctrl.TraceFileController;
-import ghidrion.GhidrionPlugin;
 import model.MemoryEntry;
-import model.MorionTraceFile;
 import util.MemoryEntryTableModel;
 
 import java.awt.GridBagLayout;
@@ -24,7 +22,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 
 public class CreateTraceFilePanel extends JPanel {
-	private final MorionTraceFile traceFile;
+	private final TraceFileController controller;
 	private final HookPanel panelHooks;
 
 	private final JTextField textFieldRegisterName = new JTextField();
@@ -47,10 +45,25 @@ public class CreateTraceFilePanel extends JPanel {
 	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	private final JPanel panelData = new JPanel();
 
-	public CreateTraceFilePanel(GhidrionPlugin plugin, MorionTraceFile traceFile) {
-		this.traceFile = traceFile;
-		this.panelHooks = new HookPanel(plugin, traceFile);
+	public CreateTraceFilePanel(TraceFileController controller) {
+		this.controller = controller;
+		this.panelHooks = new HookPanel(controller);
 
+		init();
+		setupComponents();
+	}
+	
+	/**
+	 * This constructor is solely for debugging the UI.
+	 * Do NOT use for the plugin.
+	 */
+	public CreateTraceFilePanel() {
+		this.controller = null;
+		this.panelHooks = new HookPanel();
+		init();
+	}
+
+	private void init() {
 		GridBagLayout gbl_panelCreateTraceFile = new GridBagLayout();
 		gbl_panelCreateTraceFile.columnWidths = new int[] { 956, 0 };
 		gbl_panelCreateTraceFile.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0 };
@@ -245,8 +258,6 @@ public class CreateTraceFilePanel extends JPanel {
 		gbc_scrollPaneRegisters.gridx = 0;
 		gbc_scrollPaneRegisters.gridy = 2;
 		panelRegisters.add(scrollPaneRegisters, gbc_scrollPaneRegisters);
-
-		setupComponents();
 	}
 
 	private void setupComponents() {
@@ -268,9 +279,9 @@ public class CreateTraceFilePanel extends JPanel {
 		setupBtnCreateTraceFile();
 		setupBtnClearTraceFile();
 	}
-
+	
 	private void setupListRegister() {
-		traceFile.getEntryRegisters().addObserver(newList -> {
+		controller.getTraceFile().getEntryRegisters().addObserver(newList -> {
 			List<MemoryEntry> entries = newList.stream().sorted().collect(Collectors.toList());
 			MemoryEntryTableModel model = new MemoryEntryTableModel(entries);
 			tableRegister.setModel(model);
@@ -283,7 +294,7 @@ public class CreateTraceFilePanel extends JPanel {
 			String name = textFieldRegisterName.getText();
 			String value = textFieldRegisterValue.getText();
 			boolean isSymbolic = chckbxIsRegisterSymbolic.isSelected();
-			traceFile.getEntryRegisters().add(new MemoryEntry(name, value, isSymbolic));
+			controller.getTraceFile().getEntryRegisters().add(new MemoryEntry(name, value, isSymbolic));
 		});
 	}
 
@@ -291,13 +302,13 @@ public class CreateTraceFilePanel extends JPanel {
 		btnRemoveRegister.addActionListener(e -> {
 			MemoryEntryTableModel model = (MemoryEntryTableModel) tableRegister.getModel();
 			List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableRegister.getSelectedRows());
-			traceFile.getEntryRegisters().removeAll(toDelete);
+			controller.getTraceFile().getEntryRegisters().removeAll(toDelete);
 			tableRegister.getSelectionModel().setSelectionInterval(0, 0);
 		});
 	}
 
 	private void setupListMemory() {
-		traceFile.getEntryMemory().addObserver(newList -> {
+		controller.getTraceFile().getEntryMemory().addObserver(newList -> {
 			List<MemoryEntry> entries = newList.stream().sorted().collect(Collectors.toList());
 			MemoryEntryTableModel model = new MemoryEntryTableModel(entries);
 			tableMemory.setModel(model);
@@ -310,7 +321,7 @@ public class CreateTraceFilePanel extends JPanel {
 			String address = textFieldMemoryAddress.getText();
 			String value = textFieldMemoryValue.getText();
 			boolean isSymbolic = chckbxIsMemorySymbolic.isSelected();
-			traceFile.getEntryMemory().add(new MemoryEntry(address, value, isSymbolic));
+			controller.getTraceFile().getEntryMemory().add(new MemoryEntry(address, value, isSymbolic));
 		});
 	}
 
@@ -318,7 +329,7 @@ public class CreateTraceFilePanel extends JPanel {
 		btnRemoveMemory.addActionListener(e -> {
 			MemoryEntryTableModel model = (MemoryEntryTableModel) tableMemory.getModel();
 			List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableMemory.getSelectedRows());
-			traceFile.getEntryMemory().removeAll(toDelete);
+			controller.getTraceFile().getEntryMemory().removeAll(toDelete);
 			tableMemory.getSelectionModel().setSelectionInterval(0, 0);
 		});
 	}
@@ -330,7 +341,7 @@ public class CreateTraceFilePanel extends JPanel {
 	}
 
 	private void setupBtnCreateTraceFile() {
-		btnCreateTraceFile.addActionListener(e -> TraceFileController.writeTraceFile(this, traceFile));
+		btnCreateTraceFile.addActionListener(e -> controller.writeTraceFile(this));
 	}
 
 	private void setupBtnClearTraceFile() {
@@ -349,6 +360,6 @@ public class CreateTraceFilePanel extends JPanel {
 		chckbxIsMemorySymbolic.setSelected(false);
 
 		// Clear data structure
-		traceFile.clear();
+		controller.getTraceFile().clear();
 	}
 }

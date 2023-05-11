@@ -3,7 +3,7 @@ package view;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
-import ghidrion.GhidrionPlugin;
+import ctrl.DisplayTraceFileController;
 
 import javax.swing.border.EtchedBorder;
 import java.awt.Color;
@@ -19,8 +19,8 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 
 public class DisplayTraceFilePanel extends JPanel {
-	private final GhidrionPlugin plugin;
-
+	private final DisplayTraceFileController controller;
+	
 	private final JButton btnDisplayTrace = new JButton("Import and Display");
 	private final JButton btnChooseTraceColor = new JButton("Color");
 	private final JScrollPane scrollPaneTraces = new JScrollPane();
@@ -30,9 +30,22 @@ public class DisplayTraceFilePanel extends JPanel {
 
 	private Color traceColor = Color.GREEN;
 	
-	public DisplayTraceFilePanel(GhidrionPlugin plugin) {
-		this.plugin = plugin;
+	public DisplayTraceFilePanel(DisplayTraceFileController controller) {
+		this.controller = controller;
+		init();
+		setupComponents();
+	}
 
+	/**
+	 * This constructor is solely for debugging the UI.
+	 * Do NOT use for the plugin.
+	 */
+	public DisplayTraceFilePanel() {
+		this.controller = null;
+		init();
+	}
+	
+	private void init() {
 		setBorder(new TitledBorder(
 				new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)),
 				"Display Morion trace file", TitledBorder.LEADING, TitledBorder.ABOVE_TOP, null, new Color(0, 0, 0)));
@@ -68,10 +81,6 @@ public class DisplayTraceFilePanel extends JPanel {
 		gbc_btnRemoveTraces.gridx = 0;
 		gbc_btnRemoveTraces.gridy = 2;
 		add(btnRemoveTraces, gbc_btnRemoveTraces);
-
-		// Into displayPanel
-		setupComponents();
-
 	}
 
 	private void setupComponents() {
@@ -84,7 +93,7 @@ public class DisplayTraceFilePanel extends JPanel {
 	private void setupBtnRemoveTraces() {
 		btnRemoveTraces.addActionListener(e -> {
 			List<String> selectedItems = traceList.getSelectedValuesList();
-			plugin.colorizerScript.decolorize(selectedItems);
+			controller.getPlugin().colorizerScript.decolorize(selectedItems);
 
 			int[] selectedIndices = traceList.getSelectedIndices();
 			for (int i = selectedIndices.length - 1; i >= 0; i--) {
@@ -95,7 +104,7 @@ public class DisplayTraceFilePanel extends JPanel {
 
 	private void setupBtnDisplayTrace() {
 		btnDisplayTrace.addActionListener(e -> {
-			String traceName = plugin.colorizerScript.colorize(traceColor);
+			String traceName = controller.getPlugin().colorizerScript.colorize(traceColor);
 			if (traceName != null) {
 				traceListModel.addElement(traceName);
 			}

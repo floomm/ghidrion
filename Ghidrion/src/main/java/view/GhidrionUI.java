@@ -3,21 +3,20 @@ package view;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import javax.swing.JTabbedPane;
 
-import ghidrion.GhidrionPlugin;
-import model.MorionTraceFile;
+import ctrl.DisplayTraceFileController;
+import ctrl.TraceFileController;
 
 public class GhidrionUI {
 
 	private JFrame frame;
 	private JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-	private JPanel panelCreateTraceFile;
-	private JPanel panelDisplayTraceFile;
+	private CreateTraceFilePanel panelCreateTraceFile;
+	private DisplayTraceFilePanel panelDisplayTraceFile;
 
 	/**
 	 * Launch the application.
@@ -34,19 +33,25 @@ public class GhidrionUI {
 			}
 		});
 	}
-
+	
+	/**
+	 * This constructor is solely for debugging the UI.
+	 * Do NOT use for the plugin.
+	 */
 	public GhidrionUI() {
+		this.panelCreateTraceFile = new CreateTraceFilePanel();
+		this.panelDisplayTraceFile = new DisplayTraceFilePanel();
 		initialize();
 	}
 
 	/**
 	 * Create the application.
-	 * 
-	 * @param plugin
+	 * @param traceFileController 
+	 * @param displayTraceFileController 
 	 */
-	public GhidrionUI(GhidrionPlugin plugin, MorionTraceFile traceFile) {
-		this.panelCreateTraceFile = new CreateTraceFilePanel(plugin, traceFile);
-		this.panelDisplayTraceFile = new DisplayTraceFilePanel(plugin);
+	public GhidrionUI(TraceFileController traceFileController, DisplayTraceFileController displayTraceFileController) {
+		this.panelCreateTraceFile = new CreateTraceFilePanel(traceFileController);
+		this.panelDisplayTraceFile = new DisplayTraceFilePanel(displayTraceFileController);
 		initialize();
 	}
 
