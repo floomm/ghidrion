@@ -39,9 +39,9 @@ public class CreateTraceFilePanel extends JPanel {
 	private final JButton btnAddMemory = new JButton("Add");
 	private final JButton btnRemoveMemory = new JButton("Remove");
 	private final JScrollPane scrollPaneMemory = new JScrollPane();
-	private final JButton btnLoadTraceFile = new JButton("Load");
-	private final JButton btnCreateTraceFile = new JButton("Save As");
-	private final JButton btnClearTraceFile = new JButton("Clear");
+	private final JButton btnLoadTraceFile = new JButton("Load Init Trace File");
+	private final JButton btnCreateTraceFile = new JButton("Create Init Trace File");
+	private final JButton btnClearTraceFile = new JButton("Clear Added Elements");
 	private final JTable tableRegister = new JTable();
 	private final JTable tableMemory = new JTable();
 	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
