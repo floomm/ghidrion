@@ -182,7 +182,7 @@ public class HookPanel extends JPanel {
             Mode mode = (Mode) comboBoxHookMode.getSelectedItem();
             List<Hook> toAdd = listFunctionAddress.getSelectedValuesList().stream().map(
                     a -> new Hook(functionName, a, mode)).collect(Collectors.toList());
-            traceFile.getHooks().addAll(toAdd);
+            traceFile.getHooks().replaceAll(toAdd);
         });
     }
 

@@ -283,7 +283,7 @@ public class CreateTraceFilePanel extends JPanel {
 			String name = textFieldRegisterName.getText();
 			String value = textFieldRegisterValue.getText();
 			boolean isSymbolic = chckbxIsRegisterSymbolic.isSelected();
-			traceFile.getEntryRegisters().add(new MemoryEntry(name, value, isSymbolic));
+			traceFile.getEntryRegisters().replace(new MemoryEntry(name, value, isSymbolic));
 		});
 	}
 
@@ -310,7 +310,7 @@ public class CreateTraceFilePanel extends JPanel {
 			String address = textFieldMemoryAddress.getText();
 			String value = textFieldMemoryValue.getText();
 			boolean isSymbolic = chckbxIsMemorySymbolic.isSelected();
-			traceFile.getEntryMemory().add(new MemoryEntry(address, value, isSymbolic));
+			traceFile.getEntryMemory().replace(new MemoryEntry(address, value, isSymbolic));
 		});
 	}
 
