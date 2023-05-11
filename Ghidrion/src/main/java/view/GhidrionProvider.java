@@ -11,9 +11,9 @@ public class GhidrionProvider extends ComponentProvider {
 	private final GhidrionUI ui;
 	private JPanel panel;
 
-	public GhidrionProvider(GhidrionPlugin plugin, String pluginName, String owner) {
+	public GhidrionProvider(GhidrionPlugin plugin, String pluginName, String owner, MorionTraceFile traceFile) {
 		super(plugin.getTool(), pluginName, owner);
-		ui = new GhidrionUI(plugin, new MorionTraceFile());
+		ui = new GhidrionUI(plugin, traceFile);
 
 		buildPanel();
 	}

@@ -31,6 +31,7 @@ import ghidra.framework.plugintool.PluginTool;
 import ghidra.framework.plugintool.util.PluginStatus;
 import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.listing.Program;
+import model.MorionTraceFile;
 import view.GhidrionProvider;
 
 /**
@@ -77,7 +78,10 @@ public class GhidrionPlugin extends ProgramPlugin {
 
 		String owner = getName();
 
-		provider = new GhidrionProvider(this, PLUGIN_NAME, owner);
+		MorionTraceFile traceFile = new MorionTraceFile();
+
+		provider = new GhidrionProvider(this, PLUGIN_NAME, owner, traceFile);
+		new GhidrionHookAddingListingContextAction(this, traceFile);
 
 		if (currentProgram != null) {
 			this.flatAPI = new FlatProgramAPI(currentProgram);
