@@ -14,6 +14,7 @@ import model.Hook;
 import model.Hook.Mode;
 import model.MemoryEntry;
 import model.MorionTraceFile;
+import util.MemoryEntryTableModel;
 
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -30,13 +31,12 @@ import java.util.stream.Collectors;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JScrollPane;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 
 public class CreateTraceFilePanel extends JPanel {
 	private final GhidrionPlugin plugin;
@@ -58,8 +58,8 @@ public class CreateTraceFilePanel extends JPanel {
 	private final JButton btnLoadTraceFile = new JButton("Load");
 	private final JButton btnCreateTraceFile = new JButton("Save As");
 	private final JButton btnClearTraceFile = new JButton("Clear");
-	private final JList<MemoryEntry> registerList = new JList<>();
-	private final JList<MemoryEntry> memoryList = new JList<>();
+	private final JTable tableRegister = new JTable();
+	private final JTable tableMemory = new JTable();
 	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	private final JPanel panelData = new JPanel();
 
@@ -274,12 +274,12 @@ public class CreateTraceFilePanel extends JPanel {
 		setupListRegister();
 		setupBtnAddRegister();
 		setupBtnRemoveRegister();
-		scrollPaneRegisters.setViewportView(registerList);
+		scrollPaneRegisters.setViewportView(tableRegister);
 
 		setupListMemory();
 		setupBtnAddMemory();
 		setupBtnRemoveMemory();
-		scrollPaneMemory.setViewportView(memoryList);
+		scrollPaneMemory.setViewportView(tableMemory);
 
 		setupBtnLoadTraceFile();
 		setupBtnCreateTraceFile();
@@ -288,9 +288,10 @@ public class CreateTraceFilePanel extends JPanel {
 
 	private void setupListRegister() {
 		traceFile.getEntryRegisters().addObserver(newList -> {
-			DefaultListModel<MemoryEntry> listModel = new DefaultListModel<>();
-			listModel.addAll(newList.stream().sorted().collect(Collectors.toList()));
-			registerList.setModel(listModel);
+			List<MemoryEntry> entries = newList.stream().sorted().collect(Collectors.toList());
+			MemoryEntryTableModel model = new MemoryEntryTableModel(entries);
+			tableRegister.setModel(model);
+			model.setColumnHeaders(tableRegister.getColumnModel());
 		});
 	}
 
@@ -305,16 +306,19 @@ public class CreateTraceFilePanel extends JPanel {
 
 	private void setupBtnRemoveRegister() {
 		btnRemoveRegister.addActionListener(e -> {
-			traceFile.getEntryRegisters().removeAll(registerList.getSelectedValuesList());
-			registerList.setSelectedIndex(0);
+			MemoryEntryTableModel model = (MemoryEntryTableModel) tableRegister.getModel();
+			List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableRegister.getSelectedRows());
+			traceFile.getEntryRegisters().removeAll(toDelete);
+			tableRegister.getSelectionModel().setSelectionInterval(0, 0);
 		});
 	}
 
 	private void setupListMemory() {
 		traceFile.getEntryMemory().addObserver(newList -> {
-			DefaultListModel<MemoryEntry> listModel = new DefaultListModel<>();
-			listModel.addAll(newList.stream().sorted().collect(Collectors.toList()));
-			memoryList.setModel(listModel);
+			List<MemoryEntry> entries = newList.stream().sorted().collect(Collectors.toList());
+			MemoryEntryTableModel model = new MemoryEntryTableModel(entries);
+			tableMemory.setModel(model);
+			model.setColumnHeaders(tableMemory.getColumnModel());
 		});
 	}
 
@@ -329,8 +333,10 @@ public class CreateTraceFilePanel extends JPanel {
 
 	private void setupBtnRemoveMemory() {
 		btnRemoveMemory.addActionListener(e -> {
-			traceFile.getEntryMemory().removeAll(memoryList.getSelectedValuesList());
-			memoryList.setSelectedIndex(0);
+			MemoryEntryTableModel model = (MemoryEntryTableModel) tableMemory.getModel();
+			List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableMemory.getSelectedRows());
+			traceFile.getEntryMemory().removeAll(toDelete);
+			tableMemory.getSelectionModel().setSelectionInterval(0, 0);
 		});
 	}
 
@@ -338,11 +344,12 @@ public class CreateTraceFilePanel extends JPanel {
 		btnLoadTraceFile.addActionListener(e -> {
 			// Warn user that current trace file gets cleared
 			String warning = "Are you sure you want to proceed? The current editor entries are cleared.";
-			int warningResult = JOptionPane.showConfirmDialog(this, warning, "Confirmation", JOptionPane.OK_CANCEL_OPTION);
+			int warningResult = JOptionPane.showConfirmDialog(this, warning, "Confirmation",
+					JOptionPane.OK_CANCEL_OPTION);
 			if (warningResult != JOptionPane.OK_OPTION) {
 				return;
 			}
-			
+
 			clearTraceFile();
 			JFileChooser fileChooser = new JFileChooser();
 			FileNameExtensionFilter filter = new FileNameExtensionFilter("YAML files", "yaml");
@@ -364,11 +371,13 @@ public class CreateTraceFilePanel extends JPanel {
 			Map<String, Object> newTraceFile = new Yaml().load(input);
 
 			// Load hooks
-			Map<String, Map<String, List<Map<String, String>>>> hookMap = (Map<String, Map<String, List<Map<String, String>>>>) newTraceFile.get(TraceFileController.HOOKS);
+			Map<String, Map<String, List<Map<String, String>>>> hookMap = (Map<String, Map<String, List<Map<String, String>>>>) newTraceFile
+					.get(TraceFileController.HOOKS);
 			traceFile.getHooks().addAll(buildHooks(hookMap));
-			
+
 			// Load states
-			Map<String, Map<String, Map<String, List<String>>>> stateMap = (Map<String, Map<String, Map<String, List<String>>>>) newTraceFile.get(TraceFileController.STATES);
+			Map<String, Map<String, Map<String, List<String>>>> stateMap = (Map<String, Map<String, Map<String, List<String>>>>) newTraceFile
+					.get(TraceFileController.STATES);
 			Map<String, Map<String, List<String>>> entryStates = stateMap.get(TraceFileController.ENTRY_STATE);
 
 			// Load registers
@@ -378,7 +387,7 @@ public class CreateTraceFilePanel extends JPanel {
 			traceFile.getEntryMemory().addAll(buildMemoryEntries(entryMemMap));
 		});
 	}
-	
+
 	private List<Hook> buildHooks(Map<String, Map<String, List<Map<String, String>>>> hookMap) {
 		List<Hook> hooks = new ArrayList<>();
 		Map<String, List<Map<String, String>>> functions = hookMap.get("libc"); // Libc is hardcoded for now
@@ -392,7 +401,7 @@ public class CreateTraceFilePanel extends JPanel {
 		}
 		return hooks;
 	}
-	
+
 	private List<MemoryEntry> buildMemoryEntries(Map<String, List<String>> entryMap) {
 		List<MemoryEntry> entries = new ArrayList<>();
 		for (String name : entryMap.keySet()) {
