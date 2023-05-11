@@ -64,7 +64,7 @@ public class HookPanel extends JPanel {
         gbl_panelHooks.columnWidths = new int[] { 100, 100, 100, 0, 0 };
         gbl_panelHooks.rowHeights = new int[] { 0, 100, 100 };
         gbl_panelHooks.columnWeights = new double[] { 1.0, 1.0, 1.0, 0.0, 1.0 };
-        gbl_panelHooks.rowWeights = new double[] { 1.0, 1.0, 1.0 };
+        gbl_panelHooks.rowWeights = new double[] { Double.MIN_VALUE, 1.0, 1.0 };
         setLayout(gbl_panelHooks);
 
         GridBagConstraints gbc_lblFunctionName = new GridBagConstraints();

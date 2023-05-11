@@ -8,6 +8,24 @@ import java.util.Set;
 public class ObservableSet<E extends Comparable<E>> extends Observable<Set<E>> implements Set<E> {
     private final Set<E> s = new HashSet<>();
 
+    /**
+     * @param e first gets removed if present and then re-added.
+     * @return same value as {@link ObservableSet#add(Comparable)}.
+     */
+    public boolean replace(E e) {
+        s.remove(e);
+        return add(e);
+    }
+
+    /**
+     * @param es first get removed if present and then re-added.
+     * @return same value as {@link ObservableSet#addAll(Comparable)}.
+     */
+    public boolean replaceAll(Collection<E> es) {
+        s.removeAll(es);
+        return addAll(es);
+    }
+
     @Override
     public int size() {
         return s.size();

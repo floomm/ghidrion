@@ -80,8 +80,8 @@ public class GhidrionUI {
 		gbc_tabbedPane.gridy = 0;
 		frame.getContentPane().add(tabbedPane, gbc_tabbedPane);
 
-		tabbedPane.addTab("Create", null, panelEditor, null);
+		tabbedPane.addTab("Create Init Trace File", null, panelEditor, null);
 
-		tabbedPane.addTab("Display", null, panelDisplay, null);
+		tabbedPane.addTab("Display Trace", null, panelDisplay, null);
 	}
 }
