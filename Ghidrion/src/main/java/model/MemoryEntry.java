@@ -40,11 +40,6 @@ public class MemoryEntry implements Comparable<MemoryEntry> {
     }
 
     @Override
-    public String toString() {
-        return (this.symbolic ? "✅\t" : "❎\t") + this.name + "\t" + this.value;
-    }
-
-    @Override
     public int compareTo(MemoryEntry o) {
         return this.name.compareTo(o.name);
     }
