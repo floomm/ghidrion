@@ -92,6 +92,6 @@ public class EditorPanel extends JPanel {
 
 	private void clearTraceFile() {
 		panelData.clear();
-		controller.getTraceFile().clear();
+		controller.clearTraceFile();
 	}
 }

@@ -3,8 +3,6 @@ package view;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -16,8 +14,6 @@ import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
 import ctrl.EditorController;
-import model.MemoryEntry;
-import util.MemoryEntryTableModel;
 
 public class MemoryPanel extends JPanel {
 	private final EditorController controller;
@@ -139,12 +135,7 @@ public class MemoryPanel extends JPanel {
 	}
 
 	private void setupListMemory() {
-		controller.getTraceFile().getEntryMemory().addObserver(newList -> {
-			List<MemoryEntry> entries = newList.stream().sorted().collect(Collectors.toList());
-			MemoryEntryTableModel model = new MemoryEntryTableModel(entries);
-			tableMemory.setModel(model);
-			model.setColumnHeaders(tableMemory.getColumnModel());
-		});
+		controller.addEntryMemoryObserver(tableMemory);
 	}
 
 	private void setupBtnAddMemory() {
@@ -152,15 +143,13 @@ public class MemoryPanel extends JPanel {
 			String address = textFieldMemoryAddress.getText();
 			String value = textFieldMemoryValue.getText();
 			boolean isSymbolic = chckbxIsMemorySymbolic.isSelected();
-			controller.getTraceFile().getEntryMemory().add(new MemoryEntry(address, value, isSymbolic));
+			controller.addEntryMemory(address, value, isSymbolic);
 		});
 	}
 
 	private void setupBtnRemoveMemory() {
 		btnRemoveMemory.addActionListener(e -> {
-			MemoryEntryTableModel model = (MemoryEntryTableModel) tableMemory.getModel();
-			List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableMemory.getSelectedRows());
-			controller.getTraceFile().getEntryMemory().removeAll(toDelete);
+			controller.removeAllEntryMemory(tableMemory);
 			tableMemory.getSelectionModel().setSelectionInterval(0, 0);
 		});
 	}

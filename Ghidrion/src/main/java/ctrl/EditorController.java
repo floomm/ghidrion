@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.swing.JFileChooser;
+import javax.swing.JTable;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -19,6 +20,7 @@ import ghidrion.GhidrionPlugin;
 import model.Hook;
 import model.MemoryEntry;
 import model.MorionTraceFile;
+import util.MemoryEntryTableModel;
 
 public class EditorController {
 	private final GhidrionPlugin plugin;
@@ -45,6 +47,14 @@ public class EditorController {
 	public EditorController(GhidrionPlugin plugin) {
 		this.plugin = plugin;
 	}
+	
+	public GhidrionPlugin getPlugin() {
+		return plugin;
+	}
+	
+	public MorionTraceFile getTraceFile() {
+		return traceFile;
+	}
 
 	/**
 	 * Write the information in the @param tracefile to a `.yaml` file on disk.
@@ -53,8 +63,7 @@ public class EditorController {
 	 * @param traceFile to write to disk
 	 */
 	public void writeTraceFile(Component parent) {
-
-		String content = new Yaml().dump(buildTraceFileDump(traceFile));
+		String content = new Yaml().dump(buildTraceFileDump());
 
 		JFileChooser fileChooser = new JFileChooser();
 		int result = fileChooser.showSaveDialog(parent);
@@ -74,32 +83,66 @@ public class EditorController {
 			}
 		}
 	}
-	
-	public GhidrionPlugin getPlugin() {
-		return plugin;
-	}
-	
-	public MorionTraceFile getTraceFile() {
-		return traceFile;
+
+	public void clearTraceFile() {
+		traceFile.clear();
 	}
 
-	private static Map<String, Object> buildTraceFileDump(MorionTraceFile traceFile) {
+	public void addEntryMemoryObserver(JTable tableMemory) {
+		traceFile.getEntryMemory().addObserver(newList -> {
+			List<MemoryEntry> entries = newList.stream().sorted().collect(Collectors.toList());
+			MemoryEntryTableModel model = new MemoryEntryTableModel(entries);
+			tableMemory.setModel(model);
+			model.setColumnHeaders(tableMemory.getColumnModel());
+		});
+	}
+
+	public void addEntryMemory(String address, String value, boolean isSymbolic) {
+		traceFile.getEntryMemory().add(new MemoryEntry(address, value, isSymbolic));
+	}
+
+	public void removeAllEntryMemory(JTable tableMemory) {
+		MemoryEntryTableModel model = (MemoryEntryTableModel) tableMemory.getModel();
+		List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableMemory.getSelectedRows());
+		traceFile.getEntryMemory().removeAll(toDelete);
+	}
+
+	public void addEntryRegistersObserver(JTable tableRegister) {
+		traceFile.getEntryRegisters().addObserver(newList -> {
+			List<MemoryEntry> entries = newList.stream().sorted().collect(Collectors.toList());
+			MemoryEntryTableModel model = new MemoryEntryTableModel(entries);
+			tableRegister.setModel(model);
+			model.setColumnHeaders(tableRegister.getColumnModel());
+		});
+	}
+
+	public void addEntryRegister(String name, String value, boolean isSymbolic) {
+		traceFile.getEntryRegisters().add(new MemoryEntry(name, value, isSymbolic));
+	}
+
+	public void removeAllEntryRegisters(JTable tableRegister) {
+		MemoryEntryTableModel model = (MemoryEntryTableModel) tableRegister.getModel();
+		List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableRegister.getSelectedRows());
+		traceFile.getEntryRegisters().removeAll(toDelete);
+	}
+
+	private Map<String, Object> buildTraceFileDump() {
 		Map<String, Object> traceFileDump = new HashMap<>();
-		traceFileDump.put(HOOKS, getHooksMap(traceFile));
-		traceFileDump.put(STATES, getStatesMap(traceFile));
+		traceFileDump.put(HOOKS, getHooksMap());
+		traceFileDump.put(STATES, getStatesMap());
 		// traceFileDump.put(INFO, traceFile.getInfo());
 		// traceFileDump.put(INSTRUCTIONS, traceFile.getInstructions());
 		return traceFileDump;
 	}
 
-	private static Map<String, Map<String, Map<String, List<String>>>> getStatesMap(MorionTraceFile traceFile) {
+	private Map<String, Map<String, Map<String, List<String>>>> getStatesMap() {
 		return Map.of(ENTRY_STATE,
 				Map.of(
 						STATE_REGISTERS, memoryEntriesToMap(traceFile.getEntryRegisters()),
 						STATE_MEMORY, memoryEntriesToMap(traceFile.getEntryMemory())));
 	}
 
-	private static Map<String, List<String>> memoryEntriesToMap(Collection<MemoryEntry> ms) {
+	private Map<String, List<String>> memoryEntriesToMap(Collection<MemoryEntry> ms) {
 		return ms
 				.stream()
 				.map(m -> new Pair<>(m.getName(),
@@ -107,25 +150,25 @@ public class EditorController {
 				.collect(Collectors.toMap(Pair::getA, Pair::getB));
 	}
 
-	private static synchronized String generateTargetAddress() {
+	private synchronized String generateTargetAddress() {
 		long newTargetAddress = ++targetAddressCounter * TARGET_ADDRESS_STEP;
 		return prependHex(Long.toHexString(newTargetAddress));
 	}
 
-	private static String prependHex(Object s) {
+	private String prependHex(Object s) {
 		return "0x" + s.toString();
 	}
 
-	private static Map<String, Map<String, List<Map<String, String>>>> getHooksMap(MorionTraceFile traceFile) {
+	private Map<String, Map<String, List<Map<String, String>>>> getHooksMap() {
 		return traceFile.getHooks()
 				.stream()
 				.collect(
 						Collectors.groupingBy(Hook::getLibraryName,
 								Collectors.groupingBy(Hook::getFunctionName,
-										Collectors.mapping(EditorController::hookToMap, Collectors.toList()))));
+										Collectors.mapping(this::hookToMap, Collectors.toList()))));
 	}
 
-	private static Map<String, String> hookToMap(Hook hook) {
+	private Map<String, String> hookToMap(Hook hook) {
 		Map<String, String> hookMap = new HashMap<>();
 		hookMap.put(HOOK_ENTRY, prependHex(hook.getEntryAddress()));
 		hookMap.put(HOOK_LEAVE, prependHex(hook.getLeaveAddress()));
@@ -134,7 +177,7 @@ public class EditorController {
 		return hookMap;
 	}
 
-	public static class Pair<A, B> {
+	public class Pair<A, B> {
 		private final A a;
 		private final B b;
 

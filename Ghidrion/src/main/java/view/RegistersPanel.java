@@ -3,8 +3,6 @@ package view;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -16,8 +14,6 @@ import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
 import ctrl.EditorController;
-import model.MemoryEntry;
-import util.MemoryEntryTableModel;
 
 public class RegistersPanel extends JPanel {
 	private final EditorController controller;
@@ -137,12 +133,7 @@ public class RegistersPanel extends JPanel {
 	}
 	
 	private void setupListRegister() {
-		controller.getTraceFile().getEntryRegisters().addObserver(newList -> {
-			List<MemoryEntry> entries = newList.stream().sorted().collect(Collectors.toList());
-			MemoryEntryTableModel model = new MemoryEntryTableModel(entries);
-			tableRegister.setModel(model);
-			model.setColumnHeaders(tableRegister.getColumnModel());
-		});
+		controller.addEntryRegistersObserver(tableRegister);
 	}
 
 	private void setupBtnAddRegister() {
@@ -150,15 +141,13 @@ public class RegistersPanel extends JPanel {
 			String name = textFieldRegisterName.getText();
 			String value = textFieldRegisterValue.getText();
 			boolean isSymbolic = chckbxIsRegisterSymbolic.isSelected();
-			controller.getTraceFile().getEntryRegisters().add(new MemoryEntry(name, value, isSymbolic));
+			controller.addEntryRegister(name, value, isSymbolic);
 		});
 	}
 
 	private void setupBtnRemoveRegister() {
 		btnRemoveRegister.addActionListener(e -> {
-			MemoryEntryTableModel model = (MemoryEntryTableModel) tableRegister.getModel();
-			List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableRegister.getSelectedRows());
-			controller.getTraceFile().getEntryRegisters().removeAll(toDelete);
+			controller.removeAllEntryRegisters(tableRegister);
 			tableRegister.getSelectionModel().setSelectionInterval(0, 0);
 		});
 	}
