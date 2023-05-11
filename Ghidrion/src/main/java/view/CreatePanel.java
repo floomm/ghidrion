@@ -2,7 +2,7 @@ package view;
 
 import javax.swing.JPanel;
 
-import ctrl.EditorController;
+import ctrl.CreateController;
 
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -11,8 +11,8 @@ import java.awt.Insets;
 import javax.swing.JButton;
 import javax.swing.JTabbedPane;
 
-public class EditorPanel extends JPanel {
-	private final EditorController controller;
+public class CreatePanel extends JPanel {
+	private final CreateController controller;
 	private final HookPanel panelHooks;
 	private final DataPanel panelData;
 
@@ -21,7 +21,7 @@ public class EditorPanel extends JPanel {
 	private final JButton btnClearTraceFile = new JButton("Clear");
 	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 
-	public EditorPanel(EditorController controller) {
+	public CreatePanel(CreateController controller) {
 		this.controller = controller;
 		this.panelHooks = new HookPanel(controller);
 		this.panelData = new DataPanel(controller);
@@ -33,7 +33,7 @@ public class EditorPanel extends JPanel {
 	 * This constructor is solely for debugging the UI.
 	 * Do NOT use for the plugin.
 	 */
-	public EditorPanel() {
+	public CreatePanel() {
 		this.controller = null;
 		this.panelHooks = new HookPanel();
 		this.panelData = new DataPanel();

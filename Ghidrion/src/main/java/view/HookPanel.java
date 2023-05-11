@@ -19,7 +19,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 
-import ctrl.EditorController;
+import ctrl.CreateController;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.Program;
 import model.FunctionHelper;
@@ -28,7 +28,7 @@ import model.Hook.Mode;
 import util.HookTableModel;
 
 public class HookPanel extends JPanel {
-	private final EditorController controller;
+	private final CreateController controller;
     private FunctionHelper functionHelper;
 
     protected final JLabel lblFunctionNamed = new JLabel("Block Name");
@@ -44,7 +44,7 @@ public class HookPanel extends JPanel {
     private final JScrollPane scrollPaneAddedHooks = new JScrollPane(tableAddedHooks);
     protected final JButton btnDeleteHook = new JButton("Delete");
 
-    public HookPanel(EditorController controller) {
+    public HookPanel(CreateController controller) {
     	this.controller = controller;
     	init();
         setupComponents();

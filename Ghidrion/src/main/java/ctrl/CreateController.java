@@ -22,7 +22,7 @@ import model.MemoryEntry;
 import model.MorionTraceFile;
 import util.MemoryEntryTableModel;
 
-public class EditorController {
+public class CreateController {
 	private final GhidrionPlugin plugin;
 	private final MorionTraceFile traceFile = new MorionTraceFile();
 
@@ -44,7 +44,7 @@ public class EditorController {
 	public static final String STATE_REGISTERS = "regs";
 	public static final String SYMBOLIC = "$$";
 	
-	public EditorController(GhidrionPlugin plugin) {
+	public CreateController(GhidrionPlugin plugin) {
 		this.plugin = plugin;
 	}
 	

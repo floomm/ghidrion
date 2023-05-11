@@ -6,21 +6,21 @@ import ghidrion.GhidrionPlugin;
 import javax.swing.JPanel;
 
 import ctrl.DisplayController;
-import ctrl.EditorController;
+import ctrl.CreateController;
 
 import javax.swing.JComponent;
 
 public class GhidrionProvider extends ComponentProvider {
 	private JPanel panel;
 	private GhidrionUI ui;
-	private EditorController traceFileController;
-	private DisplayController displayTraceFileController;
+	private CreateController createController;
+	private DisplayController displayController;
 
 	public GhidrionProvider(GhidrionPlugin plugin, String pluginName, String owner) {
 		super(plugin.getTool(), pluginName, owner);
-		this.traceFileController = new EditorController(plugin);
-		this.displayTraceFileController = new DisplayController(plugin);
-		ui = new GhidrionUI(this.traceFileController, this.displayTraceFileController);
+		this.createController = new CreateController(plugin);
+		this.displayController = new DisplayController(plugin);
+		ui = new GhidrionUI(this.createController, this.displayController);
 
 		buildPanel();
 	}

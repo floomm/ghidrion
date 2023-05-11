@@ -9,13 +9,13 @@ import java.awt.GridBagConstraints;
 import javax.swing.JTabbedPane;
 
 import ctrl.DisplayController;
-import ctrl.EditorController;
+import ctrl.CreateController;
 
 public class GhidrionUI {
 
 	private JFrame frame;
 	private JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-	private EditorPanel panelEditor;
+	private CreatePanel panelCreate;
 	private DisplayPanel panelDisplay;
 
 	/**
@@ -39,18 +39,18 @@ public class GhidrionUI {
 	 * Do NOT use for the plugin.
 	 */
 	public GhidrionUI() {
-		this.panelEditor = new EditorPanel();
+		this.panelCreate = new CreatePanel();
 		this.panelDisplay = new DisplayPanel();
 		initialize();
 	}
 
 	/**
 	 * Create the application.
-	 * @param editorController 
-	 * @param displayController 
+	 * @param createController controls the {@link CreatePanel}
+	 * @param displayController controls the {@link DisplayPanel}
 	 */
-	public GhidrionUI(EditorController editorController, DisplayController displayController) {
-		this.panelEditor = new EditorPanel(editorController);
+	public GhidrionUI(CreateController createController, DisplayController displayController) {
+		this.panelCreate = new CreatePanel(createController);
 		this.panelDisplay = new DisplayPanel(displayController);
 		initialize();
 	}
@@ -80,7 +80,7 @@ public class GhidrionUI {
 		gbc_tabbedPane.gridy = 0;
 		frame.getContentPane().add(tabbedPane, gbc_tabbedPane);
 
-		tabbedPane.addTab("Create Init Trace File", null, panelEditor, null);
+		tabbedPane.addTab("Create Init Trace File", null, panelCreate, null);
 
 		tabbedPane.addTab("Display Trace", null, panelDisplay, null);
 	}

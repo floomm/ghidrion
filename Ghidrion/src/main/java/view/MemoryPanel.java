@@ -13,10 +13,10 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
-import ctrl.EditorController;
+import ctrl.CreateController;
 
 public class MemoryPanel extends JPanel {
-	private final EditorController controller;
+	private final CreateController controller;
 
 	private final JTextField textFieldMemoryAddress = new JTextField();
 	private final JTextField textFieldMemoryValue = new JTextField();
@@ -26,7 +26,7 @@ public class MemoryPanel extends JPanel {
 	private final JScrollPane scrollPaneMemory = new JScrollPane();
 	private final JTable tableMemory = new JTable();
 
-	public MemoryPanel(EditorController controller) {
+	public MemoryPanel(CreateController controller) {
 		this.controller = controller;
 		init();
 		setupComponents();
