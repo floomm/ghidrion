@@ -4,9 +4,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,22 +15,23 @@
  */
 package ghidrion;
 
-import java.awt.BorderLayout;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
-import javax.swing.*;
-
-import docking.ActionContext;
-import docking.ComponentProvider;
-import docking.action.DockingAction;
-import docking.action.ToolBarData;
 import ghidra.app.ExamplesPluginPackage;
+import ghidra.app.decompiler.DecompilerHighlightService;
 import ghidra.app.plugin.PluginCategoryNames;
 import ghidra.app.plugin.ProgramPlugin;
-import ghidra.framework.plugintool.*;
+import ghidra.app.plugin.core.colorizer.ColorizingService;
+import ghidra.app.script.GhidraState;
+import ghidra.app.services.GhidraScriptService;
+import ghidra.framework.plugintool.PluginInfo;
+import ghidra.framework.plugintool.PluginTool;
 import ghidra.framework.plugintool.util.PluginStatus;
-import ghidra.util.HelpLocation;
-import ghidra.util.Msg;
-import resources.Icons;
+import ghidra.program.flatapi.FlatProgramAPI;
+import ghidra.program.model.listing.Program;
+import view.GhidrionProvider;
 
 /**
  * TODO: Provide class-level documentation that describes what this plugin does.
@@ -41,76 +42,95 @@ import resources.Icons;
 	packageName = ExamplesPluginPackage.NAME,
 	category = PluginCategoryNames.EXAMPLES,
 	shortDescription = "Plugin short description goes here.",
-	description = "Plugin long description goes here."
+	description = "Plugin long description goes here.",
+	servicesRequired = { GhidraScriptService.class }
 )
 //@formatter:on
 public class GhidrionPlugin extends ProgramPlugin {
 
-	MyProvider provider;
+	// Scripts
+	public final TraceColorizerScript colorizerScript = new TraceColorizerScript(this);
+	public final JumpToAddressScript jumpToAddressScript = new JumpToAddressScript();
+
+	// Services
+	private ColorizingService colorizingService;
+	private DecompilerHighlightService decompilerHighlightService;
+
+	private GhidrionProvider provider;
+	private FlatProgramAPI flatAPI;
+
+	private final List<Consumer<Program>> programOpenedListeners = new ArrayList<>();
+
+	private static final String PLUGIN_NAME = "Ghidrion";
 
 	/**
 	 * Plugin constructor.
-	 * 
+	 *
 	 * @param tool The plugin tool that this plugin is added to.
 	 */
 	public GhidrionPlugin(PluginTool tool) {
 		super(tool);
+		GhidraState state = new GhidraState(tool, tool.getProject(), currentProgram, currentLocation, currentSelection,
+				currentHighlight);
+		colorizerScript.set(new GhidraState(state), null, null);
+		jumpToAddressScript.set(new GhidraState(state), null, null);
 
-		// TODO: Customize provider (or remove if a provider is not desired)
-		String pluginName = getName();
-		provider = new MyProvider(this, pluginName);
+		String owner = getName();
 
-		// TODO: Customize help (or remove if help is not desired)
-		String topicName = this.getClass().getPackage().getName();
-		String anchorName = "HelpAnchor";
-		provider.setHelpLocation(new HelpLocation(topicName, anchorName));
+		provider = new GhidrionProvider(this, PLUGIN_NAME, owner);
+
+		if (currentProgram != null) {
+			this.flatAPI = new FlatProgramAPI(currentProgram);
+		}
 	}
 
 	@Override
 	public void init() {
 		super.init();
 
-		// TODO: Acquire services if necessary
+		// Acquire services here
+		colorizingService = ServiceHelper.getService(tool, ColorizingService.class, this, provider.getComponent());
+		decompilerHighlightService = ServiceHelper.getService(tool, DecompilerHighlightService.class, this,
+				provider.getComponent());
 	}
 
-	// TODO: If provider is desired, it is recommended to move it to its own file
-	private static class MyProvider extends ComponentProvider {
+	@Override
+	protected void programActivated(Program program) {
+		currentProgram = program;
+		flatAPI = new FlatProgramAPI(program);
 
-		private JPanel panel;
-		private DockingAction action;
+		// Set state of scripts
+		GhidraState state = new GhidraState(tool, tool.getProject(), program, currentLocation, currentSelection,
+				currentHighlight);
+		colorizerScript.set(state, null, null);
+		jumpToAddressScript.set(state, null, null);
 
-		public MyProvider(Plugin plugin, String owner) {
-			super(plugin.getTool(), owner, owner);
-			buildPanel();
-			createActions();
-		}
+		super.programActivated(program);
+	}
 
-		// Customize GUI
-		private void buildPanel() {
-			panel = new JPanel(new BorderLayout());
-			JTextArea textArea = new JTextArea(5, 25);
-			textArea.setEditable(false);
-			panel.add(new JScrollPane(textArea));
-			setVisible(true);
-		}
+	@Override
+	protected void programOpened(Program program) {
+		programOpenedListeners.forEach(l -> l.accept(program));
+		super.programOpened(program);
+	}
 
-		// TODO: Customize actions
-		private void createActions() {
-			action = new DockingAction("My Action", getName()) {
-				@Override
-				public void actionPerformed(ActionContext context) {
-					Msg.showInfo(getClass(), panel, "Custom Action", "Hello Ghidrion!");
-				}
-			};
-			action.setToolBarData(new ToolBarData(Icons.ADD_ICON, null));
-			action.setEnabled(true);
-			action.markHelpUnnecessary();
-			dockingTool.addLocalAction(this, action);
-		}
+	public void addProgramOpenendListener(Consumer<Program> listener) {
+		programOpenedListeners.add(listener);
+	}
 
-		@Override
-		public JComponent getComponent() {
-			return panel;
-		}
+	public void removeProgramOpenendListener(Consumer<Program> listener) {
+		programOpenedListeners.remove(listener);
+	}
+
+	public ColorizingService getColorizingService() {
+		return colorizingService;
+	}
+
+	public DecompilerHighlightService getDecompilerHighlightService() {
+		return decompilerHighlightService;
+	}
+
+	public FlatProgramAPI getFlatAPI() {
+		return flatAPI;
 	}
 }

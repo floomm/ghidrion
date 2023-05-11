@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/java,eclipse,windows,linux
-# Edit at https://www.toptal.com/developers/gitignore?templates=java,eclipse,windows,linux
+# Created by https://www.toptal.com/developers/gitignore/api/eclipse,java,windows
+# Edit at https://www.toptal.com/developers/gitignore?templates=eclipse,java,windows
 
 ### Eclipse ###
 .metadata
@@ -93,21 +93,6 @@ local.properties
 hs_err_pid*
 replay_pid*
 
-### Linux ###
-*~
-
-# temporary files which can be created if a process still has a handle open of a deleted file
-.fuse_hidden*
-
-# KDE directory preferences
-.directory
-
-# Linux trash folder which might appear on any partition or disk
-.Trash-*
-
-# .nfs files are created when an open file is removed but is still being accessed
-.nfs*
-
 ### Windows ###
 # Windows thumbnail cache files
 Thumbs.db
@@ -133,14 +118,16 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+# End of https://www.toptal.com/developers/gitignore/api/eclipse,java,windows
 
-# End of https://www.toptal.com/developers/gitignore/api/java,eclipse,windows,linux
+### MacOS ###
+.DS_Store
 
 .gradle/
-build/
-dist/
 .classpath
 .project
+build/
+dist/
 
 # Temp
 OldGhidrion/
