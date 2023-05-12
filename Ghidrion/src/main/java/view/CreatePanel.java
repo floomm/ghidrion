@@ -16,9 +16,9 @@ public class CreatePanel extends JPanel {
 	private final HookPanel panelHooks;
 	private final DataPanel panelData;
 
-	private final JButton btnLoadTraceFile = new JButton("Load");
-	private final JButton btnCreateTraceFile = new JButton("Save As");
-	private final JButton btnClearTraceFile = new JButton("Clear");
+	private final JButton btnLoadTraceFile = new JButton("Load Init Trace File");
+	private final JButton btnCreateTraceFile = new JButton("Create Init Trace File");
+	private final JButton btnClearTraceFile = new JButton("Clear Added Elements");
 	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 
 	public CreatePanel(TraceFileController controller) {

@@ -7,9 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.swing.JFileChooser;
@@ -78,7 +75,7 @@ public class TraceFileController {
 	}
 
 	public void addEntryMemory(String address, String value, boolean isSymbolic) {
-		traceFile.getEntryMemory().add(new MemoryEntry(address, value, isSymbolic));
+		traceFile.getEntryMemory().replace(new MemoryEntry(address, value, isSymbolic));
 	}
 
 	public void removeAllEntryMemory(JTable tableMemory) {
@@ -97,7 +94,7 @@ public class TraceFileController {
 	}
 
 	public void addEntryRegister(String name, String value, boolean isSymbolic) {
-		traceFile.getEntryRegisters().add(new MemoryEntry(name, value, isSymbolic));
+		traceFile.getEntryRegisters().replace(new MemoryEntry(name, value, isSymbolic));
 	}
 
 	public void removeAllEntryRegisters(JTable tableRegister) {
