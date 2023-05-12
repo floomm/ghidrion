@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.swing.JFileChooser;
@@ -85,11 +86,11 @@ public class TraceFileController {
 	}
 
 	private static Map<String, List<String>> memoryEntriesToMap(Collection<MemoryEntry> ms) {
-		return ms
+		return new TreeMap<>(ms
 				.stream()
 				.map(m -> new Pair<>(m.getName(),
 						m.isSymbolic() ? List.of(m.getValue(), SYMBOLIC) : List.of(m.getValue())))
-				.collect(Collectors.toMap(Pair::getA, Pair::getB));
+				.collect(Collectors.toMap(Pair::getA, Pair::getB)));
 	}
 
 	private static synchronized String generateTargetAddress() {
@@ -105,8 +106,12 @@ public class TraceFileController {
 		return traceFile.getHooks()
 				.stream()
 				.collect(
-						Collectors.groupingBy(Hook::getLibraryName,
-								Collectors.groupingBy(Hook::getFunctionName,
+						Collectors.groupingBy(
+								Hook::getLibraryName,
+								TreeMap::new,
+								Collectors.groupingBy(
+										Hook::getFunctionName,
+										TreeMap::new,
 										Collectors.mapping(TraceFileController::hookToMap, Collectors.toList()))));
 	}
 
