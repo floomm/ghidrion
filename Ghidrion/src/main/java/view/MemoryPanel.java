@@ -14,6 +14,7 @@ import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
 import ctrl.TraceFileController;
+import util.MemoryEntryTableModel;
 
 public class MemoryPanel extends JPanel {
 	private final TraceFileController controller;
@@ -120,13 +121,11 @@ public class MemoryPanel extends JPanel {
 		textFieldMemoryAddress.setDocument(new HexDocument());
 		textFieldMemoryValue.setDocument(new HexDocument());
 		scrollPaneMemory.setViewportView(tableMemory);
-		setupListMemory();
+		MemoryEntryTableModel tm = new MemoryEntryTableModel(controller.getTraceFile().getEntryMemory());
+		tableMemory.setModel(tm);
+		tm.setColumnHeaders(tableMemory.getColumnModel());
 		setupBtnAddMemory();
 		setupBtnRemoveMemory();
-	}
-
-	private void setupListMemory() {
-		controller.addEntryMemoryObserver(tableMemory);
 	}
 
 	private void setupBtnAddMemory() {
@@ -144,5 +143,5 @@ public class MemoryPanel extends JPanel {
 			tableMemory.getSelectionModel().setSelectionInterval(0, 0);
 		});
 	}
-	
+
 }

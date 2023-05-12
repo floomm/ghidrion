@@ -7,7 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 import javax.swing.JFileChooser;
 import javax.swing.JTable;
@@ -20,28 +20,29 @@ import util.TraceFileToYamlConverter;
 
 public class TraceFileController {
 	private final GhidrionPlugin plugin;
-	private final MorionTraceFile traceFile = new MorionTraceFile();
-	
-	public TraceFileController(GhidrionPlugin plugin) {
-		this.plugin = plugin;
+	private final MorionTraceFile traceFile;
+
+	public TraceFileController(GhidrionPlugin plugin, MorionTraceFile traceFile) {
+		this.plugin = Objects.requireNonNull(plugin);
+		this.traceFile = Objects.requireNonNull(traceFile);
 	}
-	
+
 	public GhidrionPlugin getPlugin() {
 		return plugin;
 	}
-	
+
 	public MorionTraceFile getTraceFile() {
 		return traceFile;
 	}
-	
+
 	/**
 	 * Write the information in the @param tracefile to a `.yaml` file on disk.
 	 * 
-	 * @param parent    to show the Save As dialog from
+	 * @param parent to show the Save As dialog from
 	 */
 	public void writeTraceFile(Component parent) {
 		String content = TraceFileToYamlConverter.toYaml(traceFile);
-		
+
 		JFileChooser fileChooser = new JFileChooser();
 		int result = fileChooser.showSaveDialog(parent);
 		File file = null;
@@ -65,15 +66,6 @@ public class TraceFileController {
 		traceFile.clear();
 	}
 
-	public void addEntryMemoryObserver(JTable tableMemory) {
-		traceFile.getEntryMemory().addObserver(newList -> {
-			List<MemoryEntry> entries = newList.stream().sorted().collect(Collectors.toList());
-			MemoryEntryTableModel model = new MemoryEntryTableModel(entries);
-			tableMemory.setModel(model);
-			model.setColumnHeaders(tableMemory.getColumnModel());
-		});
-	}
-
 	public void addEntryMemory(String address, String value, boolean isSymbolic) {
 		traceFile.getEntryMemory().replace(new MemoryEntry(address, value, isSymbolic));
 	}
@@ -82,15 +74,6 @@ public class TraceFileController {
 		MemoryEntryTableModel model = (MemoryEntryTableModel) tableMemory.getModel();
 		List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableMemory.getSelectedRows());
 		traceFile.getEntryMemory().removeAll(toDelete);
-	}
-
-	public void addEntryRegistersObserver(JTable tableRegister) {
-		traceFile.getEntryRegisters().addObserver(newList -> {
-			List<MemoryEntry> entries = newList.stream().sorted().collect(Collectors.toList());
-			MemoryEntryTableModel model = new MemoryEntryTableModel(entries);
-			tableRegister.setModel(model);
-			model.setColumnHeaders(tableRegister.getColumnModel());
-		});
 	}
 
 	public void addEntryRegister(String name, String value, boolean isSymbolic) {

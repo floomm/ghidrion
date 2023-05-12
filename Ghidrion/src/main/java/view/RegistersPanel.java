@@ -14,6 +14,7 @@ import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
 import ctrl.TraceFileController;
+import util.MemoryEntryTableModel;
 
 public class RegistersPanel extends JPanel {
 	private final TraceFileController controller;
@@ -118,13 +119,11 @@ public class RegistersPanel extends JPanel {
 	private void setupComponents() {
 		textFieldRegisterValue.setDocument(new HexDocument());
 		scrollPaneRegisters.setViewportView(tableRegister);
-		setupListRegister();
+		MemoryEntryTableModel tm = new MemoryEntryTableModel(controller.getTraceFile().getEntryRegisters());
+		tableRegister.setModel(tm);
+		tm.setColumnHeaders(tableRegister.getColumnModel());
 		setupBtnAddRegister();
 		setupBtnRemoveRegister();
-	}
-	
-	private void setupListRegister() {
-		controller.addEntryRegistersObserver(tableRegister);
 	}
 
 	private void setupBtnAddRegister() {

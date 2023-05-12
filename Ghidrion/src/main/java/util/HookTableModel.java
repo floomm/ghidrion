@@ -5,7 +5,7 @@ import java.util.List;
 import model.Hook;
 
 public class HookTableModel extends CustomTableModel<Hook> {
-    public HookTableModel(List<Hook> hooks) {
+    public HookTableModel(ObservableSet<Hook> hooks) {
         super(hooks);
     }
 

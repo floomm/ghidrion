@@ -6,8 +6,8 @@ import model.MemoryEntry;
 
 public class MemoryEntryTableModel extends CustomTableModel<MemoryEntry> {
 
-    public MemoryEntryTableModel(List<MemoryEntry> elements) {
-        super(elements);
+    public MemoryEntryTableModel(ObservableSet<MemoryEntry> hooks) {
+        super(hooks);
     }
 
     @Override

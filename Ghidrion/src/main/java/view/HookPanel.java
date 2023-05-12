@@ -28,7 +28,7 @@ import model.Hook.Mode;
 import util.HookTableModel;
 
 public class HookPanel extends JPanel {
-	private final TraceFileController controller;
+    private final TraceFileController controller;
     private FunctionHelper functionHelper;
 
     protected final JLabel lblFunctionNamed = new JLabel("Block Name");
@@ -45,20 +45,20 @@ public class HookPanel extends JPanel {
     protected final JButton btnDeleteHook = new JButton("Delete");
 
     public HookPanel(TraceFileController controller) {
-    	this.controller = controller;
-    	init();
+        this.controller = controller;
+        init();
         setupComponents();
     }
 
-	/**
-	 * This constructor is solely for debugging the UI.
-	 * Do NOT use for the plugin.
-	 */
+    /**
+     * This constructor is solely for debugging the UI.
+     * Do NOT use for the plugin.
+     */
     public HookPanel() {
-    	this.controller = null;
-    	init();
-	}
-    
+        this.controller = null;
+        init();
+    }
+
     private void init() {
         GridBagLayout gbl_panelHooks = new GridBagLayout();
         gbl_panelHooks.columnWidths = new int[] { 100, 100, 100, 0, 0 };
@@ -141,12 +141,15 @@ public class HookPanel extends JPanel {
         add(btnDeleteHook, gbc_btnDeleteHook);
     }
 
-	private void setupComponents() {
+    private void setupComponents() {
         controller.getPlugin().addProgramOpenendListener(this::setupHookLists);
-        controller.getTraceFile().getHooks().addObserver((h) -> setupHookLists(controller.getPlugin().getCurrentProgram()));
+        controller.getTraceFile().getHooks()
+                .addObserver((h) -> setupHookLists(controller.getPlugin().getCurrentProgram()));
         setupBtnAddHook();
-        setupListAddedHooks();
         setupBtnDeleteHook();
+        HookTableModel htm = new HookTableModel(controller.getTraceFile().getHooks());
+        tableAddedHooks.setModel(htm);
+        htm.setColumnHeaders(tableAddedHooks.getColumnModel());
     }
 
     private void setupHookLists(Program p) {
@@ -191,15 +194,6 @@ public class HookPanel extends JPanel {
             List<Hook> toAdd = listFunctionAddress.getSelectedValuesList().stream().map(
                     a -> new Hook(functionName, a, mode)).collect(Collectors.toList());
             controller.getTraceFile().getHooks().replaceAll(toAdd);
-        });
-    }
-
-    private void setupListAddedHooks() {
-        controller.getTraceFile().getHooks().addObserver(newSet -> {
-            List<Hook> hooks = newSet.stream().sorted().collect(Collectors.toList());
-            HookTableModel model = new HookTableModel(hooks);
-            tableAddedHooks.setModel(model);
-            model.setColumnHeaders(tableAddedHooks.getColumnModel());
         });
     }
 
