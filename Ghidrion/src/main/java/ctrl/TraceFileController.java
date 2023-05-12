@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.swing.JFileChooser;
@@ -103,15 +104,15 @@ public class TraceFileController {
 	}
 
 	private static Map<String, Map<String, List<Map<String, String>>>> getHooksMap(MorionTraceFile traceFile) {
-		return traceFile.getHooks()
+		return new TreeSet<>(traceFile.getHooks()) // convert to TreeSet to sort hooks
 				.stream()
 				.collect(
 						Collectors.groupingBy(
 								Hook::getLibraryName,
-								TreeMap::new,
+								TreeMap::new, // sort library names
 								Collectors.groupingBy(
 										Hook::getFunctionName,
-										TreeMap::new,
+										TreeMap::new, // sort function names
 										Collectors.mapping(TraceFileController::hookToMap, Collectors.toList()))));
 	}
 

@@ -55,9 +55,9 @@ public class Hook implements Comparable<Hook> {
 
 	@Override
 	public int compareTo(Hook o) {
-		if (this.libraryName != o.libraryName)
+		if (!this.libraryName.equals(o.libraryName))
 			return this.libraryName.compareTo(o.libraryName);
-		if (this.functionName != o.functionName)
+		if (!this.functionName.equals(o.functionName))
 			return this.functionName.compareTo(o.functionName);
 		return this.entryAddress.compareTo(o.entryAddress);
 	}
