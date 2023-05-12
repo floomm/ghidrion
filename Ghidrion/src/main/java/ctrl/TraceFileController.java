@@ -17,11 +17,11 @@ import model.MorionTraceFile;
 import util.MemoryEntryTableModel;
 import util.TraceFileToYamlConverter;
 
-public class CreateController {
+public class TraceFileController {
 	private final GhidrionPlugin plugin;
 	private final MorionTraceFile traceFile = new MorionTraceFile();
 	
-	public CreateController(GhidrionPlugin plugin) {
+	public TraceFileController(GhidrionPlugin plugin) {
 		this.plugin = plugin;
 	}
 	

@@ -9,7 +9,7 @@ import java.awt.GridBagConstraints;
 import javax.swing.JTabbedPane;
 
 import ctrl.DisplayController;
-import ctrl.CreateController;
+import ctrl.TraceFileController;
 
 public class GhidrionUI {
 
@@ -46,11 +46,11 @@ public class GhidrionUI {
 
 	/**
 	 * Create the application.
-	 * @param createController controls the {@link CreatePanel}
+	 * @param traceFileController controls the {@link CreatePanel}
 	 * @param displayController controls the {@link DisplayPanel}
 	 */
-	public GhidrionUI(CreateController createController, DisplayController displayController) {
-		this.panelCreate = new CreatePanel(createController);
+	public GhidrionUI(TraceFileController traceFileController, DisplayController displayController) {
+		this.panelCreate = new CreatePanel(traceFileController);
 		this.panelDisplay = new DisplayPanel(displayController);
 		initialize();
 	}

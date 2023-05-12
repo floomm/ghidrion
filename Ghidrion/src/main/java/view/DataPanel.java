@@ -6,13 +6,13 @@ import java.awt.Insets;
 
 import javax.swing.JPanel;
 
-import ctrl.CreateController;
+import ctrl.TraceFileController;
 
 public class DataPanel extends JPanel {
 	private final MemoryPanel panelMemory;
 	private final RegistersPanel panelRegisters;
 
-	public DataPanel(CreateController controller) {
+	public DataPanel(TraceFileController controller) {
 		this.panelMemory = new MemoryPanel(controller);
 		this.panelRegisters = new RegistersPanel(controller);
 		init();

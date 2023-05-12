@@ -2,7 +2,7 @@ package view;
 
 import javax.swing.JPanel;
 
-import ctrl.CreateController;
+import ctrl.TraceFileController;
 
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -12,7 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JTabbedPane;
 
 public class CreatePanel extends JPanel {
-	private final CreateController controller;
+	private final TraceFileController controller;
 	private final HookPanel panelHooks;
 	private final DataPanel panelData;
 
@@ -21,7 +21,7 @@ public class CreatePanel extends JPanel {
 	private final JButton btnClearTraceFile = new JButton("Clear");
 	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 
-	public CreatePanel(CreateController controller) {
+	public CreatePanel(TraceFileController controller) {
 		this.controller = controller;
 		this.panelHooks = new HookPanel(controller);
 		this.panelData = new DataPanel(controller);
