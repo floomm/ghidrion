@@ -1,8 +1,9 @@
 package util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.swing.table.AbstractTableModel;
@@ -13,11 +14,17 @@ import javax.swing.table.TableColumnModel;
  * should be displayed in a table. It provides the mapping between table entries
  * and objects.
  */
-public abstract class CustomTableModel<E> extends AbstractTableModel {
-    private final List<E> elements;
+public abstract class CustomTableModel<E extends Comparable<E>> extends AbstractTableModel {
+    private final List<E> elements = new ArrayList<>();
 
-    public CustomTableModel(List<E> elements) {
-        this.elements = Objects.requireNonNull(elements);
+    public CustomTableModel(ObservableSet<E> elements) {
+        elements.addObserver(this::onChange);
+    }
+
+    private void onChange(Collection<E> newElements) {
+        this.elements.clear();
+        this.elements.addAll(newElements.stream().sorted().toList());
+        fireTableDataChanged();
     }
 
     @Override
