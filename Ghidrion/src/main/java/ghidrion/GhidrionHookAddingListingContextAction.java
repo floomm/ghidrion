@@ -20,7 +20,7 @@ public class GhidrionHookAddingListingContextAction extends ListingContextAction
     private static final String MENU_GROUP = "Ghidrion";
     private static final String MENU_PATH_ADD_HOOK = "Ghidrion: Add Hook";
     private static final String MENU_PATH_CHANGE_HOOK = "Ghidrion: Change Hook";
-    private static final String DELETE_ENTRY = "delete";
+    private static final String DELETE_ENTRY = "delete hook";
     private final GhidrionPlugin plugin;
     private final MorionTraceFile traceFile;
 
