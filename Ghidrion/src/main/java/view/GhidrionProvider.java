@@ -2,18 +2,25 @@ package view;
 
 import docking.ComponentProvider;
 import ghidrion.GhidrionPlugin;
-import model.MorionTraceFile;
 
 import javax.swing.JPanel;
+
+import ctrl.DisplayController;
+import ctrl.TraceFileController;
+
 import javax.swing.JComponent;
 
 public class GhidrionProvider extends ComponentProvider {
-	private final GhidrionUI ui;
 	private JPanel panel;
+	private GhidrionUI ui;
+	private TraceFileController traceFileController;
+	private DisplayController displayController;
 
 	public GhidrionProvider(GhidrionPlugin plugin, String pluginName, String owner) {
 		super(plugin.getTool(), pluginName, owner);
-		ui = new GhidrionUI(plugin, new MorionTraceFile());
+		this.traceFileController = new TraceFileController(plugin);
+		this.displayController = new DisplayController(plugin);
+		ui = new GhidrionUI(this.traceFileController, this.displayController);
 
 		buildPanel();
 	}
