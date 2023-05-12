@@ -23,7 +23,7 @@ public class MemoryEntryTableModel extends CustomTableModel<MemoryEntry> {
         MemoryEntry m = getElements().get(rowIndex);
         switch (columnIndex) {
             case 0:
-                return m.isSymbolic() ? "✅" : "❎";
+                return m.isSymbolic() ? "✅" : "❌";
             case 1:
                 return m.getName();
             case 2:
