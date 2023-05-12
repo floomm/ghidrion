@@ -1,6 +1,7 @@
 package ctrl;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -60,7 +61,7 @@ public class TraceFileController {
 		}
 	}
 
-	public void clearTraceFile() {
+	public void clearTraceFileListener(ActionEvent e) {
 		traceFile.clear();
 	}
 
