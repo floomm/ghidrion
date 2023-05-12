@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.yaml.snakeyaml.Yaml;
@@ -53,13 +55,14 @@ public class TraceFileToYamlConverter {
 						STATE_REGISTERS, memoryEntriesToMap(traceFile.getEntryRegisters()),
 						STATE_MEMORY, memoryEntriesToMap(traceFile.getEntryMemory())));
 	}
+	
 
 	private static Map<String, List<String>> memoryEntriesToMap(Collection<MemoryEntry> ms) {
-		return ms
+		return new TreeMap<>(ms
 				.stream()
 				.map(m -> new Pair<>(m.getName(),
 						m.isSymbolic() ? List.of(m.getValue(), SYMBOLIC) : List.of(m.getValue())))
-				.collect(Collectors.toMap(Pair::getA, Pair::getB));
+				.collect(Collectors.toMap(Pair::getA, Pair::getB)));
 	}
 
 	private synchronized static String generateTargetAddress() {
@@ -72,11 +75,15 @@ public class TraceFileToYamlConverter {
 	}
 
 	private static Map<String, Map<String, List<Map<String, String>>>> getHooksMap(MorionTraceFile traceFile) {
-		return traceFile.getHooks()
+		return new TreeSet<>(traceFile.getHooks()) // convert to TreeSet to sort hooks
 				.stream()
 				.collect(
-						Collectors.groupingBy(Hook::getLibraryName,
-								Collectors.groupingBy(Hook::getFunctionName,
+						Collectors.groupingBy(
+								Hook::getLibraryName,
+								TreeMap::new, // sort library names
+								Collectors.groupingBy(
+										Hook::getFunctionName,
+										TreeMap::new, // sort function names
 										Collectors.mapping(TraceFileToYamlConverter::hookToMap, Collectors.toList()))));
 	}
 
