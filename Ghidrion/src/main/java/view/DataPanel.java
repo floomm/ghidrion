@@ -27,14 +27,6 @@ public class DataPanel extends JPanel {
 		this.panelRegisters = new RegistersPanel();
 		init();
 	}
-	
-	/**
-	 * Clears all fields
-	 */
-	public void clear() {
-		panelMemory.clear();
-		panelRegisters.clear();
-	}
 
 	private void init() {
 		GridBagLayout gbl_panelData = new GridBagLayout();

@@ -40,15 +40,6 @@ public class RegistersPanel extends JPanel {
 		this.controller = null;
 		init();
 	}
-	
-	/**
-	 * Clears all fields
-	 */
-	public void clear() {
-		textFieldRegisterName.setText("");
-		textFieldRegisterValue.setDocument(new HexDocument());
-		chckbxIsRegisterSymbolic.setSelected(false);
-	}
 
 	private void init() {
 		setBorder(new TitledBorder(null, "Add register", TitledBorder.LEADING, TitledBorder.TOP, null, null));

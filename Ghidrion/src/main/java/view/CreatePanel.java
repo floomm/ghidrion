@@ -77,9 +77,7 @@ public class CreatePanel extends JPanel {
 	}
 
 	private void setupBtnLoadTraceFile() {
-		btnLoadTraceFile.addActionListener(e -> {
-			clearTraceFile();
-		});
+		btnLoadTraceFile.addActionListener(e -> controller.clearTraceFile());
 	}
 
 	private void setupBtnCreateTraceFile() {
@@ -87,11 +85,7 @@ public class CreatePanel extends JPanel {
 	}
 
 	private void setupBtnClearTraceFile() {
-		btnClearTraceFile.addActionListener(e -> clearTraceFile());
+		btnClearTraceFile.addActionListener(e -> controller.clearTraceFile());
 	}
 
-	private void clearTraceFile() {
-		panelData.clear();
-		controller.clearTraceFile();
-	}
 }

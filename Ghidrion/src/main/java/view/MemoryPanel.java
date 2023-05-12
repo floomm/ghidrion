@@ -40,15 +40,6 @@ public class MemoryPanel extends JPanel {
 		this.controller = null;
 		init();
 	}
-	
-	/**
-	 * Clears all fields
-	 */
-	public void clear() {
-		textFieldMemoryAddress.setDocument(new HexDocument());
-		textFieldMemoryValue.setDocument(new HexDocument());
-		chckbxIsMemorySymbolic.setSelected(false);
-	}
 
 	private void init() {
 		setBorder(new TitledBorder(null, "Add memory", TitledBorder.LEADING, TitledBorder.TOP, null, null));
