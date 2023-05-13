@@ -2,47 +2,37 @@ package view;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-
 import ctrl.TraceFileController;
-import ghidra.program.model.address.Address;
-import ghidra.program.model.listing.Program;
-import model.FunctionHelper;
 import model.Hook;
+import model.HookableFunction;
 import model.Hook.Mode;
 import util.HookTableModel;
 
 public class HookPanel extends JPanel {
     private final TraceFileController controller;
-    private FunctionHelper functionHelper;
 
-    protected final JLabel lblFunctionNamed = new JLabel("Block Name");
-    protected final JLabel lblFunctionName = new JLabel("Function Name");
-    protected final JLabel lblFunctionAddress = new JLabel("Function Address");
-    protected final JList<String> listBlockName = new JList<>();
-    protected final JList<Address> listFunctionAddress = new JList<>();
-    protected final JLabel lblMode = new JLabel("Mode");
-    protected final JComboBox<Mode> comboBoxHookMode = new JComboBox<>();
-    protected final JButton btnAddHook = new JButton("Add");
-    protected final JList<String> listFunctionName = new JList<String>();
+    private final FilterPanel<HookableFunction> filterFunctionNames = new FilterPanel<>(HookableFunction::getName,
+            "Function Name");
+    private final FilterPanel<HookableFunction> filterBlockNames = new FilterPanel<>(HookableFunction::getBlockName,
+            "Block Name");;
+    private final FilterPanel<HookableFunction> filterAddresses = new FilterPanel<>(f -> f.getAddress().toString(),
+            "Address");;
+    private final JComboBox<Mode> comboBoxHookMode = new JComboBox<>(new DefaultComboBoxModel<>(Mode.values()));
+    private final JButton btnAddHook = new JButton("Add");
     private final JTable tableAddedHooks = new JTable();
     private final JScrollPane scrollPaneAddedHooks = new JScrollPane(tableAddedHooks);
-    protected final JButton btnDeleteHook = new JButton("Delete");
+    private final JButton btnDeleteHook = new JButton("Delete");
+    private final Set<HookableFunction> allFunctions = new HashSet<>();
 
     public HookPanel(TraceFileController controller) {
         this.controller = controller;
@@ -61,76 +51,43 @@ public class HookPanel extends JPanel {
 
     private void init() {
         GridBagLayout gbl_panelHooks = new GridBagLayout();
-        gbl_panelHooks.columnWidths = new int[] { 100, 100, 100, 0, 0 };
-        gbl_panelHooks.rowHeights = new int[] { 0, 100, 100 };
-        gbl_panelHooks.columnWeights = new double[] { 1.0, 1.0, 1.0, 0.0, 1.0 };
+        gbl_panelHooks.columnWidths = new int[] { 0, 0, 0, 0, 0 };
+        gbl_panelHooks.rowHeights = new int[] { 0, 0, 1 };
+        gbl_panelHooks.columnWeights = new double[] { 1.0, 1.0, 1.0, Double.MIN_VALUE, Double.MIN_VALUE };
         gbl_panelHooks.rowWeights = new double[] { Double.MIN_VALUE, 1.0, 1.0 };
         setLayout(gbl_panelHooks);
 
-        GridBagConstraints gbc_lblFunctionName = new GridBagConstraints();
-        gbc_lblFunctionName.insets = new Insets(0, 0, 5, 5);
-        gbc_lblFunctionName.gridx = 0;
-        gbc_lblFunctionName.gridy = 0;
-        add(lblFunctionName, gbc_lblFunctionName);
+        GridBagConstraints gbc_filterFunctionName = new GridBagConstraints();
+        gbc_filterFunctionName.gridx = 0;
+        gbc_filterFunctionName.gridy = 0;
+        gbc_filterFunctionName.gridheight = 2;
+        add(filterFunctionNames, gbc_filterFunctionName);
 
-        GridBagConstraints gbc_lblFunctionNamed = new GridBagConstraints();
-        gbc_lblFunctionNamed.insets = new Insets(0, 0, 5, 5);
-        gbc_lblFunctionNamed.gridx = 1;
-        gbc_lblFunctionNamed.gridy = 0;
-        add(lblFunctionNamed, gbc_lblFunctionNamed);
+        GridBagConstraints gbc_filterBlockName = new GridBagConstraints();
+        gbc_filterBlockName.gridx = 1;
+        gbc_filterBlockName.gridy = 0;
+        gbc_filterBlockName.gridheight = 2;
+        add(filterBlockNames, gbc_filterBlockName);
 
-        GridBagConstraints gbc_lblFunctionAddress = new GridBagConstraints();
-        gbc_lblFunctionAddress.insets = new Insets(0, 0, 5, 5);
-        gbc_lblFunctionAddress.gridx = 2;
-        gbc_lblFunctionAddress.gridy = 0;
-        add(lblFunctionAddress, gbc_lblFunctionAddress);
+        GridBagConstraints gbc_filterAddresses = new GridBagConstraints();
+        gbc_filterAddresses.gridx = 2;
+        gbc_filterAddresses.gridy = 0;
+        gbc_filterAddresses.gridheight = 2;
+        add(filterAddresses, gbc_filterAddresses);
 
-        GridBagConstraints gbc_lblMode = new GridBagConstraints();
-        gbc_lblMode.insets = new Insets(0, 0, 5, 5);
-        gbc_lblMode.gridx = 3;
-        gbc_lblMode.gridy = 0;
-        add(lblMode, gbc_lblMode);
-
-        GridBagConstraints gbc_listAddedHooks = new GridBagConstraints();
-        gbc_listAddedHooks.gridwidth = 4;
-        gbc_listAddedHooks.insets = new Insets(0, 0, 0, 5);
-        gbc_listAddedHooks.fill = GridBagConstraints.BOTH;
-        gbc_listAddedHooks.gridx = 0;
-        gbc_listAddedHooks.gridy = 2;
-        add(scrollPaneAddedHooks, gbc_listAddedHooks);
-
-        GridBagConstraints gbc_listFunctionName = new GridBagConstraints();
-        gbc_listFunctionName.insets = new Insets(0, 0, 5, 5);
-        gbc_listFunctionName.fill = GridBagConstraints.BOTH;
-        gbc_listFunctionName.gridx = 0;
-        gbc_listFunctionName.gridy = 1;
-        listFunctionName.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        add(listFunctionName, gbc_listFunctionName);
-
-        GridBagConstraints gbc_listBlockName = new GridBagConstraints();
-        gbc_listBlockName.insets = new Insets(0, 0, 5, 5);
-        gbc_listBlockName.fill = GridBagConstraints.BOTH;
-        gbc_listBlockName.gridx = 1;
-        gbc_listBlockName.gridy = 1;
-        add(listBlockName, gbc_listBlockName);
-
-        GridBagConstraints gbc_listFunctionAddress = new GridBagConstraints();
-        gbc_listFunctionAddress.insets = new Insets(0, 0, 5, 5);
-        gbc_listFunctionAddress.fill = GridBagConstraints.BOTH;
-        gbc_listFunctionAddress.gridx = 2;
-        gbc_listFunctionAddress.gridy = 1;
-        add(listFunctionAddress, gbc_listFunctionAddress);
+        GridBagConstraints gbc_tableAddedHooks = new GridBagConstraints();
+        gbc_tableAddedHooks.gridwidth = 4;
+        gbc_tableAddedHooks.fill = GridBagConstraints.BOTH;
+        gbc_tableAddedHooks.gridx = 0;
+        gbc_tableAddedHooks.gridy = 2;
+        add(scrollPaneAddedHooks, gbc_tableAddedHooks);
 
         GridBagConstraints gbc_comboBoxHookMode = new GridBagConstraints();
-        gbc_comboBoxHookMode.insets = new Insets(0, 0, 5, 5);
-        gbc_comboBoxHookMode.fill = GridBagConstraints.HORIZONTAL;
         gbc_comboBoxHookMode.gridx = 3;
         gbc_comboBoxHookMode.gridy = 1;
-        comboBoxHookMode.setModel(new DefaultComboBoxModel<>(Mode.values()));
         add(comboBoxHookMode, gbc_comboBoxHookMode);
 
         GridBagConstraints gbc_btnAddHook = new GridBagConstraints();
-        gbc_btnAddHook.insets = new Insets(0, 0, 5, 0);
         gbc_btnAddHook.gridx = 4;
         gbc_btnAddHook.gridy = 1;
         add(btnAddHook, gbc_btnAddHook);
@@ -142,9 +99,21 @@ public class HookPanel extends JPanel {
     }
 
     private void setupComponents() {
-        controller.getPlugin().addProgramOpenendListener(this::setupHookLists);
-        controller.getTraceFile().getHooks()
-                .addObserver((h) -> setupHookLists(controller.getPlugin().getCurrentProgram()));
+        controller.getPlugin().addProgramOpenendListener(p -> {
+            allFunctions.addAll(HookableFunction.getFunctions(p));
+            filterFunctionNames.updateElements(allFunctions);
+        });
+        controller.getTraceFile().getHooks().addObserver(newHooks -> {
+            filterFunctionNames.updateElements(allFunctions
+                    .stream()
+                    .filter(e -> !newHooks
+                            .stream()
+                            .map(nH -> nH.getEntryAddress())
+                            .anyMatch(nH -> nH.equals(e.getAddress())))
+                    .toList());
+        });
+        filterFunctionNames.addFilteredElementsObserver(filterBlockNames::updateElements);
+        filterBlockNames.addFilteredElementsObserver(filterAddresses::updateElements);
         setupBtnAddHook();
         setupBtnDeleteHook();
         HookTableModel htm = new HookTableModel(controller.getTraceFile().getHooks());
@@ -152,48 +121,15 @@ public class HookPanel extends JPanel {
         htm.setColumnHeaders(tableAddedHooks.getColumnModel());
     }
 
-    private void setupHookLists(Program p) {
-        functionHelper = new FunctionHelper(p);
-        DefaultListModel<String> functionNameModel = new DefaultListModel<>();
-        List<String> functionNames = functionHelper
-                .getFunctionNames(controller.getTraceFile().getHooks())
-                .stream()
-                .sorted()
-                .collect(Collectors.toList());
-        functionNameModel.addAll(functionNames);
-        listFunctionName.setModel(functionNameModel);
-        listFunctionName.addListSelectionListener((ListSelectionEvent e) -> {
-            List<String> blockNames = functionHelper
-                    .getBlockNames(controller.getTraceFile().getHooks(), listFunctionName.getSelectedValuesList())
-                    .stream()
-                    .sorted()
-                    .collect(Collectors.toList());
-            DefaultListModel<String> blockNameModel = new DefaultListModel<>();
-            blockNameModel.addAll(blockNames);
-            listBlockName.setModel(blockNameModel);
-            listBlockName.addListSelectionListener((ListSelectionEvent e2) -> {
-                List<Address> addresses = functionHelper
-                        .getAddresses(controller.getTraceFile().getHooks(), listFunctionName.getSelectedValuesList(),
-                                listBlockName.getSelectedValuesList())
-                        .stream()
-                        .sorted()
-                        .collect(Collectors.toList());
-                DefaultListModel<Address> addressesModel = new DefaultListModel<>();
-                addressesModel.addAll(addresses);
-                listFunctionAddress.setModel(addressesModel);
-                listFunctionAddress.setSelectedIndices(IntStream.range(0, addresses.size()).toArray());
-            });
-            listBlockName.setSelectedIndices(IntStream.range(0, blockNames.size()).toArray());
-        });
-    }
-
     private void setupBtnAddHook() {
-        btnAddHook.addActionListener(e -> {
-            String functionName = listFunctionName.getSelectedValue();
-            Mode mode = (Mode) comboBoxHookMode.getSelectedItem();
-            List<Hook> toAdd = listFunctionAddress.getSelectedValuesList().stream().map(
-                    a -> new Hook(functionName, a, mode)).collect(Collectors.toList());
-            controller.getTraceFile().getHooks().replaceAll(toAdd);
+        btnAddHook.addActionListener(event -> {
+            controller.getTraceFile().getHooks().replaceAll(
+                    filterAddresses
+                            .getFilteredElements()
+                            .stream()
+                            .map(e -> new Hook(e.getName(), e.getAddress(), (Mode) comboBoxHookMode.getSelectedItem()))
+                            .toList());
+
         });
     }
 
