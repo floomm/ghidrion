@@ -2,10 +2,7 @@ package view;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -29,13 +26,14 @@ public class HookPanel extends JPanel {
             "Address");;
     private final JComboBox<Mode> comboBoxHookMode = new JComboBox<>(new DefaultComboBoxModel<>(Mode.values()));
     private final JButton btnAddHook = new JButton("Add");
+    private final HookTableModel tableAddedHooksModel;
     private final JTable tableAddedHooks = new JTable();
     private final JScrollPane scrollPaneAddedHooks = new JScrollPane(tableAddedHooks);
     private final JButton btnDeleteHook = new JButton("Delete");
-    private final Set<HookableFunction> allFunctions = new HashSet<>();
 
     public HookPanel(TraceFileController controller) {
         this.controller = controller;
+        this.tableAddedHooksModel = new HookTableModel(controller.getTraceFile().getHooks());
         init();
         setupComponents();
     }
@@ -46,6 +44,7 @@ public class HookPanel extends JPanel {
      */
     public HookPanel() {
         this.controller = null;
+        this.tableAddedHooksModel = null;
         init();
     }
 
@@ -99,47 +98,20 @@ public class HookPanel extends JPanel {
     }
 
     private void setupComponents() {
-        controller.getPlugin().addProgramOpenendListener(p -> {
-            allFunctions.addAll(HookableFunction.getFunctions(p));
-            filterFunctionNames.updateElements(allFunctions);
-        });
-        controller.getTraceFile().getHooks().addObserver(newHooks -> {
-            filterFunctionNames.updateElements(allFunctions
-                    .stream()
-                    .filter(e -> !newHooks
-                            .stream()
-                            .map(nH -> nH.getEntryAddress())
-                            .anyMatch(nH -> nH.equals(e.getAddress())))
-                    .toList());
-        });
+        controller.getAllHookableFunctionsObservable().addObserver(filterFunctionNames::updateElements);
         filterFunctionNames.addFilteredElementsObserver(filterBlockNames::updateElements);
         filterBlockNames.addFilteredElementsObserver(filterAddresses::updateElements);
-        setupBtnAddHook();
-        setupBtnDeleteHook();
-        HookTableModel htm = new HookTableModel(controller.getTraceFile().getHooks());
-        tableAddedHooks.setModel(htm);
-        htm.setColumnHeaders(tableAddedHooks.getColumnModel());
-    }
+        btnAddHook.addActionListener(event -> controller.addHooks(filterAddresses.getFilteredElements(),
+                (Mode) comboBoxHookMode.getSelectedItem()));
 
-    private void setupBtnAddHook() {
-        btnAddHook.addActionListener(event -> {
-            controller.getTraceFile().getHooks().replaceAll(
-                    filterAddresses
-                            .getFilteredElements()
-                            .stream()
-                            .map(e -> new Hook(e.getName(), e.getAddress(), (Mode) comboBoxHookMode.getSelectedItem()))
-                            .toList());
+        tableAddedHooks.setModel(tableAddedHooksModel);
+        tableAddedHooksModel.setColumnHeaders(tableAddedHooks.getColumnModel());
 
-        });
-    }
-
-    private void setupBtnDeleteHook() {
-        btnDeleteHook.addActionListener(e -> {
-            HookTableModel model = (HookTableModel) tableAddedHooks.getModel();
-            List<Hook> toDelete = model.getElementsAtRowIndices(tableAddedHooks.getSelectedRows());
+        btnDeleteHook.addActionListener(event -> {
+            List<Hook> toDelete = tableAddedHooksModel.getElementsAtRowIndices(tableAddedHooks.getSelectedRows());
             controller.getTraceFile().getHooks().removeAll(toDelete);
             tableAddedHooks.getSelectionModel().setSelectionInterval(0, 0);
         });
-    }
 
+    }
 }

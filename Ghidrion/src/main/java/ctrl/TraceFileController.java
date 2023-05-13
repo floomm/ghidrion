@@ -8,23 +8,40 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-
 import javax.swing.JFileChooser;
 import javax.swing.JTable;
 
 import ghidrion.GhidrionPlugin;
+import model.Hook;
+import model.HookableFunction;
 import model.MemoryEntry;
 import model.MorionTraceFile;
+import model.Hook.Mode;
 import util.MemoryEntryTableModel;
+import util.ObservableSet;
 import util.TraceFileToYamlConverter;
 
 public class TraceFileController {
 	private final GhidrionPlugin plugin;
 	private final MorionTraceFile traceFile;
 
+	private final ObservableSet<HookableFunction> allHookableFunctions = new ObservableSet<>();
+
 	public TraceFileController(GhidrionPlugin plugin, MorionTraceFile traceFile) {
 		this.plugin = Objects.requireNonNull(plugin);
 		this.traceFile = Objects.requireNonNull(traceFile);
+
+		plugin.addProgramOpenendListener(p -> allHookableFunctions.addAll(HookableFunction.getFunctions(p)));
+		traceFile.getHooks().addObserver(newHooks -> {
+			allHookableFunctions.clear();
+			allHookableFunctions.addAll(allHookableFunctions
+					.stream()
+					.filter(e -> !newHooks
+							.stream()
+							.map(nH -> nH.getEntryAddress())
+							.anyMatch(nH -> nH.equals(e.getAddress())))
+					.toList());
+		});
 	}
 
 	public GhidrionPlugin getPlugin() {
@@ -86,4 +103,14 @@ public class TraceFileController {
 		traceFile.getEntryRegisters().removeAll(toDelete);
 	}
 
+	public ObservableSet<HookableFunction> getAllHookableFunctionsObservable() {
+		return allHookableFunctions;
+	}
+
+	public void addHooks(List<HookableFunction> hooksToAdd, Mode mode) {
+		traceFile.getHooks().replaceAll(hooksToAdd
+				.stream()
+				.map(e -> new Hook(e.getName(), e.getAddress(), mode))
+				.toList());
+	}
 }
