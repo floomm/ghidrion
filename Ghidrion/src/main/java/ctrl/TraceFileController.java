@@ -8,10 +8,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.LongStream;
 
 import javax.swing.JFileChooser;
 import javax.swing.JTable;
 
+import ghidra.util.Msg;
 import ghidrion.GhidrionPlugin;
 import model.MemoryEntry;
 import model.MorionTraceFile;
@@ -66,8 +68,22 @@ public class TraceFileController {
 		traceFile.clear();
 	}
 
-	public void addEntryMemory(String address, String value, boolean isSymbolic) {
-		traceFile.getEntryMemory().replace(new MemoryEntry(address, value, isSymbolic));
+	public void addEntryMemory(
+			String startAddress,
+			String endAddress,
+			String value,
+			boolean isSymbolic,
+			Component component) {
+		long startAddressLong = Long.parseLong(startAddress.substring(2), 16);
+		long endAddressLong = Long.parseLong(endAddress.substring(2), 16);
+		if (startAddressLong > endAddressLong)
+			Msg.showError(this, component, "Illegal End Address",
+					"End Address has to be bigger or equal to Start Address.");
+		else
+			traceFile.getEntryMemory().replaceAll(LongStream
+					.rangeClosed(startAddressLong, endAddressLong)
+					.mapToObj(i -> new MemoryEntry("0x" + Long.toString(i, 16), value, isSymbolic))
+					.toList());
 	}
 
 	public void removeAllEntryMemory(JTable tableMemory) {
