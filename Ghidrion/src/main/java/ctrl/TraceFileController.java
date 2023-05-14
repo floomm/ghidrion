@@ -1,53 +1,47 @@
 package ctrl;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 import javax.swing.JFileChooser;
+import javax.swing.JTable;
 
-import org.yaml.snakeyaml.Yaml;
-
-import model.Hook;
+import ghidrion.GhidrionPlugin;
 import model.MemoryEntry;
 import model.MorionTraceFile;
+import util.MemoryEntryTableModel;
+import util.TraceFileToYamlConverter;
 
 public class TraceFileController {
+	private final GhidrionPlugin plugin;
+	private final MorionTraceFile traceFile;
 
-	private static final long TARGET_ADDRESS_STEP = 0x100;
-	private static long targetAddressCounter = 0;
+	public TraceFileController(GhidrionPlugin plugin, MorionTraceFile traceFile) {
+		this.plugin = Objects.requireNonNull(plugin);
+		this.traceFile = Objects.requireNonNull(traceFile);
+	}
 
-	public static final String HOOKS = "hooks";
-	public static final String HOOK_ENTRY = "entry";
-	public static final String HOOK_LEAVE = "leave";
-	public static final String HOOK_TARGET = "target";
-	public static final String HOOK_MODE = "mode";
-	public static final String INFO = "info";
-	public static final String INSTRUCTIONS = "instructions";
-	public static final String STATES = "states";
-	public static final String ENTRY_STATE = "entry";
-	public static final String LEAVE_STATE = "leave";
-	public static final String STATE_ADDRESS = "addr";
-	public static final String STATE_MEMORY = "mems";
-	public static final String STATE_REGISTERS = "regs";
-	public static final String SYMBOLIC = "$$";
+	public GhidrionPlugin getPlugin() {
+		return plugin;
+	}
+
+	public MorionTraceFile getTraceFile() {
+		return traceFile;
+	}
 
 	/**
 	 * Write the information in the @param tracefile to a `.yaml` file on disk.
 	 * 
-	 * @param parent    to show the Save As dialog from
-	 * @param traceFile to write to disk
+	 * @param parent to show the Save As dialog from
 	 */
-	public static void writeTraceFile(Component parent, MorionTraceFile traceFile) {
-
-		String content = new Yaml().dump(buildTraceFileDump(traceFile));
+	public void writeTraceFile(Component parent) {
+		String content = TraceFileToYamlConverter.toYaml(traceFile);
 
 		JFileChooser fileChooser = new JFileChooser();
 		int result = fileChooser.showSaveDialog(parent);
@@ -68,72 +62,28 @@ public class TraceFileController {
 		}
 	}
 
-	private static Map<String, Object> buildTraceFileDump(MorionTraceFile traceFile) {
-		Map<String, Object> traceFileDump = new HashMap<>();
-		traceFileDump.put(HOOKS, getHooksMap(traceFile));
-		traceFileDump.put(STATES, getStatesMap(traceFile));
-		// traceFileDump.put(INFO, traceFile.getInfo());
-		// traceFileDump.put(INSTRUCTIONS, traceFile.getInstructions());
-		return traceFileDump;
+	public void clearTraceFileListener(ActionEvent e) {
+		traceFile.clear();
 	}
 
-	private static Map<String, Map<String, Map<String, List<String>>>> getStatesMap(MorionTraceFile traceFile) {
-		return Map.of(ENTRY_STATE,
-				Map.of(
-						STATE_REGISTERS, memoryEntriesToMap(traceFile.getEntryRegisters()),
-						STATE_MEMORY, memoryEntriesToMap(traceFile.getEntryMemory())));
+	public void addEntryMemory(String address, String value, boolean isSymbolic) {
+		traceFile.getEntryMemory().replace(new MemoryEntry(address, value, isSymbolic));
 	}
 
-	private static Map<String, List<String>> memoryEntriesToMap(Collection<MemoryEntry> ms) {
-		return ms
-				.stream()
-				.map(m -> new Pair<>(m.getName(),
-						m.isSymbolic() ? List.of(m.getValue(), SYMBOLIC) : List.of(m.getValue())))
-				.collect(Collectors.toMap(Pair::getA, Pair::getB));
+	public void removeAllEntryMemory(JTable tableMemory) {
+		MemoryEntryTableModel model = (MemoryEntryTableModel) tableMemory.getModel();
+		List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableMemory.getSelectedRows());
+		traceFile.getEntryMemory().removeAll(toDelete);
 	}
 
-	private static synchronized String generateTargetAddress() {
-		long newTargetAddress = ++targetAddressCounter * TARGET_ADDRESS_STEP;
-		return prependHex(Long.toHexString(newTargetAddress));
+	public void addEntryRegister(String name, String value, boolean isSymbolic) {
+		traceFile.getEntryRegisters().replace(new MemoryEntry(name, value, isSymbolic));
 	}
 
-	private static String prependHex(Object s) {
-		return "0x" + s.toString();
+	public void removeAllEntryRegisters(JTable tableRegister) {
+		MemoryEntryTableModel model = (MemoryEntryTableModel) tableRegister.getModel();
+		List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableRegister.getSelectedRows());
+		traceFile.getEntryRegisters().removeAll(toDelete);
 	}
 
-	private static Map<String, Map<String, List<Map<String, String>>>> getHooksMap(MorionTraceFile traceFile) {
-		return traceFile.getHooks()
-				.stream()
-				.collect(
-						Collectors.groupingBy(Hook::getLibraryName,
-								Collectors.groupingBy(Hook::getFunctionName,
-										Collectors.mapping(TraceFileController::hookToMap, Collectors.toList()))));
-	}
-
-	private static Map<String, String> hookToMap(Hook hook) {
-		Map<String, String> hookMap = new HashMap<>();
-		hookMap.put(HOOK_ENTRY, prependHex(hook.getEntryAddress()));
-		hookMap.put(HOOK_LEAVE, prependHex(hook.getLeaveAddress()));
-		hookMap.put(HOOK_TARGET, generateTargetAddress());
-		hookMap.put(HOOK_MODE, hook.getMode().getValue());
-		return hookMap;
-	}
-
-	public static class Pair<A, B> {
-		private final A a;
-		private final B b;
-
-		public Pair(A a, B b) {
-			this.a = a;
-			this.b = b;
-		}
-
-		public A getA() {
-			return a;
-		}
-
-		public B getB() {
-			return b;
-		}
-	}
 }

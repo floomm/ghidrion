@@ -6,8 +6,8 @@ import model.MemoryEntry;
 
 public class MemoryEntryTableModel extends CustomTableModel<MemoryEntry> {
 
-    public MemoryEntryTableModel(List<MemoryEntry> elements) {
-        super(elements);
+    public MemoryEntryTableModel(ObservableSet<MemoryEntry> hooks) {
+        super(hooks);
     }
 
     @Override
@@ -23,7 +23,7 @@ public class MemoryEntryTableModel extends CustomTableModel<MemoryEntry> {
         MemoryEntry m = getElements().get(rowIndex);
         switch (columnIndex) {
             case 0:
-                return m.isSymbolic() ? "✅" : "❎";
+                return m.isSymbolic() ? "✅" : "❌";
             case 1:
                 return m.getName();
             case 2:

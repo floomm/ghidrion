@@ -19,18 +19,16 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 
+import ctrl.TraceFileController;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.Program;
-import ghidrion.GhidrionPlugin;
 import model.FunctionHelper;
 import model.Hook;
-import model.MorionTraceFile;
 import model.Hook.Mode;
 import util.HookTableModel;
 
 public class HookPanel extends JPanel {
-    private final MorionTraceFile traceFile;
-    private final GhidrionPlugin plugin;
+    private final TraceFileController controller;
     private FunctionHelper functionHelper;
 
     protected final JLabel lblFunctionNamed = new JLabel("Block Name");
@@ -46,15 +44,27 @@ public class HookPanel extends JPanel {
     private final JScrollPane scrollPaneAddedHooks = new JScrollPane(tableAddedHooks);
     protected final JButton btnDeleteHook = new JButton("Delete");
 
-    public HookPanel(GhidrionPlugin plugin, MorionTraceFile traceFile) {
-        this.traceFile = traceFile;
-        this.plugin = plugin;
+    public HookPanel(TraceFileController controller) {
+        this.controller = controller;
+        init();
+        setupComponents();
+    }
 
+    /**
+     * This constructor is solely for debugging the UI.
+     * Do NOT use for the plugin.
+     */
+    public HookPanel() {
+        this.controller = null;
+        init();
+    }
+
+    private void init() {
         GridBagLayout gbl_panelHooks = new GridBagLayout();
         gbl_panelHooks.columnWidths = new int[] { 100, 100, 100, 0, 0 };
         gbl_panelHooks.rowHeights = new int[] { 0, 100, 100 };
         gbl_panelHooks.columnWeights = new double[] { 1.0, 1.0, 1.0, 0.0, 1.0 };
-        gbl_panelHooks.rowWeights = new double[] { 1.0, 1.0, 1.0 };
+        gbl_panelHooks.rowWeights = new double[] { Double.MIN_VALUE, 1.0, 1.0 };
         setLayout(gbl_panelHooks);
 
         GridBagConstraints gbc_lblFunctionName = new GridBagConstraints();
@@ -129,23 +139,24 @@ public class HookPanel extends JPanel {
         gbc_btnDeleteHook.gridx = 4;
         gbc_btnDeleteHook.gridy = 2;
         add(btnDeleteHook, gbc_btnDeleteHook);
-
-        setupComponents();
     }
 
     private void setupComponents() {
-        plugin.addProgramOpenendListener(this::setupHookLists);
-        traceFile.getHooks().addObserver((h) -> setupHookLists(plugin.getCurrentProgram()));
+        controller.getPlugin().addProgramOpenendListener(this::setupHookLists);
+        controller.getTraceFile().getHooks()
+                .addObserver((h) -> setupHookLists(controller.getPlugin().getCurrentProgram()));
         setupBtnAddHook();
-        setupListAddedHooks();
         setupBtnDeleteHook();
+        HookTableModel htm = new HookTableModel(controller.getTraceFile().getHooks());
+        tableAddedHooks.setModel(htm);
+        htm.setColumnHeaders(tableAddedHooks.getColumnModel());
     }
 
     private void setupHookLists(Program p) {
         functionHelper = new FunctionHelper(p);
         DefaultListModel<String> functionNameModel = new DefaultListModel<>();
         List<String> functionNames = functionHelper
-                .getFunctionNames(traceFile.getHooks())
+                .getFunctionNames(controller.getTraceFile().getHooks())
                 .stream()
                 .sorted()
                 .collect(Collectors.toList());
@@ -153,7 +164,7 @@ public class HookPanel extends JPanel {
         listFunctionName.setModel(functionNameModel);
         listFunctionName.addListSelectionListener((ListSelectionEvent e) -> {
             List<String> blockNames = functionHelper
-                    .getBlockNames(traceFile.getHooks(), listFunctionName.getSelectedValuesList())
+                    .getBlockNames(controller.getTraceFile().getHooks(), listFunctionName.getSelectedValuesList())
                     .stream()
                     .sorted()
                     .collect(Collectors.toList());
@@ -162,7 +173,7 @@ public class HookPanel extends JPanel {
             listBlockName.setModel(blockNameModel);
             listBlockName.addListSelectionListener((ListSelectionEvent e2) -> {
                 List<Address> addresses = functionHelper
-                        .getAddresses(traceFile.getHooks(), listFunctionName.getSelectedValuesList(),
+                        .getAddresses(controller.getTraceFile().getHooks(), listFunctionName.getSelectedValuesList(),
                                 listBlockName.getSelectedValuesList())
                         .stream()
                         .sorted()
@@ -182,16 +193,7 @@ public class HookPanel extends JPanel {
             Mode mode = (Mode) comboBoxHookMode.getSelectedItem();
             List<Hook> toAdd = listFunctionAddress.getSelectedValuesList().stream().map(
                     a -> new Hook(functionName, a, mode)).collect(Collectors.toList());
-            traceFile.getHooks().addAll(toAdd);
-        });
-    }
-
-    private void setupListAddedHooks() {
-        traceFile.getHooks().addObserver(newSet -> {
-            List<Hook> hooks = newSet.stream().sorted().collect(Collectors.toList());
-            HookTableModel model = new HookTableModel(hooks);
-            tableAddedHooks.setModel(model);
-            model.setColumnHeaders(tableAddedHooks.getColumnModel());
+            controller.getTraceFile().getHooks().replaceAll(toAdd);
         });
     }
 
@@ -199,7 +201,7 @@ public class HookPanel extends JPanel {
         btnDeleteHook.addActionListener(e -> {
             HookTableModel model = (HookTableModel) tableAddedHooks.getModel();
             List<Hook> toDelete = model.getElementsAtRowIndices(tableAddedHooks.getSelectedRows());
-            traceFile.getHooks().removeAll(toDelete);
+            controller.getTraceFile().getHooks().removeAll(toDelete);
             tableAddedHooks.getSelectionModel().setSelectionInterval(0, 0);
         });
     }
