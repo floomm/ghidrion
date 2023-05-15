@@ -6,8 +6,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import javax.swing.JFileChooser;
 import javax.swing.JTable;
 
@@ -25,18 +27,22 @@ public class TraceFileController {
 	private final GhidrionPlugin plugin;
 	private final MorionTraceFile traceFile;
 
-	private final ObservableSet<HookableFunction> allHookableFunctions = new ObservableSet<>();
+	private final Set<HookableFunction> allHookableFunctions = new HashSet<>();
+	private final ObservableSet<HookableFunction> currentlyHookableFunctions = new ObservableSet<>();
 
 	public TraceFileController(GhidrionPlugin plugin, MorionTraceFile traceFile) {
 		this.plugin = Objects.requireNonNull(plugin);
 		this.traceFile = Objects.requireNonNull(traceFile);
 
-		plugin.addProgramOpenendListener(p -> allHookableFunctions.addAll(HookableFunction.getFunctions(p)));
-		traceFile.getHooks().addObserver(newHooks -> {
+		plugin.addProgramOpenendListener(p -> {
 			allHookableFunctions.clear();
-			allHookableFunctions.addAll(allHookableFunctions
+			allHookableFunctions.addAll(HookableFunction.getFunctions(p));
+			traceFile.getHooks().clear(); // trigger update of lists
+		});
+		traceFile.getHooks().addObserver(alreadyHooked -> {
+			currentlyHookableFunctions.replaceContent(allHookableFunctions
 					.stream()
-					.filter(e -> !newHooks
+					.filter(e -> !alreadyHooked
 							.stream()
 							.map(nH -> nH.getEntryAddress())
 							.anyMatch(nH -> nH.equals(e.getAddress())))
@@ -103,8 +109,8 @@ public class TraceFileController {
 		traceFile.getEntryRegisters().removeAll(toDelete);
 	}
 
-	public ObservableSet<HookableFunction> getAllHookableFunctionsObservable() {
-		return allHookableFunctions;
+	public ObservableSet<HookableFunction> getCurrentlyHookableFunctions() {
+		return currentlyHookableFunctions;
 	}
 
 	public void addHooks(List<HookableFunction> hooksToAdd, Mode mode) {

@@ -98,7 +98,7 @@ public class HookPanel extends JPanel {
     }
 
     private void setupComponents() {
-        controller.getAllHookableFunctionsObservable().addObserver(filterFunctionNames::updateElements);
+        controller.getCurrentlyHookableFunctions().addObserver(filterFunctionNames::updateElements);
         filterFunctionNames.addFilteredElementsObserver(filterBlockNames::updateElements);
         filterBlockNames.addFilteredElementsObserver(filterAddresses::updateElements);
         btnAddHook.addActionListener(event -> controller.addHooks(filterAddresses.getFilteredElements(),

@@ -13,7 +13,7 @@ public class ObservableCollection<E, C extends Collection<E>> extends Observable
 
     /**
      * @param e first gets removed if present and then re-added.
-     * @return same value as {@link ObservableCollection#add(Comparable)}.
+     * @return same value as {@link ObservableCollection#add(Object)}.
      */
     public boolean replace(E e) {
         collection.remove(e);
@@ -22,11 +22,20 @@ public class ObservableCollection<E, C extends Collection<E>> extends Observable
 
     /**
      * @param es first get removed if present and then re-added.
-     * @return same value as {@link ObservableCollection#addAll(Comparable)}.
+     * @return same value as {@link ObservableCollection#addAll(Collection)}.
      */
     public boolean replaceAll(Collection<E> es) {
         collection.removeAll(es);
         return addAll(es);
+    }
+
+    /**
+     * @param newContent replaces all existing elements in the collection
+     * @return same value as {@link ObservableCollection#addAll(Collection)}
+     */
+    public boolean replaceContent(Collection<E> newContent) {
+        collection.clear();
+        return addAll(newContent);
     }
 
     @Override
