@@ -49,27 +49,35 @@ public class YamlToTraceFileConverter {
 	}
 	
 	private static void addEntryMemory(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) {
-		Map<String, List<String>> entryMemoryMap = getEntryStateMap(traceFileToConvert)
-				.get(MorionTraceFile.STATE_MEMORY);
-		traceFile.getEntryMemory().replaceAll(mapToMemoryEntries(entryMemoryMap));
+		Map<String, Map<String, List<String>>> entryStateMap = getEntryStateMap(traceFileToConvert);
+		if (entryStateMap != null && entryStateMap.containsKey(MorionTraceFile.STATE_MEMORY)) {
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryStateMap.get(MorionTraceFile.STATE_MEMORY));
+			traceFile.getEntryMemory().replaceAll(memoryEntries);
+		}
 	}
 	
 	private static void addEntryRegisters(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) {
-		Map<String, List<String>> entryRegistersMap = getEntryStateMap(traceFileToConvert)
-				.get(MorionTraceFile.STATE_REGISTERS);
-		traceFile.getEntryRegisters().replaceAll(mapToMemoryEntries(entryRegistersMap));
+		Map<String, Map<String, List<String>>> entryStateMap = getEntryStateMap(traceFileToConvert);
+		if (entryStateMap != null && entryStateMap.containsKey(MorionTraceFile.STATE_REGISTERS)) {
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryStateMap.get(MorionTraceFile.STATE_REGISTERS));
+			traceFile.getEntryRegisters().replaceAll(memoryEntries);
+		}
 	}
 	
 	private static void addLeaveMemory(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) {
-		Map<String, List<String>> leaveMemoryMap = getLeaveStateMap(traceFileToConvert)
-				.get(MorionTraceFile.STATE_MEMORY);
-		traceFile.getLeaveMemory().replaceAll(mapToMemoryEntries(leaveMemoryMap));
+		Map<String, Map<String, List<String>>> leaveStateMap = getLeaveStateMap(traceFileToConvert);
+		if (leaveStateMap != null && leaveStateMap.containsKey(MorionTraceFile.STATE_MEMORY)) {
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(leaveStateMap.get(MorionTraceFile.STATE_MEMORY));
+			traceFile.getLeaveMemory().replaceAll(memoryEntries);
+		}
 	}
 	
 	private static void addLeaveRegisters(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) {
-		Map<String, List<String>> leaveRegistersMap = getLeaveStateMap(traceFileToConvert)
-				.get(MorionTraceFile.STATE_REGISTERS);
-		traceFile.getLeaveRegisters().replaceAll(mapToMemoryEntries(leaveRegistersMap));
+		Map<String, Map<String, List<String>>> leaveStateMap = getLeaveStateMap(traceFileToConvert);
+		if (leaveStateMap != null && leaveStateMap.containsKey(MorionTraceFile.STATE_REGISTERS)) {
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(leaveStateMap.get(MorionTraceFile.STATE_REGISTERS));
+			traceFile.getLeaveRegisters().replaceAll(memoryEntries);
+		}
 	}
 
 	private static List<MemoryEntry> mapToMemoryEntries(Map<String, List<String>> entryMap) {
@@ -83,15 +91,29 @@ public class YamlToTraceFileConverter {
 	}
 	
 	private static Map<String, Map<String, List<String>>> getEntryStateMap(Map<String, Object> traceFileToConvert) {
-		return getStatesMap(traceFileToConvert).get(MorionTraceFile.ENTRY_STATE);
+		Map<String, Map<String, List<String>>> entryStateMap = null;
+		Map<String, Map<String, Map<String, List<String>>>> statesMap = getStatesMap(traceFileToConvert);
+		if (statesMap != null && statesMap.containsKey(MorionTraceFile.ENTRY_STATE)) {
+			entryStateMap = statesMap.get(MorionTraceFile.ENTRY_STATE);
+		}
+		return entryStateMap;
 	}
 	
 	private static Map<String, Map<String, List<String>>> getLeaveStateMap(Map<String, Object> traceFileToConvert) {
-		return getStatesMap(traceFileToConvert).get(MorionTraceFile.LEAVE_STATE);
+		Map<String, Map<String, List<String>>> leaveStateMap = null;
+		Map<String, Map<String, Map<String, List<String>>>> statesMap = getStatesMap(traceFileToConvert);
+		if (statesMap != null && statesMap.containsKey(MorionTraceFile.LEAVE_STATE)) {
+			leaveStateMap = statesMap.get(MorionTraceFile.LEAVE_STATE);
+		}
+		return leaveStateMap;
 	}
 	
 	private static Map<String, Map<String, Map<String, List<String>>>> getStatesMap(Map<String, Object> traceFileToConvert) {
-		return (Map<String, Map<String, Map<String, List<String>>>>) traceFileToConvert.get(MorionTraceFile.STATES);
+		Map<String, Map<String, Map<String, List<String>>>> statesMap = null;
+		if (traceFileToConvert.containsKey(MorionTraceFile.STATES)) {
+			statesMap = (Map<String, Map<String, Map<String, List<String>>>>) traceFileToConvert.get(MorionTraceFile.STATES);
+		}
+		return statesMap;
 	}
 
 }
