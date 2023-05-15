@@ -110,7 +110,8 @@ public class HookPanel extends JPanel {
         btnDeleteHook.addActionListener(event -> {
             List<Hook> toDelete = tableAddedHooksModel.getElementsAtRowIndices(tableAddedHooks.getSelectedRows());
             controller.getTraceFile().getHooks().removeAll(toDelete);
-            tableAddedHooks.getSelectionModel().setSelectionInterval(0, 0);
+            if (tableAddedHooks.getRowCount() > 0)
+                tableAddedHooks.getSelectionModel().setSelectionInterval(0, 0);
         });
 
     }

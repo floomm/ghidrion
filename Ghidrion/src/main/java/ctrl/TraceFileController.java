@@ -9,10 +9,13 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.LongStream;
+
 import java.util.Set;
 import javax.swing.JFileChooser;
 import javax.swing.JTable;
 
+import ghidra.util.Msg;
 import ghidrion.GhidrionPlugin;
 import model.Hook;
 import model.HookableFunction;
@@ -89,8 +92,36 @@ public class TraceFileController {
 		traceFile.clear();
 	}
 
-	public void addEntryMemory(String address, String value, boolean isSymbolic) {
-		traceFile.getEntryMemory().replace(new MemoryEntry(address, value, isSymbolic));
+	public void addEntryMemory(
+			String startAddress,
+			String endAddress,
+			String value,
+			boolean isSymbolic,
+			Component component) {
+
+		if (startAddress.length() <= 2) {
+			Msg.showError(this, component, "Empty Start Address", "Start Address can not be empty.");
+			return;
+		}
+		if (endAddress.length() <= 2) {
+			endAddress = startAddress;
+		}
+		try {
+			long startAddressLong = Long.parseLong(startAddress.substring(2), 16);
+			long endAddressLong = Long.parseLong(endAddress.substring(2), 16);
+			if (startAddressLong > endAddressLong)
+				Msg.showError(this, component, "Illegal End Address",
+						"End Address has to be bigger or equal to Start Address.");
+			else if (value.length() <= 2)
+				Msg.showError(this, component, "Empty Value", "Value can not be empty.");
+			else
+				traceFile.getEntryMemory().replaceAll(LongStream
+						.rangeClosed(startAddressLong, endAddressLong)
+						.mapToObj(i -> new MemoryEntry("0x" + Long.toString(i, 16), value, isSymbolic))
+						.toList());
+		} catch (NumberFormatException e) {
+			Msg.showError(this, component, "Illegal Address Value", "Addresses are not a hex value.");
+		}
 	}
 
 	public void removeAllEntryMemory(JTable tableMemory) {
@@ -99,7 +130,15 @@ public class TraceFileController {
 		traceFile.getEntryMemory().removeAll(toDelete);
 	}
 
-	public void addEntryRegister(String name, String value, boolean isSymbolic) {
+	public void addEntryRegister(String name, String value, boolean isSymbolic, Component component) {
+		if (name.isEmpty()) {
+			Msg.showError(this, component, "Empty Name", "Name can not be empty.");
+			return;
+		}
+		if (value.length() <= 2) {
+			Msg.showError(this, component, "Empty Value", "Value can not be empty.");
+			return;
+		}
 		traceFile.getEntryRegisters().replace(new MemoryEntry(name, value, isSymbolic));
 	}
 
