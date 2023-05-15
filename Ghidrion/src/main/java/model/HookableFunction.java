@@ -61,32 +61,6 @@ public class HookableFunction implements Comparable<HookableFunction> {
 		return address.compareTo(o.getAddress());
 	}
 
-	// public static Set<HookableFunction> getFunctions(Program p) {
-	// FunctionManager fm = p.getFunctionManager();
-	// ReferenceManager rm = p.getReferenceManager();
-	// Memory m = p.getMemory();
-	// Set<HookableFunction> res = new HashSet<>();
-
-	// Set<Address> addressesOfExternalFunctions = new HashSet<>();
-	// for (Function externalFunction : fm.getExternalFunctions())
-	// for (Address a : externalFunction.getFunctionThunkAddresses(true))
-	// addressesOfExternalFunctions.add(a);
-
-	// for (Address a : addressesOfExternalFunctions) {
-	// System.out.println(a);
-	// Function f = fm.getFunctionAt(a);
-	// if (f != null)
-	// res.add(new HookableFunction(f.getName(), a, m));
-	// for (Reference r : rm.getReferencesTo(a)) {
-	// Address a2 = r.getFromAddress();
-	// Function f2 = fm.getFunctionAt(a2);
-	// if (f2 != null)
-	// res.add(new HookableFunction(f2.getName(), a2, m));
-	// }
-	// }
-	// return res;
-	// }
-
 	public static Set<HookableFunction> getFunctions(Program p) {
 		FunctionManager fm = p.getFunctionManager();
 		ReferenceManager rm = p.getReferenceManager();
