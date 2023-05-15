@@ -119,7 +119,7 @@ public class RegistersPanel extends JPanel {
 			String name = textFieldRegisterName.getText();
 			String value = textFieldRegisterValue.getText();
 			boolean isSymbolic = chckbxIsRegisterSymbolic.isSelected();
-			controller.addEntryRegister(name, value, isSymbolic);
+			controller.addEntryRegister(name, value, isSymbolic, this);
 		});
 	}
 
