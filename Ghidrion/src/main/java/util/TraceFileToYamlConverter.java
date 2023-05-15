@@ -16,21 +16,6 @@ import model.MorionTraceFile;
 
 public class TraceFileToYamlConverter {
 
-	public static final String HOOKS = "hooks";
-	public static final String HOOK_ENTRY = "entry";
-	public static final String HOOK_LEAVE = "leave";
-	public static final String HOOK_TARGET = "target";
-	public static final String HOOK_MODE = "mode";
-	public static final String INFO = "info";
-	public static final String INSTRUCTIONS = "instructions";
-	public static final String STATES = "states";
-	public static final String ENTRY_STATE = "entry";
-	public static final String LEAVE_STATE = "leave";
-	public static final String STATE_ADDRESS = "addr";
-	public static final String STATE_MEMORY = "mems";
-	public static final String STATE_REGISTERS = "regs";
-	public static final String SYMBOLIC = "$$";
-
 	private static final long TARGET_ADDRESS_STEP = 0x100;
 	private static long targetAddressCounter = 0;
 
@@ -42,18 +27,18 @@ public class TraceFileToYamlConverter {
 	 */
 	public static String toYaml(MorionTraceFile traceFile) {
 		Map<String, Object> traceFileDump = new HashMap<>();
-		traceFileDump.put(HOOKS, getHooksMap(traceFile));
-		traceFileDump.put(STATES, getStatesMap(traceFile));
+		traceFileDump.put(MorionTraceFile.HOOKS, getHooksMap(traceFile));
+		traceFileDump.put(MorionTraceFile.STATES, getStatesMap(traceFile));
 		// traceFileDump.put(INFO, traceFile.getInfo());
 		// traceFileDump.put(INSTRUCTIONS, traceFile.getInstructions());
 		return new Yaml().dump(traceFileDump);
 	}
 
 	private static Map<String, Map<String, Map<String, List<String>>>> getStatesMap(MorionTraceFile traceFile) {
-		return Map.of(ENTRY_STATE,
+		return Map.of(MorionTraceFile.ENTRY_STATE,
 				Map.of(
-						STATE_REGISTERS, memoryEntriesToMap(traceFile.getEntryRegisters()),
-						STATE_MEMORY, memoryEntriesToMap(traceFile.getEntryMemory())));
+						MorionTraceFile.STATE_REGISTERS, memoryEntriesToMap(traceFile.getEntryRegisters()),
+						MorionTraceFile.STATE_MEMORY, memoryEntriesToMap(traceFile.getEntryMemory())));
 	}
 	
 
@@ -61,7 +46,7 @@ public class TraceFileToYamlConverter {
 		return new TreeMap<>(ms
 				.stream()
 				.map(m -> new Pair<>(m.getName(),
-						m.isSymbolic() ? List.of(m.getValue(), SYMBOLIC) : List.of(m.getValue())))
+						m.isSymbolic() ? List.of(m.getValue(), MorionTraceFile.SYMBOLIC) : List.of(m.getValue())))
 				.collect(Collectors.toMap(Pair::getA, Pair::getB)));
 	}
 
@@ -89,10 +74,10 @@ public class TraceFileToYamlConverter {
 
 	private static Map<String, String> hookToMap(Hook hook) {
 		Map<String, String> hookMap = new HashMap<>();
-		hookMap.put(HOOK_ENTRY, prependHex(hook.getEntryAddress()));
-		hookMap.put(HOOK_LEAVE, prependHex(hook.getLeaveAddress()));
-		hookMap.put(HOOK_TARGET, generateTargetAddress());
-		hookMap.put(HOOK_MODE, hook.getMode().getValue());
+		hookMap.put(MorionTraceFile.HOOK_ENTRY, prependHex(hook.getEntryAddress()));
+		hookMap.put(MorionTraceFile.HOOK_LEAVE, prependHex(hook.getLeaveAddress()));
+		hookMap.put(MorionTraceFile.HOOK_TARGET, generateTargetAddress());
+		hookMap.put(MorionTraceFile.HOOK_MODE, hook.getMode().getValue());
 		return hookMap;
 	}
 

@@ -77,7 +77,7 @@ public class CreatePanel extends JPanel {
 	}
 
 	private void setupBtnLoadTraceFile() {
-		btnLoadTraceFile.addActionListener(controller::clearTraceFileListener);
+		btnLoadTraceFile.addActionListener(controller::loadTraceFileListener);
 	}
 
 	private void setupBtnCreateTraceFile() {
