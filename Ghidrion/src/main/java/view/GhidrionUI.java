@@ -2,10 +2,9 @@ package view;
 
 import java.awt.EventQueue;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
 import javax.swing.JTabbedPane;
 
 import ctrl.DisplayController;
@@ -33,7 +32,7 @@ public class GhidrionUI {
 			}
 		});
 	}
-	
+
 	/**
 	 * This constructor is solely for debugging the UI.
 	 * Do NOT use for the plugin.
@@ -46,8 +45,9 @@ public class GhidrionUI {
 
 	/**
 	 * Create the application.
+	 * 
 	 * @param traceFileController controls the {@link CreatePanel}
-	 * @param displayController controls the {@link DisplayPanel}
+	 * @param displayController   controls the {@link DisplayPanel}
 	 */
 	public GhidrionUI(TraceFileController traceFileController, DisplayController displayController) {
 		this.panelCreate = new CreatePanel(traceFileController);
@@ -55,7 +55,7 @@ public class GhidrionUI {
 		initialize();
 	}
 
-	public JTabbedPane getTabbedPane() {
+	public JComponent getTabbedPane() {
 		return tabbedPane;
 	}
 
@@ -67,18 +67,7 @@ public class GhidrionUI {
 		frame.setBounds(100, 100, 1000, 800);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[] { 0, 0 };
-		gridBagLayout.rowHeights = new int[] { 0, 0 };
-		gridBagLayout.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
-		frame.getContentPane().setLayout(gridBagLayout);
-
-		GridBagConstraints gbc_tabbedPane = new GridBagConstraints();
-		gbc_tabbedPane.fill = GridBagConstraints.BOTH;
-		gbc_tabbedPane.gridx = 0;
-		gbc_tabbedPane.gridy = 0;
-		frame.getContentPane().add(tabbedPane, gbc_tabbedPane);
+		frame.getContentPane().add(tabbedPane);
 
 		tabbedPane.addTab("Create Init Trace File", null, panelCreate, null);
 
