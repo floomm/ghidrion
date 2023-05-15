@@ -8,7 +8,7 @@ import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 
 import ctrl.DisplayController;
-import ctrl.TraceFileController;
+import ctrl.InitTraceFileController;
 
 public class GhidrionUI {
 
@@ -49,7 +49,7 @@ public class GhidrionUI {
 	 * @param traceFileController controls the {@link CreatePanel}
 	 * @param displayController   controls the {@link DisplayPanel}
 	 */
-	public GhidrionUI(TraceFileController traceFileController, DisplayController displayController) {
+	public GhidrionUI(InitTraceFileController traceFileController, DisplayController displayController) {
 		this.panelCreate = new CreatePanel(traceFileController);
 		this.panelDisplay = new DisplayPanel(displayController);
 		initialize();

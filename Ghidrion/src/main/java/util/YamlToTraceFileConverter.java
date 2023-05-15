@@ -18,6 +18,14 @@ import model.MorionTraceFile;
 
 public class YamlToTraceFileConverter {
 	
+	public static void toInitTraceFile(MorionTraceFile traceFile, InputStream yamlStream, AddressFactory addressFactory) {
+		Map<String, Object> traceFileToConvert = new Yaml().load(yamlStream);
+		
+		addHooks(traceFile, traceFileToConvert, addressFactory);
+		addEntryMemory(traceFile, traceFileToConvert);
+		addEntryRegisters(traceFile, traceFileToConvert);
+	}
+	
 	public static void toTraceFile(MorionTraceFile traceFile, InputStream yamlStream, AddressFactory addressFactory) {
 		Map<String, Object> traceFileToConvert = new Yaml().load(yamlStream);
 		

@@ -30,14 +30,14 @@ import util.ObservableSet;
 import util.TraceFileToYamlConverter;
 import util.YamlToTraceFileConverter;
 
-public class TraceFileController {
+public class InitTraceFileController {
 	private final GhidrionPlugin plugin;
 	private final MorionTraceFile traceFile;
 
 	private final Set<HookableFunction> allHookableFunctions = new HashSet<>();
 	private final ObservableSet<HookableFunction> currentlyHookableFunctions = new ObservableSet<>();
 
-	public TraceFileController(GhidrionPlugin plugin, MorionTraceFile traceFile) {
+	public InitTraceFileController(GhidrionPlugin plugin, MorionTraceFile traceFile) {
 		this.plugin = Objects.requireNonNull(plugin);
 		this.traceFile = Objects.requireNonNull(traceFile);
 
@@ -65,8 +65,8 @@ public class TraceFileController {
 		return traceFile;
 	}
 	
-	public void loadTraceFileListener(ActionEvent e) {
-		// Warn user that current trace file gets cleared
+	public void loadTraceFile(Component parent) {
+		// Warn user that current init trace file gets cleared
 		String warning = "Are you sure you want to proceed? The current editor entries are cleared.";
 		int warningResult = JOptionPane.showConfirmDialog(null, warning, "Confirmation",
 				JOptionPane.OK_CANCEL_OPTION);
@@ -75,7 +75,7 @@ public class TraceFileController {
 		}
 		traceFile.clear();
 
-		YamlToTraceFileConverter.toTraceFile(traceFile, getFileStreamToLoad(null), plugin.getCurrentProgram().getAddressFactory());
+		YamlToTraceFileConverter.toInitTraceFile(traceFile, getFileStreamToLoad(parent), plugin.getCurrentProgram().getAddressFactory());
 	}
 
 	/**

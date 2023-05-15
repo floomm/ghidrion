@@ -9,14 +9,14 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import ctrl.TraceFileController;
+import ctrl.InitTraceFileController;
 import model.Hook;
 import model.HookableFunction;
 import model.Hook.Mode;
 import util.HookTableModel;
 
 public class HookPanel extends JPanel {
-    private final TraceFileController controller;
+    private final InitTraceFileController controller;
 
     private final FilterPanel<HookableFunction> filterFunctionNames = new FilterPanel<>(HookableFunction::getName,
             "Function Name");
@@ -31,7 +31,7 @@ public class HookPanel extends JPanel {
     private final JScrollPane scrollPaneAddedHooks = new JScrollPane(tableAddedHooks);
     private final JButton btnDeleteHook = new JButton("Delete");
 
-    public HookPanel(TraceFileController controller) {
+    public HookPanel(InitTraceFileController controller) {
         this.controller = controller;
         this.tableAddedHooksModel = new HookTableModel(controller.getTraceFile().getHooks());
         init();

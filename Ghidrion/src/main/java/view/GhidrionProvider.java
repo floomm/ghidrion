@@ -7,19 +7,19 @@ import model.MorionTraceFile;
 import javax.swing.JPanel;
 
 import ctrl.DisplayController;
-import ctrl.TraceFileController;
+import ctrl.InitTraceFileController;
 
 import javax.swing.JComponent;
 
 public class GhidrionProvider extends ComponentProvider {
 	private JPanel panel;
 	private GhidrionUI ui;
-	private TraceFileController traceFileController;
+	private InitTraceFileController traceFileController;
 	private DisplayController displayController;
 
 	public GhidrionProvider(GhidrionPlugin plugin, String pluginName, String owner, MorionTraceFile traceFile) {
 		super(plugin.getTool(), pluginName, owner);
-		this.traceFileController = new TraceFileController(plugin, traceFile);
+		this.traceFileController = new InitTraceFileController(plugin, traceFile);
 		this.displayController = new DisplayController(plugin);
 		ui = new GhidrionUI(this.traceFileController, this.displayController);
 
