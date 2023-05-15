@@ -126,7 +126,8 @@ public class RegistersPanel extends JPanel {
 	private void setupBtnRemoveRegister() {
 		btnRemoveRegister.addActionListener(e -> {
 			controller.removeAllEntryRegisters(tableRegister);
-			tableRegister.getSelectionModel().setSelectionInterval(0, 0);
+			if (tableRegister.getRowCount() > 0)
+				tableRegister.getSelectionModel().setSelectionInterval(0, 0);
 		});
 	}
 

@@ -146,7 +146,8 @@ public class MemoryPanel extends JPanel {
 	private void setupBtnRemoveMemory() {
 		btnRemoveMemory.addActionListener(e -> {
 			controller.removeAllEntryMemory(tableMemory);
-			tableMemory.getSelectionModel().setSelectionInterval(0, 0);
+			if (tableMemory.getRowCount() > 0)
+				tableMemory.getSelectionModel().setSelectionInterval(0, 0);
 		});
 	}
 

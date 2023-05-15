@@ -202,7 +202,8 @@ public class HookPanel extends JPanel {
             HookTableModel model = (HookTableModel) tableAddedHooks.getModel();
             List<Hook> toDelete = model.getElementsAtRowIndices(tableAddedHooks.getSelectedRows());
             controller.getTraceFile().getHooks().removeAll(toDelete);
-            tableAddedHooks.getSelectionModel().setSelectionInterval(0, 0);
+            if (tableAddedHooks.getRowCount() > 0)
+                tableAddedHooks.getSelectionModel().setSelectionInterval(0, 0);
         });
     }
 
