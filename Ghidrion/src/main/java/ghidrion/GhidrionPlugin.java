@@ -79,6 +79,7 @@ public class GhidrionPlugin extends ProgramPlugin {
 		String owner = getName();
 
 		MorionTraceFile traceFile = new MorionTraceFile();
+		addProgramOpenendListener(p -> traceFile.clear()); // clear trace when a new program is loaded
 
 		provider = new GhidrionProvider(this, PLUGIN_NAME, owner, traceFile);
 		new GhidrionHookAddingListingContextAction(this, traceFile);

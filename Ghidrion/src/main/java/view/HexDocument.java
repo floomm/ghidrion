@@ -15,7 +15,7 @@ public class HexDocument extends PlainDocument {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
 		if (str == null) {
@@ -25,10 +25,10 @@ public class HexDocument extends PlainDocument {
 		String currentText = getText(0, getLength());
 		String newText = currentText.substring(0, offs) + str + currentText.substring(offs);
 		if (isValidHex(newText)) {
-			super.insertString(offs, str, a);
+			super.insertString(offs, str.toLowerCase(), a);
 		}
 	}
-	
+
 	@Override
 	public void remove(int offs, int len) throws BadLocationException {
 		if (offs == 0 || offs == 1) {
@@ -36,9 +36,9 @@ public class HexDocument extends PlainDocument {
 		}
 		super.remove(offs, len);
 	}
-	
+
 	private boolean isValidHex(String text) {
-	    return text.startsWith("0x") && text.substring(2).matches(HEX_REGEX) && text.length() <= MAX_LENGTH;
+		return text.startsWith("0x") && text.substring(2).matches(HEX_REGEX) && text.length() <= MAX_LENGTH;
 	}
 
 }
