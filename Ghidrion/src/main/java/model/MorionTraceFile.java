@@ -48,5 +48,7 @@ public class MorionTraceFile {
 		hooks.clear();
 		entryMemory.clear();
 		entryRegisters.clear();
+		leaveMemory.clear();
+		leaveRegisters.clear();
 	}
 }
