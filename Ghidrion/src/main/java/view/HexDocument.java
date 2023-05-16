@@ -37,6 +37,12 @@ public class HexDocument extends PlainDocument {
 		super.remove(offs, len);
 	}
 
+	/**
+	 * Checks if a given String represents a valid hexadecimal value.
+	 *
+	 * @param text the String to be checked
+	 * @return {@code true} if the String is a valid hexadecimal value, {@code false} otherwise
+	 */
 	public static boolean isValidHex(String text) {
 		return text.startsWith("0x") && text.substring(2).matches(HEX_REGEX) && text.length() <= MAX_LENGTH;
 	}

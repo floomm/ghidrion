@@ -21,6 +21,19 @@ import view.HexDocument;
 
 public class YamlToTraceFileConverter {
 	
+	/**
+	 * Convert the information in the @param yamlStream to a {@link MorionTraceFile}.
+	 * This method only converts information needed for a init trace file:
+	 * <ul>
+	 * 	<li>Hooks</li>
+	 * 	<li>Entry state memory</li>
+	 * 	<li>Entry state registers</li>
+	 * </ul>
+	 * 
+	 * @param traceFile			{@link MorionTraceFile} to write to
+	 * @param yamlStream		to write to @param traceFile
+	 * @param addressFactory 	to create {@link Address} objects
+	 */
 	public static void toInitTraceFile(MorionTraceFile traceFile, InputStream yamlStream, AddressFactory addressFactory) {
 		Map<String, Object> traceFileToConvert = loadTraceFile(yamlStream);
 		if (traceFileToConvert == null) {
@@ -31,7 +44,22 @@ public class YamlToTraceFileConverter {
 		addEntryMemory(traceFile, traceFileToConvert);
 		addEntryRegisters(traceFile, traceFileToConvert);
 	}
-	
+
+	/**
+	 * Convert the information in the @param yamlStream to a {@link MorionTraceFile}.
+	 * This method converts:
+	 * <ul>
+	 * 	<li>Hooks</li>
+	 * 	<li>Entry state memory</li>
+	 * 	<li>Entry state registers</li>
+	 * 	<li>Leave state memory</li>
+	 * 	<li>Leave state registers</li>
+	 * </ul>
+	 * 
+	 * @param traceFile			{@link MorionTraceFile} to write to
+	 * @param yamlStream		to write to @param traceFile
+	 * @param addressFactory 	to create {@link Address} objects
+	 */
 	public static void toTraceFile(MorionTraceFile traceFile, InputStream yamlStream, AddressFactory addressFactory) {
 		Map<String, Object> traceFileToConvert = loadTraceFile(yamlStream);
 		if (traceFileToConvert == null) {
