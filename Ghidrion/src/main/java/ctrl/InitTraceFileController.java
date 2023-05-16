@@ -75,7 +75,7 @@ public class InitTraceFileController {
 		}
 		traceFile.clear();
 
-		YamlToTraceFileConverter.toInitTraceFile(traceFile, getFileStreamToLoad(parent), plugin.getCurrentProgram().getAddressFactory());
+		YamlToTraceFileConverter.toInitTraceFile(traceFile, getFileStreamToLoad(parent), plugin.getCurrentProgram().getAddressFactory(), parent);
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package util;
 
+import java.awt.Component;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,16 +34,17 @@ public class YamlToTraceFileConverter {
 	 * @param traceFile			{@link MorionTraceFile} to write to
 	 * @param yamlStream		to write to @param traceFile
 	 * @param addressFactory 	to create {@link Address} objects
+	 * @param parent 
 	 */
-	public static void toInitTraceFile(MorionTraceFile traceFile, InputStream yamlStream, AddressFactory addressFactory) {
-		Map<String, Object> traceFileToConvert = loadTraceFile(yamlStream);
+	public static void toInitTraceFile(MorionTraceFile traceFile, InputStream yamlStream, AddressFactory addressFactory, Component parent) {
+		Map<String, Object> traceFileToConvert = loadTraceFile(yamlStream, parent);
 		if (traceFileToConvert == null) {
 			return;
 		}
 		
-		addHooks(traceFile, traceFileToConvert, addressFactory);
-		addEntryMemory(traceFile, traceFileToConvert);
-		addEntryRegisters(traceFile, traceFileToConvert);
+		addHooks(traceFile, traceFileToConvert, addressFactory, parent);
+		addEntryMemory(traceFile, traceFileToConvert, parent);
+		addEntryRegisters(traceFile, traceFileToConvert, parent);
 	}
 
 	/**
@@ -59,47 +61,48 @@ public class YamlToTraceFileConverter {
 	 * @param traceFile			{@link MorionTraceFile} to write to
 	 * @param yamlStream		to write to @param traceFile
 	 * @param addressFactory 	to create {@link Address} objects
+	 * @param parent 
 	 */
-	public static void toTraceFile(MorionTraceFile traceFile, InputStream yamlStream, AddressFactory addressFactory) {
-		Map<String, Object> traceFileToConvert = loadTraceFile(yamlStream);
+	public static void toTraceFile(MorionTraceFile traceFile, InputStream yamlStream, AddressFactory addressFactory, Component parent) {
+		Map<String, Object> traceFileToConvert = loadTraceFile(yamlStream, parent);
 		if (traceFileToConvert == null) {
 			return;
 		}
 		
-		addHooks(traceFile, traceFileToConvert, addressFactory);
-		addEntryMemory(traceFile, traceFileToConvert);
-		addEntryRegisters(traceFile, traceFileToConvert);
-		addLeaveMemory(traceFile, traceFileToConvert);
-		addLeaveRegisters(traceFile, traceFileToConvert);
+		addHooks(traceFile, traceFileToConvert, addressFactory, parent);
+		addEntryMemory(traceFile, traceFileToConvert, parent);
+		addEntryRegisters(traceFile, traceFileToConvert, parent);
+		addLeaveMemory(traceFile, traceFileToConvert, parent);
+		addLeaveRegisters(traceFile, traceFileToConvert, parent);
 	}
 	
-	private static Map<String, Object> loadTraceFile(InputStream yamlStream) {
+	private static Map<String, Object> loadTraceFile(InputStream yamlStream, Component parent) {
 		Map<String, Object> traceFileToConvert = null;
 		try {
 			traceFileToConvert = new Yaml().load(yamlStream);
 		} catch (ParserException e) {
-			Msg.showError(YamlToTraceFileConverter.class, null, "Parser exception", e.getMessage(), e);
+			Msg.showError(YamlToTraceFileConverter.class, parent, "Parser exception", e.getMessage(), e);
 		}
 		return traceFileToConvert;
 	}
 	
-	private static void addHooks(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert, AddressFactory addressFactory) {
+	private static void addHooks(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert, AddressFactory addressFactory, Component parent) {
 		Map<String, Map<String, List<Map<String, String>>>> hookMap = (Map<String, Map<String, List<Map<String, String>>>>) traceFileToConvert
 				.get(MorionTraceFile.HOOKS);
-		Set<Hook> hooks = mapToHooks(hookMap, addressFactory);
+		Set<Hook> hooks = mapToHooks(hookMap, addressFactory, parent);
 		if (hooks == null) {
 			return;
 		}
 		traceFile.getHooks().replaceAll(hooks);
 	}
 	
-	private static Set<Hook> mapToHooks(Map<String, Map<String, List<Map<String, String>>>> hookMap, AddressFactory addressFactory) {
+	private static Set<Hook> mapToHooks(Map<String, Map<String, List<Map<String, String>>>> hookMap, AddressFactory addressFactory, Component parent) {
 		Set<Hook> hooks = new HashSet<>();
 		Map<String, List<Map<String, String>>> functions = hookMap.get("libc"); // Libc is hardcoded for now
 		for (String functionName : functions.keySet()) {
 			for (Map<String, String> hookDetails : functions.get(functionName)) {
-				Address entry = getHookEntryAddress(functionName, hookDetails, addressFactory);
-				Mode mode = getHookMode(functionName, hookDetails, entry);
+				Address entry = getHookEntryAddress(functionName, hookDetails, addressFactory, parent);
+				Mode mode = getHookMode(functionName, hookDetails, entry, parent);
 				if (entry == null || mode == null) {
 					return null;
 				}
@@ -109,7 +112,7 @@ public class YamlToTraceFileConverter {
 				} catch (NullPointerException e) {
 					String message = "Hook entry address " + entry + " is illegal"
 							+ " (Function: " + functionName + ")";
-					Msg.showError(YamlToTraceFileConverter.class, null, "Illegal hook entry", message, e);
+					Msg.showError(YamlToTraceFileConverter.class, parent, "Illegal hook entry", message, e);
 					return null;
 				}
 			}
@@ -117,20 +120,20 @@ public class YamlToTraceFileConverter {
 		return hooks;
 	}
 	
-	private static Address getHookEntryAddress(String functionName, Map<String, String> hookDetails, AddressFactory addressFactory) {
+	private static Address getHookEntryAddress(String functionName, Map<String, String> hookDetails, AddressFactory addressFactory, Component parent) {
 		if (! (hookDetails.containsKey(MorionTraceFile.HOOK_ENTRY))) {
 			String message = "Hook entry address is missing (Function: " + functionName + ")";
-			Msg.showError(YamlToTraceFileConverter.class, null, "Entry missing", message);
+			Msg.showError(YamlToTraceFileConverter.class, parent, "Entry missing", message);
 			return null;
 		}
 		String entry = hookDetails.get(MorionTraceFile.HOOK_ENTRY);
 		return addressFactory.getAddress(entry);
 	}
 	
-	private static Mode getHookMode(String functionName, Map<String, String> hookDetails, Address entry) {
+	private static Mode getHookMode(String functionName, Map<String, String> hookDetails, Address entry, Component parent) {
 		if (! (hookDetails.containsKey(MorionTraceFile.HOOK_MODE))) {
 			String message = "Hook mode is missing (Function: " + functionName + ", Entry: " + entry + ")";
-			Msg.showError(YamlToTraceFileConverter.class, null, "Mode missing", message);
+			Msg.showError(YamlToTraceFileConverter.class, parent, "Mode missing", message);
 			return null;
 		}
 		Mode mode = null;
@@ -139,76 +142,76 @@ public class YamlToTraceFileConverter {
 		} catch (IllegalArgumentException e) {
 			String message = "Hook mode " + hookDetails.get(MorionTraceFile.HOOK_MODE) + " is illegal" 
 					+ " (Function: " + functionName + ", Entry: " + entry + ")";
-			Msg.showError(YamlToTraceFileConverter.class, null, "Illegal hook mode", message, e);
+			Msg.showError(YamlToTraceFileConverter.class, parent, "Illegal hook mode", message, e);
 		}
 		return mode;
 	}
 	
-	private static void addEntryMemory(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) {
+	private static void addEntryMemory(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert, Component parent) {
 		Map<String, Map<String, List<String>>> entryStateMap = getEntryStateMap(traceFileToConvert);
 		if (entryStateMap != null && entryStateMap.containsKey(MorionTraceFile.STATE_MEMORY)) {
-			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryStateMap.get(MorionTraceFile.STATE_MEMORY));
-			if (memoryEntries != null && hasValidMemoryStateAddresses(memoryEntries)) {
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryStateMap.get(MorionTraceFile.STATE_MEMORY), parent);
+			if (memoryEntries != null && hasValidMemoryStateAddresses(memoryEntries, parent)) {
 				traceFile.getEntryMemory().replaceAll(memoryEntries);
 			}
 		}
 	}
 	
-	private static void addEntryRegisters(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) {
+	private static void addEntryRegisters(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert, Component parent) {
 		Map<String, Map<String, List<String>>> entryStateMap = getEntryStateMap(traceFileToConvert);
 		if (entryStateMap != null && entryStateMap.containsKey(MorionTraceFile.STATE_REGISTERS)) {
-			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryStateMap.get(MorionTraceFile.STATE_REGISTERS));
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryStateMap.get(MorionTraceFile.STATE_REGISTERS), parent);
 			if (memoryEntries != null) {
 				traceFile.getEntryRegisters().replaceAll(memoryEntries);
 			}
 		}
 	}
 	
-	private static void addLeaveMemory(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) {
+	private static void addLeaveMemory(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert, Component parent) {
 		Map<String, Map<String, List<String>>> leaveStateMap = getLeaveStateMap(traceFileToConvert);
 		if (leaveStateMap != null && leaveStateMap.containsKey(MorionTraceFile.STATE_MEMORY)) {
-			List<MemoryEntry> memoryEntries = mapToMemoryEntries(leaveStateMap.get(MorionTraceFile.STATE_MEMORY));
-			if (memoryEntries != null && hasValidMemoryStateAddresses(memoryEntries)) {
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(leaveStateMap.get(MorionTraceFile.STATE_MEMORY), parent);
+			if (memoryEntries != null && hasValidMemoryStateAddresses(memoryEntries, parent)) {
 				traceFile.getLeaveMemory().replaceAll(memoryEntries);
 			}
 		}
 	}
 	
-	private static void addLeaveRegisters(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) {
+	private static void addLeaveRegisters(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert, Component parent) {
 		Map<String, Map<String, List<String>>> leaveStateMap = getLeaveStateMap(traceFileToConvert);
 		if (leaveStateMap != null && leaveStateMap.containsKey(MorionTraceFile.STATE_REGISTERS)) {
-			List<MemoryEntry> memoryEntries = mapToMemoryEntries(leaveStateMap.get(MorionTraceFile.STATE_REGISTERS));
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(leaveStateMap.get(MorionTraceFile.STATE_REGISTERS), parent);
 			if (memoryEntries != null) {
 				traceFile.getLeaveRegisters().replaceAll(memoryEntries);
 			}
 		}
 	}
 	
-	private static boolean hasValidMemoryStateAddresses(List<MemoryEntry> memoryEntries) {
+	private static boolean hasValidMemoryStateAddresses(List<MemoryEntry> memoryEntries, Component parent) {
 		boolean hasValidMemoryStateAddresses = true;
 		for (MemoryEntry entry : memoryEntries) {
 			if (! HexDocument.isValidHex(entry.getName())) {
 				String message = "Memory state address '" + entry.getName() + "' has to be hexadecimal";
-				Msg.showError(YamlToTraceFileConverter.class, null, "Illegal memory state address", message);
+				Msg.showError(YamlToTraceFileConverter.class, parent, "Illegal memory state address", message);
 				hasValidMemoryStateAddresses = false;
 			}
 		}
 		return hasValidMemoryStateAddresses;
 	}
 
-	private static List<MemoryEntry> mapToMemoryEntries(Map<String, List<String>> entryMap) {
+	private static List<MemoryEntry> mapToMemoryEntries(Map<String, List<String>> entryMap, Component parent) {
 		List<MemoryEntry> entries = new ArrayList<>();
 		for (String name : entryMap.keySet()) {
 			List<String> details = entryMap.get(name);
 			if (details == null || details.size() <= 0) {
 				String message = "State " + name + " has no value";
-				Msg.showError(YamlToTraceFileConverter.class, null, "Missing state value", message);
+				Msg.showError(YamlToTraceFileConverter.class, parent, "Missing state value", message);
 				return null;
 			}
 			String value = details.get(0);
 			if (! HexDocument.isValidHex(value)) {
 				String message = "State " + name + "'s value has to be hexadecimal";
-				Msg.showError(YamlToTraceFileConverter.class, null, "Illegal state value", message);
+				Msg.showError(YamlToTraceFileConverter.class, parent, "Illegal state value", message);
 				return null;
 			}
 			boolean symbolic = details.size() > 1 
