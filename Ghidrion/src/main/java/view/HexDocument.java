@@ -37,7 +37,7 @@ public class HexDocument extends PlainDocument {
 		super.remove(offs, len);
 	}
 
-	private boolean isValidHex(String text) {
+	public static boolean isValidHex(String text) {
 		return text.startsWith("0x") && text.substring(2).matches(HEX_REGEX) && text.length() <= MAX_LENGTH;
 	}
 
