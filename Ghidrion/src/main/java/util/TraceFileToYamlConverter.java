@@ -14,7 +14,7 @@ import model.Hook;
 import model.MemoryEntry;
 import model.MorionInitTraceFile;
 
-public class TraceFileToYamlConverter {
+public class TraceFileToYamlConverter implements ConversionConstants {
 
 	private static final long TARGET_ADDRESS_STEP = 0x100;
 	private static long targetAddressCounter = 0;
@@ -27,18 +27,18 @@ public class TraceFileToYamlConverter {
 	 */
 	public static String toYaml(MorionInitTraceFile traceFile) {
 		Map<String, Object> traceFileDump = new HashMap<>();
-		traceFileDump.put(MorionInitTraceFile.HOOKS, getHooksMap(traceFile));
-		traceFileDump.put(MorionInitTraceFile.STATES, getStatesMap(traceFile));
+		traceFileDump.put(HOOKS, getHooksMap(traceFile));
+		traceFileDump.put(STATES, getStatesMap(traceFile));
 		// traceFileDump.put(INFO, traceFile.getInfo());
 		// traceFileDump.put(INSTRUCTIONS, traceFile.getInstructions());
 		return new Yaml().dump(traceFileDump);
 	}
 
 	private static Map<String, Map<String, Map<String, List<String>>>> getStatesMap(MorionInitTraceFile traceFile) {
-		return Map.of(MorionInitTraceFile.ENTRY_STATE,
+		return Map.of(ENTRY_STATE,
 				Map.of(
-						MorionInitTraceFile.STATE_REGISTERS, memoryEntriesToMap(traceFile.getEntryRegisters()),
-						MorionInitTraceFile.STATE_MEMORY, memoryEntriesToMap(traceFile.getEntryMemory())));
+						STATE_REGISTERS, memoryEntriesToMap(traceFile.getEntryRegisters()),
+						STATE_MEMORY, memoryEntriesToMap(traceFile.getEntryMemory())));
 	}
 	
 
@@ -46,7 +46,7 @@ public class TraceFileToYamlConverter {
 		return new TreeMap<>(ms
 				.stream()
 				.map(m -> new Pair<>(m.getName(),
-						m.isSymbolic() ? List.of(m.getValue(), MorionInitTraceFile.SYMBOLIC) : List.of(m.getValue())))
+						m.isSymbolic() ? List.of(m.getValue(), SYMBOLIC) : List.of(m.getValue())))
 				.collect(Collectors.toMap(Pair::getA, Pair::getB)));
 	}
 
@@ -74,10 +74,10 @@ public class TraceFileToYamlConverter {
 
 	private static Map<String, String> hookToMap(Hook hook) {
 		Map<String, String> hookMap = new HashMap<>();
-		hookMap.put(MorionInitTraceFile.HOOK_ENTRY, prependHex(hook.getEntryAddress()));
-		hookMap.put(MorionInitTraceFile.HOOK_LEAVE, prependHex(hook.getLeaveAddress()));
-		hookMap.put(MorionInitTraceFile.HOOK_TARGET, generateTargetAddress());
-		hookMap.put(MorionInitTraceFile.HOOK_MODE, hook.getMode().getValue());
+		hookMap.put(HOOK_ENTRY, prependHex(hook.getEntryAddress()));
+		hookMap.put(HOOK_LEAVE, prependHex(hook.getLeaveAddress()));
+		hookMap.put(HOOK_TARGET, generateTargetAddress());
+		hookMap.put(HOOK_MODE, hook.getMode().getValue());
 		return hookMap;
 	}
 

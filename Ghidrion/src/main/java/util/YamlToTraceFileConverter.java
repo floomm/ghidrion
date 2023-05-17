@@ -21,7 +21,7 @@ import model.MorionInitTraceFile;
 import model.MorionTraceFile;
 import view.HexDocument;
 
-public class YamlToTraceFileConverter {
+public class YamlToTraceFileConverter implements ConversionConstants {
 	
 	/**
 	 * Convert the information in the @param yamlStream to a {@link MorionInitTraceFile}.
@@ -84,7 +84,7 @@ public class YamlToTraceFileConverter {
 	
 	private static void addHooks(MorionInitTraceFile traceFile, Map<String, Object> traceFileToConvert, AddressFactory addressFactory) throws YamlConverterException {
 		Map<String, Map<String, List<Map<String, String>>>> hookMap = (Map<String, Map<String, List<Map<String, String>>>>) traceFileToConvert
-				.get(MorionInitTraceFile.HOOKS);
+				.get(HOOKS);
 		Set<Hook> hooks = mapToHooks(hookMap, addressFactory);
 		traceFile.getHooks().replaceAll(hooks);
 	}
@@ -105,11 +105,11 @@ public class YamlToTraceFileConverter {
 	}
 	
 	private static Address getHookEntryAddress(String functionName, Map<String, String> hookDetails, AddressFactory addressFactory) throws YamlConverterException {
-		if (! (hookDetails.containsKey(MorionInitTraceFile.HOOK_ENTRY))) {
+		if (! (hookDetails.containsKey(HOOK_ENTRY))) {
 			String message = "Hook entry address is missing (Function: " + functionName + ")";
 			throw new YamlConverterException("Entry missing", message, null);
 		}
-		String entry = hookDetails.get(MorionInitTraceFile.HOOK_ENTRY);
+		String entry = hookDetails.get(HOOK_ENTRY);
 		Address addr = addressFactory.getAddress(entry);
 		if (addr == null) {
 			String title = "Illegal hook entry";
@@ -121,14 +121,14 @@ public class YamlToTraceFileConverter {
 	}
 	
 	private static Mode getHookMode(String functionName, Map<String, String> hookDetails, Address entry) throws YamlConverterException {
-		if (! (hookDetails.containsKey(MorionInitTraceFile.HOOK_MODE))) {
+		if (! (hookDetails.containsKey(HOOK_MODE))) {
 			String message = "Hook mode is missing (Function: " + functionName + ", Entry: " + entry + ")";
 			throw new YamlConverterException("Mode missing", message, null);
 		}
 
-		Optional<Mode> mode = Mode.fromValue(hookDetails.get(MorionInitTraceFile.HOOK_MODE));
+		Optional<Mode> mode = Mode.fromValue(hookDetails.get(HOOK_MODE));
 		if (mode.isEmpty()) {
-			String message = "Hook mode '" + hookDetails.get(MorionInitTraceFile.HOOK_MODE) + "' is illegal" 
+			String message = "Hook mode '" + hookDetails.get(HOOK_MODE) + "' is illegal" 
 					+ " (Function: " + functionName + ", Entry: " + entry + ")";
 			throw new YamlConverterException("Illegal hook mode", message, null);
 		}
@@ -138,8 +138,8 @@ public class YamlToTraceFileConverter {
 	
 	private static void addEntryMemory(MorionInitTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {
 		Map<String, Map<String, List<String>>> entryStateMap = getEntryStateMap(traceFileToConvert);
-		if (entryStateMap.containsKey(MorionInitTraceFile.STATE_MEMORY)) {
-			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryStateMap.get(MorionInitTraceFile.STATE_MEMORY));
+		if (entryStateMap.containsKey(STATE_MEMORY)) {
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryStateMap.get(STATE_MEMORY));
 			checkMemoryStateAddresses(memoryEntries);
 			traceFile.getEntryMemory().replaceAll(memoryEntries);
 		}
@@ -147,16 +147,16 @@ public class YamlToTraceFileConverter {
 	
 	private static void addEntryRegisters(MorionInitTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {
 		Map<String, Map<String, List<String>>> entryStateMap = getEntryStateMap(traceFileToConvert);
-		if (entryStateMap.containsKey(MorionInitTraceFile.STATE_REGISTERS)) {
-			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryStateMap.get(MorionInitTraceFile.STATE_REGISTERS));
+		if (entryStateMap.containsKey(STATE_REGISTERS)) {
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryStateMap.get(STATE_REGISTERS));
 			traceFile.getEntryRegisters().replaceAll(memoryEntries);
 		}
 	}
 	
 	private static void addLeaveMemory(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {
 		Map<String, Map<String, List<String>>> leaveStateMap = getLeaveStateMap(traceFileToConvert);
-		if (leaveStateMap.containsKey(MorionInitTraceFile.STATE_MEMORY)) {
-			List<MemoryEntry> memoryEntries = mapToMemoryEntries(leaveStateMap.get(MorionInitTraceFile.STATE_MEMORY));
+		if (leaveStateMap.containsKey(STATE_MEMORY)) {
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(leaveStateMap.get(STATE_MEMORY));
 			checkMemoryStateAddresses(memoryEntries);
 			traceFile.getLeaveMemory().replaceAll(memoryEntries);
 		}
@@ -164,8 +164,8 @@ public class YamlToTraceFileConverter {
 	
 	private static void addLeaveRegisters(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {
 		Map<String, Map<String, List<String>>> leaveStateMap = getLeaveStateMap(traceFileToConvert);
-		if (leaveStateMap.containsKey(MorionInitTraceFile.STATE_REGISTERS)) {
-			List<MemoryEntry> memoryEntries = mapToMemoryEntries(leaveStateMap.get(MorionInitTraceFile.STATE_REGISTERS));
+		if (leaveStateMap.containsKey(STATE_REGISTERS)) {
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(leaveStateMap.get(STATE_REGISTERS));
 			traceFile.getLeaveRegisters().replaceAll(memoryEntries);
 		}
 	}
@@ -193,7 +193,7 @@ public class YamlToTraceFileConverter {
 				throw new YamlConverterException("Illegal state value", message, null);
 			}
 			boolean symbolic = details.size() > 1 
-					&& MorionInitTraceFile.SYMBOLIC.equals(details.get(1));
+					&& SYMBOLIC.equals(details.get(1));
 			entries.add(new MemoryEntry(name, value, symbolic));
 		}
 		return entries;
@@ -202,8 +202,8 @@ public class YamlToTraceFileConverter {
 	private static Map<String, Map<String, List<String>>> getEntryStateMap(Map<String, Object> traceFileToConvert) {
 		Map<String, Map<String, List<String>>> entryStateMap = new HashMap<>();
 		Map<String, Map<String, Map<String, List<String>>>> statesMap = getStatesMap(traceFileToConvert);
-		if (statesMap.containsKey(MorionInitTraceFile.ENTRY_STATE)) {
-			entryStateMap = statesMap.get(MorionInitTraceFile.ENTRY_STATE);
+		if (statesMap.containsKey(ENTRY_STATE)) {
+			entryStateMap = statesMap.get(ENTRY_STATE);
 		}
 		return entryStateMap;
 	}
@@ -211,16 +211,16 @@ public class YamlToTraceFileConverter {
 	private static Map<String, Map<String, List<String>>> getLeaveStateMap(Map<String, Object> traceFileToConvert) {
 		Map<String, Map<String, List<String>>> leaveStateMap = new HashMap<>();
 		Map<String, Map<String, Map<String, List<String>>>> statesMap = getStatesMap(traceFileToConvert);
-		if (statesMap != null && statesMap.containsKey(MorionInitTraceFile.LEAVE_STATE)) {
-			leaveStateMap = statesMap.get(MorionInitTraceFile.LEAVE_STATE);
+		if (statesMap != null && statesMap.containsKey(LEAVE_STATE)) {
+			leaveStateMap = statesMap.get(LEAVE_STATE);
 		}
 		return leaveStateMap;
 	}
 	
 	private static Map<String, Map<String, Map<String, List<String>>>> getStatesMap(Map<String, Object> traceFileToConvert) {
 		Map<String, Map<String, Map<String, List<String>>>> statesMap = new HashMap<>();
-		if (traceFileToConvert.containsKey(MorionInitTraceFile.STATES)) {
-			statesMap = (Map<String, Map<String, Map<String, List<String>>>>) traceFileToConvert.get(MorionInitTraceFile.STATES);
+		if (traceFileToConvert.containsKey(STATES)) {
+			statesMap = (Map<String, Map<String, Map<String, List<String>>>>) traceFileToConvert.get(STATES);
 		}
 		return statesMap;
 	}
