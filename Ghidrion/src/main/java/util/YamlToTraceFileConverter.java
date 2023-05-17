@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.yaml.snakeyaml.Yaml;
@@ -123,15 +124,15 @@ public class YamlToTraceFileConverter {
 			String message = "Hook mode is missing (Function: " + functionName + ", Entry: " + entry + ")";
 			throw new YamlConverterException("Mode missing", message, null);
 		}
-		Mode mode;
-		try {
-			mode = Mode.fromValue(hookDetails.get(MorionInitTraceFile.HOOK_MODE));
-		} catch (IllegalArgumentException e) {
+
+		Optional<Mode> mode = Mode.fromValue(hookDetails.get(MorionInitTraceFile.HOOK_MODE));
+		if (mode.isEmpty()) {
 			String message = "Hook mode '" + hookDetails.get(MorionInitTraceFile.HOOK_MODE) + "' is illegal" 
 					+ " (Function: " + functionName + ", Entry: " + entry + ")";
-			throw new YamlConverterException("Illegal hook mode", message, e);
+			throw new YamlConverterException("Illegal hook mode", message, null);
 		}
-		return mode;
+
+		return mode.get();
 	}
 	
 	private static void addEntryMemory(MorionInitTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {

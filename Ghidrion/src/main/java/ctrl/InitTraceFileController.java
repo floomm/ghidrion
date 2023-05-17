@@ -79,8 +79,8 @@ public class InitTraceFileController {
 		try {
 			YamlToTraceFileConverter.toInitTraceFile(traceFile, getFileStreamToLoad(parent), plugin.getCurrentProgram().getAddressFactory());
 		} catch (YamlConverterException e) {
-			if (e.getError() != null) {
-				Msg.showError(this, parent, e.getTitle(), e.getMessage(), e.getError());
+			if (e.getCause() != null) {
+				Msg.showError(this, parent, e.getTitle(), e.getMessage(), e.getCause());
 			} else {
 				Msg.showError(this, parent, e.getTitle(), e.getMessage());
 			}
