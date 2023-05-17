@@ -117,7 +117,7 @@ public class YamlToTraceFileConverter {
 		}
 		String entry = hookDetails.get(HOOK_ENTRY);
 		Address addr = addressFactory.getAddress(entry);
-		if (addr == null) {
+		if ((addr == null) || (! isValidHex(entry, FOUR_BYTE_LENGTH))) {
 			String title = "Illegal hook entry";
 			String message = "Hook entry address '" + entry + "' is illegal"
 					+ " (Function: " + functionName + ")";
@@ -179,13 +179,13 @@ public class YamlToTraceFileConverter {
 	private static void checkMemoryStateAddresses(List<MemoryEntry> memoryEntries) throws YamlConverterException {
 		for (MemoryEntry entry : memoryEntries) {
 			if (! isValidHex(entry.getName(), FOUR_BYTE_LENGTH)) {
-				String message = "Memory state address '" + entry.getName() + "' has to be hexadecimal";
+				String message = "Memory state address '" + entry.getName() + "' has to be a hexadecimal no longer than 4 byte";
 				throw new YamlConverterException("Illegal memory state address", message);
 			}
 		}
 	}
 
-	private static List<MemoryEntry> mapToMemoryEntries(Map<String, List<String>> entryMap, int maxLengthValue) throws YamlConverterException {
+	private static List<MemoryEntry> mapToMemoryEntries(Map<String, List<String>> entryMap, int maxValueLength) throws YamlConverterException {
 		List<MemoryEntry> entries = new ArrayList<>();
 		for (String name : entryMap.keySet()) {
 			List<String> details = entryMap.get(name);
@@ -194,8 +194,8 @@ public class YamlToTraceFileConverter {
 				throw new YamlConverterException("Missing state value", message);
 			}
 			String value = details.get(0);
-			if (! isValidHex(value, maxLengthValue)) {
-				String message = "State " + name + "'s value has to be hexadecimal";
+			if (! isValidHex(value, maxValueLength)) {
+				String message = "State " + name + "'s value has to be a hexadecimal no longer than " + (maxValueLength-2)/2 + " byte";
 				throw new YamlConverterException("Illegal state value", message);
 			}
 			boolean symbolic = details.size() > 1 
