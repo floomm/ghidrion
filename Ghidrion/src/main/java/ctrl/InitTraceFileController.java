@@ -74,7 +74,6 @@ public class InitTraceFileController {
 		if (warningResult != JOptionPane.OK_OPTION) {
 			return;
 		}
-		traceFile.clear();
 
 		try {
 			YamlToTraceFileConverter.toInitTraceFile(traceFile, getFileStreamToLoad(parent), plugin.getCurrentProgram().getAddressFactory());

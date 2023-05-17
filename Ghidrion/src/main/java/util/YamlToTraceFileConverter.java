@@ -35,10 +35,10 @@ public class YamlToTraceFileConverter {
 	 * @param traceFile			{@link MorionInitTraceFile} to write to
 	 * @param yamlStream		to write to @param traceFile
 	 * @param addressFactory 	to create {@link Address} objects
-	 * @throws YamlConverterException 
+	 * @throws YamlConverterException if any exception occurs while converting
 	 */
 	public static void toInitTraceFile(MorionInitTraceFile traceFile, InputStream yamlStream, AddressFactory addressFactory) throws YamlConverterException {
-		Map<String, Object> traceFileToConvert = loadTraceFile(yamlStream);
+		Map<String, Object> traceFileToConvert = loadTraceFile(traceFile, yamlStream);
 		
 		addHooks(traceFile, traceFileToConvert, addressFactory);
 		addEntryMemory(traceFile, traceFileToConvert);
@@ -59,10 +59,10 @@ public class YamlToTraceFileConverter {
 	 * @param traceFile			{@link MorionTraceFile} to write to
 	 * @param yamlStream		to write to @param traceFile
 	 * @param addressFactory 	to create {@link Address} objects
-	 * @throws YamlConverterException 
+	 * @throws YamlConverterException if any exception occurs while converting
 	 */
 	public static void toTraceFile(MorionTraceFile traceFile, InputStream yamlStream, AddressFactory addressFactory) throws YamlConverterException {
-		Map<String, Object> traceFileToConvert = loadTraceFile(yamlStream);
+		Map<String, Object> traceFileToConvert = loadTraceFile(traceFile, yamlStream);
 		
 		addHooks(traceFile, traceFileToConvert, addressFactory);
 		addEntryMemory(traceFile, traceFileToConvert);
@@ -71,7 +71,8 @@ public class YamlToTraceFileConverter {
 		addLeaveRegisters(traceFile, traceFileToConvert);
 	}
 	
-	private static Map<String, Object> loadTraceFile(InputStream yamlStream) throws YamlConverterException {
+	private static Map<String, Object> loadTraceFile(MorionInitTraceFile oldTraceFile, InputStream yamlStream) throws YamlConverterException {
+		oldTraceFile.clear();
 		Map<String, Object> traceFileToConvert;
 		try {
 			traceFileToConvert = new Yaml().load(yamlStream);
