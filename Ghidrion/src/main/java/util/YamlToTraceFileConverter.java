@@ -89,12 +89,14 @@ public class YamlToTraceFileConverter {
 	
 	private static Set<Hook> mapToHooks(Map<String, Map<String, List<Map<String, String>>>> hookMap, AddressFactory addressFactory) throws YamlConverterException {
 		Set<Hook> hooks = new HashSet<>();
-		Map<String, List<Map<String, String>>> functions = hookMap.get("libc"); // Libc is hardcoded for now
-		for (String functionName : functions.keySet()) {
-			for (Map<String, String> hookDetails : functions.get(functionName)) {
-				Address entry = getHookEntryAddress(functionName, hookDetails, addressFactory);
-				Mode mode = getHookMode(functionName, hookDetails, entry);
-				hooks.add(new Hook(functionName, entry, mode));
+		for (String libName : hookMap.keySet()) {
+			Map<String, List<Map<String, String>>> functions = hookMap.get(libName);
+			for (String functionName : functions.keySet()) {
+				for (Map<String, String> hookDetails : functions.get(functionName)) {
+					Address entry = getHookEntryAddress(functionName, hookDetails, addressFactory);
+					Mode mode = getHookMode(functionName, hookDetails, entry);
+					hooks.add(new Hook(functionName, entry, mode));
+				}
 			}
 		}
 		return hooks;
