@@ -23,7 +23,7 @@ import ghidrion.GhidrionPlugin;
 import model.Hook;
 import model.HookableFunction;
 import model.MemoryEntry;
-import model.MorionTraceFile;
+import model.MorionInitTraceFile;
 import model.Hook.Mode;
 import util.MemoryEntryTableModel;
 import util.ObservableSet;
@@ -32,12 +32,12 @@ import util.YamlToTraceFileConverter;
 
 public class InitTraceFileController {
 	private final GhidrionPlugin plugin;
-	private final MorionTraceFile traceFile;
+	private final MorionInitTraceFile traceFile;
 
 	private final Set<HookableFunction> allHookableFunctions = new HashSet<>();
 	private final ObservableSet<HookableFunction> currentlyHookableFunctions = new ObservableSet<>();
 
-	public InitTraceFileController(GhidrionPlugin plugin, MorionTraceFile traceFile) {
+	public InitTraceFileController(GhidrionPlugin plugin, MorionInitTraceFile traceFile) {
 		this.plugin = Objects.requireNonNull(plugin);
 		this.traceFile = Objects.requireNonNull(traceFile);
 
@@ -61,7 +61,7 @@ public class InitTraceFileController {
 		return plugin;
 	}
 
-	public MorionTraceFile getTraceFile() {
+	public MorionInitTraceFile getTraceFile() {
 		return traceFile;
 	}
 	

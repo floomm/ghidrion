@@ -12,7 +12,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import model.Hook;
 import model.MemoryEntry;
-import model.MorionTraceFile;
+import model.MorionInitTraceFile;
 
 public class TraceFileToYamlConverter {
 
@@ -25,20 +25,20 @@ public class TraceFileToYamlConverter {
 	 * @param 	traceFile to write to disk
 	 * @return 	traceFile as yaml code
 	 */
-	public static String toYaml(MorionTraceFile traceFile) {
+	public static String toYaml(MorionInitTraceFile traceFile) {
 		Map<String, Object> traceFileDump = new HashMap<>();
-		traceFileDump.put(MorionTraceFile.HOOKS, getHooksMap(traceFile));
-		traceFileDump.put(MorionTraceFile.STATES, getStatesMap(traceFile));
+		traceFileDump.put(MorionInitTraceFile.HOOKS, getHooksMap(traceFile));
+		traceFileDump.put(MorionInitTraceFile.STATES, getStatesMap(traceFile));
 		// traceFileDump.put(INFO, traceFile.getInfo());
 		// traceFileDump.put(INSTRUCTIONS, traceFile.getInstructions());
 		return new Yaml().dump(traceFileDump);
 	}
 
-	private static Map<String, Map<String, Map<String, List<String>>>> getStatesMap(MorionTraceFile traceFile) {
-		return Map.of(MorionTraceFile.ENTRY_STATE,
+	private static Map<String, Map<String, Map<String, List<String>>>> getStatesMap(MorionInitTraceFile traceFile) {
+		return Map.of(MorionInitTraceFile.ENTRY_STATE,
 				Map.of(
-						MorionTraceFile.STATE_REGISTERS, memoryEntriesToMap(traceFile.getEntryRegisters()),
-						MorionTraceFile.STATE_MEMORY, memoryEntriesToMap(traceFile.getEntryMemory())));
+						MorionInitTraceFile.STATE_REGISTERS, memoryEntriesToMap(traceFile.getEntryRegisters()),
+						MorionInitTraceFile.STATE_MEMORY, memoryEntriesToMap(traceFile.getEntryMemory())));
 	}
 	
 
@@ -46,7 +46,7 @@ public class TraceFileToYamlConverter {
 		return new TreeMap<>(ms
 				.stream()
 				.map(m -> new Pair<>(m.getName(),
-						m.isSymbolic() ? List.of(m.getValue(), MorionTraceFile.SYMBOLIC) : List.of(m.getValue())))
+						m.isSymbolic() ? List.of(m.getValue(), MorionInitTraceFile.SYMBOLIC) : List.of(m.getValue())))
 				.collect(Collectors.toMap(Pair::getA, Pair::getB)));
 	}
 
@@ -59,7 +59,7 @@ public class TraceFileToYamlConverter {
 		return "0x" + s.toString();
 	}
 
-	private static Map<String, Map<String, List<Map<String, String>>>> getHooksMap(MorionTraceFile traceFile) {
+	private static Map<String, Map<String, List<Map<String, String>>>> getHooksMap(MorionInitTraceFile traceFile) {
 		return new TreeSet<>(traceFile.getHooks()) // convert to TreeSet to sort hooks
 				.stream()
 				.collect(
@@ -74,10 +74,10 @@ public class TraceFileToYamlConverter {
 
 	private static Map<String, String> hookToMap(Hook hook) {
 		Map<String, String> hookMap = new HashMap<>();
-		hookMap.put(MorionTraceFile.HOOK_ENTRY, prependHex(hook.getEntryAddress()));
-		hookMap.put(MorionTraceFile.HOOK_LEAVE, prependHex(hook.getLeaveAddress()));
-		hookMap.put(MorionTraceFile.HOOK_TARGET, generateTargetAddress());
-		hookMap.put(MorionTraceFile.HOOK_MODE, hook.getMode().getValue());
+		hookMap.put(MorionInitTraceFile.HOOK_ENTRY, prependHex(hook.getEntryAddress()));
+		hookMap.put(MorionInitTraceFile.HOOK_LEAVE, prependHex(hook.getLeaveAddress()));
+		hookMap.put(MorionInitTraceFile.HOOK_TARGET, generateTargetAddress());
+		hookMap.put(MorionInitTraceFile.HOOK_MODE, hook.getMode().getValue());
 		return hookMap;
 	}
 

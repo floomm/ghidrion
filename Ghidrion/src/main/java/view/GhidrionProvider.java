@@ -2,7 +2,7 @@ package view;
 
 import docking.ComponentProvider;
 import ghidrion.GhidrionPlugin;
-import model.MorionTraceFile;
+import model.MorionInitTraceFile;
 
 import javax.swing.JPanel;
 
@@ -17,7 +17,7 @@ public class GhidrionProvider extends ComponentProvider {
 	private InitTraceFileController traceFileController;
 	private DisplayController displayController;
 
-	public GhidrionProvider(GhidrionPlugin plugin, String pluginName, String owner, MorionTraceFile traceFile) {
+	public GhidrionProvider(GhidrionPlugin plugin, String pluginName, String owner, MorionInitTraceFile traceFile) {
 		super(plugin.getTool(), pluginName, owner);
 		this.traceFileController = new InitTraceFileController(plugin, traceFile);
 		this.displayController = new DisplayController(plugin);
