@@ -5,10 +5,16 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
 public class HexDocument extends PlainDocument {
-	private static final String HEX_REGEX = "[0-9a-fA-F]+";
-	private static final int MAX_LENGTH = 10; // maximum length of 0x followed by 8 hexadecimal digits
+	public static final int MAX_HEX_DIGITS_MEMORY_ADDRESS = 8;
+	public static final int MAX_HEX_DIGITS_REGISTER_VALUE = 8;
+	public static final int MAX_HEX_DIGITS_UNLIMITED = -1;
 
-	public HexDocument() {
+	private static final String HEX_REGEX = "[0-9a-fA-F]+";
+
+	private final int maxHexDigits;
+
+	public HexDocument(int maxHexDigits) {
+		this.maxHexDigits = maxHexDigits;
 		try {
 			super.insertString(0, "0x", null);
 		} catch (BadLocationException e) {
@@ -26,6 +32,8 @@ public class HexDocument extends PlainDocument {
 		String newText = currentText.substring(0, offs) + str + currentText.substring(offs);
 		if (isValidHex(newText)) {
 			super.insertString(offs, str.toLowerCase(), a);
+			if (maxHexDigits == MAX_HEX_DIGITS_UNLIMITED || getLength() > maxHexDigits + 2)
+				super.remove(maxHexDigits, getLength() - (maxHexDigits + 2));
 		}
 	}
 
@@ -38,7 +46,7 @@ public class HexDocument extends PlainDocument {
 	}
 
 	private boolean isValidHex(String text) {
-		return text.startsWith("0x") && text.substring(2).matches(HEX_REGEX) && text.length() <= MAX_LENGTH;
+		return text.startsWith("0x") && text.substring(2).matches(HEX_REGEX);
 	}
 
 }

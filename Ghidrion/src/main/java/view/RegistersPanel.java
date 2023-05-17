@@ -105,7 +105,7 @@ public class RegistersPanel extends JPanel {
 	}
 
 	private void setupComponents() {
-		textFieldRegisterValue.setDocument(new HexDocument());
+		textFieldRegisterValue.setDocument(new HexDocument(HexDocument.MAX_HEX_DIGITS_REGISTER_VALUE));
 		scrollPaneRegisters.setViewportView(tableRegister);
 		MemoryEntryTableModel tm = new MemoryEntryTableModel(controller.getTraceFile().getEntryRegisters());
 		tableRegister.setModel(tm);

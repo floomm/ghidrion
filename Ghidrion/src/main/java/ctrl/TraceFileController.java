@@ -92,6 +92,10 @@ public class TraceFileController {
 		traceFile.clear();
 	}
 
+	private String padHex(long i) {
+		return String.format("0x%8s", Long.toString(i, 16)).replace(' ', '0');
+	}
+
 	public void addEntryMemory(
 			String startAddress,
 			String endAddress,
@@ -100,27 +104,53 @@ public class TraceFileController {
 			Component component) {
 
 		if (startAddress.length() <= 2) {
-			Msg.showError(this, component, "Empty Start Address", "Start Address can not be empty.");
+			Msg.showError(this, component, "Empty start address", "Start address can not be empty.");
 			return;
 		}
-		if (endAddress.length() <= 2) {
-			endAddress = startAddress;
+		if (value.length() <= 2) {
+			Msg.showError(this, component, "Empty value", "Value cannot be empty.");
+			return;
 		}
-		try {
-			long startAddressLong = Long.parseLong(startAddress.substring(2), 16);
-			long endAddressLong = Long.parseLong(endAddress.substring(2), 16);
-			if (startAddressLong > endAddressLong)
-				Msg.showError(this, component, "Illegal End Address",
-						"End Address has to be bigger or equal to Start Address.");
-			else if (value.length() <= 2)
-				Msg.showError(this, component, "Empty Value", "Value can not be empty.");
-			else
-				traceFile.getEntryMemory().replaceAll(LongStream
-						.rangeClosed(startAddressLong, endAddressLong)
-						.mapToObj(i -> new MemoryEntry("0x" + Long.toString(i, 16), value, isSymbolic))
-						.toList());
-		} catch (NumberFormatException e) {
-			Msg.showError(this, component, "Illegal Address Value", "Addresses are not a hex value.");
+		if (endAddress.length() > 2 && value.length() > 4) {
+			Msg.showWarn(this, component, "Value does not fit",
+					"Please only provide up to one byte (two chars) to add a value to multiple addresses or leave the end address blank to spread the value over an incrementing range of addresses.");
+			return;
+		}
+
+		if (endAddress.length() > 2) {
+			try {
+				long startAddressLong = Long.parseLong(startAddress.substring(2), 16);
+				long endAddressLong = Long.parseLong(endAddress.substring(2), 16);
+				if (startAddressLong > endAddressLong) {
+					Msg.showError(this, component, "Illegal end address",
+							"End address has to be bigger or equal to start address.");
+					return;
+				} else
+					traceFile.getEntryMemory().replaceAll(LongStream
+							.rangeClosed(startAddressLong, endAddressLong)
+							.mapToObj(i -> new MemoryEntry(padHex(i), value,
+									isSymbolic))
+							.toList());
+			} catch (NumberFormatException e) {
+				Msg.showError(this, component, "Illegal address value", "Addresses are not a hex value.");
+			}
+		} else {
+			try {
+				long startAddressLong = Long.parseLong(startAddress.substring(2), 16);
+				Set<MemoryEntry> entriesToAdd = new HashSet<>();
+				String e = value.substring(2);
+				while (!e.isEmpty()) {
+					String startAddressToAdd = padHex(startAddressLong);
+					int charsToAdd = e.length() >= 2 ? 2 : 1;
+					String valueToAdd = "0x" + e.substring(0, charsToAdd);
+					entriesToAdd.add(new MemoryEntry(startAddressToAdd, valueToAdd, isSymbolic));
+					startAddressLong++;
+					e = e.substring(charsToAdd);
+				}
+				traceFile.getEntryMemory().replaceAll(entriesToAdd);
+			} catch (NumberFormatException e) {
+				Msg.showError(this, component, "Illegal address value", "Addresses are not a hex value.");
+			}
 		}
 	}
 

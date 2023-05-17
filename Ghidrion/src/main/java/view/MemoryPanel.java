@@ -122,9 +122,9 @@ public class MemoryPanel extends JPanel {
 	}
 
 	private void setupComponents() {
-		textFieldMemoryStartAddress.setDocument(new HexDocument());
-		textFieldMemoryEndAddress.setDocument(new HexDocument());
-		textFieldMemoryValue.setDocument(new HexDocument());
+		textFieldMemoryStartAddress.setDocument(new HexDocument(HexDocument.MAX_HEX_DIGITS_MEMORY_ADDRESS));
+		textFieldMemoryEndAddress.setDocument(new HexDocument(HexDocument.MAX_HEX_DIGITS_MEMORY_ADDRESS));
+		textFieldMemoryValue.setDocument(new HexDocument(HexDocument.MAX_HEX_DIGITS_UNLIMITED));
 		scrollPaneMemory.setViewportView(tableMemory);
 		MemoryEntryTableModel tm = new MemoryEntryTableModel(controller.getTraceFile().getEntryMemory());
 		tableMemory.setModel(tm);
