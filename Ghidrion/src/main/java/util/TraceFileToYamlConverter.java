@@ -14,7 +14,9 @@ import model.Hook;
 import model.MemoryEntry;
 import model.MorionInitTraceFile;
 
-public class TraceFileToYamlConverter implements ConversionConstants {
+import static util.ConversionConstants.*;
+
+public class TraceFileToYamlConverter {
 
 	private static final long TARGET_ADDRESS_STEP = 0x100;
 	private static long targetAddressCounter = 0;

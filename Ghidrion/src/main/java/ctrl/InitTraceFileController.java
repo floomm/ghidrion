@@ -69,7 +69,7 @@ public class InitTraceFileController {
 	public void loadTraceFile(Component parent) {
 		// Warn user that current init trace file gets cleared
 		String warning = "Are you sure you want to proceed? The current editor entries are cleared.";
-		int warningResult = JOptionPane.showConfirmDialog(null, warning, "Confirmation",
+		int warningResult = JOptionPane.showConfirmDialog(parent, warning, "Confirmation",
 				JOptionPane.OK_CANCEL_OPTION);
 		if (warningResult != JOptionPane.OK_OPTION) {
 			return;
@@ -83,6 +83,8 @@ public class InitTraceFileController {
 			} else {
 				Msg.showError(this, parent, e.getTitle(), e.getMessage());
 			}
+		} catch (TraceFileNotFoundException e) {
+			Msg.showError(this, parent, "No yaml file", "Select a yaml file to load");
 		}
 	}
 
@@ -94,16 +96,21 @@ public class InitTraceFileController {
 	public void writeTraceFile(Component parent) {
 		String content = TraceFileToYamlConverter.toYaml(traceFile);
 
-		File file = chooseFile(parent);
-		if (file != null) {
-			try (FileOutputStream fos = new FileOutputStream(file)) {
-				fos.write(content.getBytes());
-				fos.close();
-			} catch (FileNotFoundException e1) {
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
+		File file;
+		try {
+			file = chooseFile(parent);
+		} catch (TraceFileNotFoundException e) {
+			Msg.showError(this, parent, "No yaml file", "Select a yaml file to write to", e);
+			return;
+		}
+
+		try (FileOutputStream fos = new FileOutputStream(file)) {
+			fos.write(content.getBytes());
+			fos.close();
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
 		}
 	}
 
@@ -167,27 +174,25 @@ public class InitTraceFileController {
 		traceFile.getEntryRegisters().removeAll(toDelete);
 	}
 	
-	private File chooseFile(Component parent) {
+	private File chooseFile(Component parent) throws TraceFileNotFoundException {
 		JFileChooser fileChooser = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("YAML files", "yaml");
 		fileChooser.setFileFilter(filter);
 		int result = fileChooser.showSaveDialog(parent);
-		File file = null;
 		if (result == JFileChooser.APPROVE_OPTION) {
-			file = fileChooser.getSelectedFile();
+			return fileChooser.getSelectedFile();
 		}
-		return file;
+		throw new TraceFileNotFoundException();
 	}
 	
-	private FileInputStream getFileStreamToLoad(Component parent) {
+	private FileInputStream getFileStreamToLoad(Component parent) throws TraceFileNotFoundException {
 		File file = chooseFile(parent);
+
 		FileInputStream input;
 		try {
 			input = new FileInputStream(file);
-		} catch (FileNotFoundException ex) {
-			Msg.showError(YamlToTraceFileConverter.class, null, "No trace file", "Couldn't find trace file");
-			ex.printStackTrace();
-			return null;
+		} catch (FileNotFoundException e) {
+			throw new TraceFileNotFoundException();
 		}
 		
 		return input;

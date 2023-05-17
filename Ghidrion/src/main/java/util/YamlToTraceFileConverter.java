@@ -19,9 +19,14 @@ import model.Hook.Mode;
 import model.MemoryEntry;
 import model.MorionInitTraceFile;
 import model.MorionTraceFile;
-import view.HexDocument;
 
-public class YamlToTraceFileConverter implements ConversionConstants {
+import static util.ConversionConstants.*;
+
+public class YamlToTraceFileConverter {
+
+	private static final String HEX_REGEX = "[0-9a-fA-F]+";
+	private static final int ONE_BYTE_LENGTH = 4; // maximum length of 0x followed by 2 hexadecimal digits
+	private static final int FOUR_BYTE_LENGTH = 10; // maximum length of 0x followed by 8 hexadecimal digits
 	
 	/**
 	 * Convert the information in the @param yamlStream to a {@link MorionInitTraceFile}.
@@ -73,18 +78,19 @@ public class YamlToTraceFileConverter implements ConversionConstants {
 	
 	private static Map<String, Object> loadTraceFile(MorionInitTraceFile oldTraceFile, InputStream yamlStream) throws YamlConverterException {
 		oldTraceFile.clear();
-		Map<String, Object> traceFileToConvert;
 		try {
-			traceFileToConvert = new Yaml().load(yamlStream);
+			return new Yaml().load(yamlStream);
 		} catch (ParserException e) {
 			throw new YamlConverterException("Parser exception", e.getMessage(), e);
 		}
-		return traceFileToConvert;
 	}
 	
 	private static void addHooks(MorionInitTraceFile traceFile, Map<String, Object> traceFileToConvert, AddressFactory addressFactory) throws YamlConverterException {
-		Map<String, Map<String, List<Map<String, String>>>> hookMap = (Map<String, Map<String, List<Map<String, String>>>>) traceFileToConvert
+		Map<String, Map<String, List<Map<String, String>>>> hookMap = new HashMap<>();
+		if (traceFileToConvert.containsKey(HOOKS)) {
+			hookMap = (Map<String, Map<String, List<Map<String, String>>>>) traceFileToConvert
 				.get(HOOKS);
+		}
 		Set<Hook> hooks = mapToHooks(hookMap, addressFactory);
 		traceFile.getHooks().replaceAll(hooks);
 	}
@@ -107,7 +113,7 @@ public class YamlToTraceFileConverter implements ConversionConstants {
 	private static Address getHookEntryAddress(String functionName, Map<String, String> hookDetails, AddressFactory addressFactory) throws YamlConverterException {
 		if (! (hookDetails.containsKey(HOOK_ENTRY))) {
 			String message = "Hook entry address is missing (Function: " + functionName + ")";
-			throw new YamlConverterException("Entry missing", message, null);
+			throw new YamlConverterException("Entry missing", message);
 		}
 		String entry = hookDetails.get(HOOK_ENTRY);
 		Address addr = addressFactory.getAddress(entry);
@@ -115,7 +121,7 @@ public class YamlToTraceFileConverter implements ConversionConstants {
 			String title = "Illegal hook entry";
 			String message = "Hook entry address '" + entry + "' is illegal"
 					+ " (Function: " + functionName + ")";
-			throw new YamlConverterException(title, message, null);
+			throw new YamlConverterException(title, message);
 		}
 		return addr;
 	}
@@ -123,14 +129,14 @@ public class YamlToTraceFileConverter implements ConversionConstants {
 	private static Mode getHookMode(String functionName, Map<String, String> hookDetails, Address entry) throws YamlConverterException {
 		if (! (hookDetails.containsKey(HOOK_MODE))) {
 			String message = "Hook mode is missing (Function: " + functionName + ", Entry: " + entry + ")";
-			throw new YamlConverterException("Mode missing", message, null);
+			throw new YamlConverterException("Mode missing", message);
 		}
 
 		Optional<Mode> mode = Mode.fromValue(hookDetails.get(HOOK_MODE));
 		if (mode.isEmpty()) {
 			String message = "Hook mode '" + hookDetails.get(HOOK_MODE) + "' is illegal" 
 					+ " (Function: " + functionName + ", Entry: " + entry + ")";
-			throw new YamlConverterException("Illegal hook mode", message, null);
+			throw new YamlConverterException("Illegal hook mode", message);
 		}
 
 		return mode.get();
@@ -139,7 +145,7 @@ public class YamlToTraceFileConverter implements ConversionConstants {
 	private static void addEntryMemory(MorionInitTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {
 		Map<String, Map<String, List<String>>> entryStateMap = getEntryStateMap(traceFileToConvert);
 		if (entryStateMap.containsKey(STATE_MEMORY)) {
-			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryStateMap.get(STATE_MEMORY));
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryStateMap.get(STATE_MEMORY), ONE_BYTE_LENGTH);
 			checkMemoryStateAddresses(memoryEntries);
 			traceFile.getEntryMemory().replaceAll(memoryEntries);
 		}
@@ -148,7 +154,7 @@ public class YamlToTraceFileConverter implements ConversionConstants {
 	private static void addEntryRegisters(MorionInitTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {
 		Map<String, Map<String, List<String>>> entryStateMap = getEntryStateMap(traceFileToConvert);
 		if (entryStateMap.containsKey(STATE_REGISTERS)) {
-			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryStateMap.get(STATE_REGISTERS));
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryStateMap.get(STATE_REGISTERS), FOUR_BYTE_LENGTH);
 			traceFile.getEntryRegisters().replaceAll(memoryEntries);
 		}
 	}
@@ -156,7 +162,7 @@ public class YamlToTraceFileConverter implements ConversionConstants {
 	private static void addLeaveMemory(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {
 		Map<String, Map<String, List<String>>> leaveStateMap = getLeaveStateMap(traceFileToConvert);
 		if (leaveStateMap.containsKey(STATE_MEMORY)) {
-			List<MemoryEntry> memoryEntries = mapToMemoryEntries(leaveStateMap.get(STATE_MEMORY));
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(leaveStateMap.get(STATE_MEMORY), ONE_BYTE_LENGTH);
 			checkMemoryStateAddresses(memoryEntries);
 			traceFile.getLeaveMemory().replaceAll(memoryEntries);
 		}
@@ -165,32 +171,32 @@ public class YamlToTraceFileConverter implements ConversionConstants {
 	private static void addLeaveRegisters(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {
 		Map<String, Map<String, List<String>>> leaveStateMap = getLeaveStateMap(traceFileToConvert);
 		if (leaveStateMap.containsKey(STATE_REGISTERS)) {
-			List<MemoryEntry> memoryEntries = mapToMemoryEntries(leaveStateMap.get(STATE_REGISTERS));
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(leaveStateMap.get(STATE_REGISTERS), FOUR_BYTE_LENGTH);
 			traceFile.getLeaveRegisters().replaceAll(memoryEntries);
 		}
 	}
 	
 	private static void checkMemoryStateAddresses(List<MemoryEntry> memoryEntries) throws YamlConverterException {
 		for (MemoryEntry entry : memoryEntries) {
-			if (! HexDocument.isValidHex(entry.getName())) {
+			if (! isValidHex(entry.getName(), FOUR_BYTE_LENGTH)) {
 				String message = "Memory state address '" + entry.getName() + "' has to be hexadecimal";
-				throw new YamlConverterException("Illegal memory state address", message, null);
+				throw new YamlConverterException("Illegal memory state address", message);
 			}
 		}
 	}
 
-	private static List<MemoryEntry> mapToMemoryEntries(Map<String, List<String>> entryMap) throws YamlConverterException {
+	private static List<MemoryEntry> mapToMemoryEntries(Map<String, List<String>> entryMap, int maxLengthValue) throws YamlConverterException {
 		List<MemoryEntry> entries = new ArrayList<>();
 		for (String name : entryMap.keySet()) {
 			List<String> details = entryMap.get(name);
 			if (details == null || details.size() <= 0) {
 				String message = "State " + name + " has no value";
-				throw new YamlConverterException("Missing state value", message, null);
+				throw new YamlConverterException("Missing state value", message);
 			}
 			String value = details.get(0);
-			if (! HexDocument.isValidHex(value)) {
+			if (! isValidHex(value, maxLengthValue)) {
 				String message = "State " + name + "'s value has to be hexadecimal";
-				throw new YamlConverterException("Illegal state value", message, null);
+				throw new YamlConverterException("Illegal state value", message);
 			}
 			boolean symbolic = details.size() > 1 
 					&& SYMBOLIC.equals(details.get(1));
@@ -211,7 +217,7 @@ public class YamlToTraceFileConverter implements ConversionConstants {
 	private static Map<String, Map<String, List<String>>> getLeaveStateMap(Map<String, Object> traceFileToConvert) {
 		Map<String, Map<String, List<String>>> leaveStateMap = new HashMap<>();
 		Map<String, Map<String, Map<String, List<String>>>> statesMap = getStatesMap(traceFileToConvert);
-		if (statesMap != null && statesMap.containsKey(LEAVE_STATE)) {
+		if (statesMap.containsKey(LEAVE_STATE)) {
 			leaveStateMap = statesMap.get(LEAVE_STATE);
 		}
 		return leaveStateMap;
@@ -223,6 +229,10 @@ public class YamlToTraceFileConverter implements ConversionConstants {
 			statesMap = (Map<String, Map<String, Map<String, List<String>>>>) traceFileToConvert.get(STATES);
 		}
 		return statesMap;
+	}
+
+	private static boolean isValidHex(String text, int maxLength) {
+		return text.startsWith("0x") && text.substring(2).matches(HEX_REGEX) && text.length() <= maxLength;
 	}
 
 }
