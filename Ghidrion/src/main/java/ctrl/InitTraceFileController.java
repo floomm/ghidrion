@@ -28,6 +28,7 @@ import model.Hook.Mode;
 import util.MemoryEntryTableModel;
 import util.ObservableSet;
 import util.TraceFileToYamlConverter;
+import util.YamlConverterException;
 import util.YamlToTraceFileConverter;
 
 public class InitTraceFileController {
@@ -75,7 +76,15 @@ public class InitTraceFileController {
 		}
 		traceFile.clear();
 
-		YamlToTraceFileConverter.toInitTraceFile(traceFile, getFileStreamToLoad(parent), plugin.getCurrentProgram().getAddressFactory(), parent);
+		try {
+			YamlToTraceFileConverter.toInitTraceFile(traceFile, getFileStreamToLoad(parent), plugin.getCurrentProgram().getAddressFactory());
+		} catch (YamlConverterException e) {
+			if (e.getError() != null) {
+				Msg.showError(this, parent, e.getTitle(), e.getMessage(), e.getError());
+			} else {
+				Msg.showError(this, parent, e.getTitle(), e.getMessage());
+			}
+		}
 	}
 
 	/**
