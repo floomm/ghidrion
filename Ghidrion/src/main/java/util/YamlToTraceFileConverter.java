@@ -94,15 +94,7 @@ public class YamlToTraceFileConverter {
 			for (Map<String, String> hookDetails : functions.get(functionName)) {
 				Address entry = getHookEntryAddress(functionName, hookDetails, addressFactory);
 				Mode mode = getHookMode(functionName, hookDetails, entry);
-
-				try {
-					hooks.add(new Hook(functionName, entry, mode));
-				} catch (NullPointerException e) {
-					String title = "Illegal hook entry";
-					String message = "Hook entry address " + entry + " is illegal"
-							+ " (Function: " + functionName + ")";
-					throw new YamlConverterException(title, message, e);
-				}
+				hooks.add(new Hook(functionName, entry, mode));
 			}
 		}
 		return hooks;
@@ -114,7 +106,14 @@ public class YamlToTraceFileConverter {
 			throw new YamlConverterException("Entry missing", message, null);
 		}
 		String entry = hookDetails.get(MorionInitTraceFile.HOOK_ENTRY);
-		return addressFactory.getAddress(entry);
+		Address addr = addressFactory.getAddress(entry);
+		if (addr == null) {
+			String title = "Illegal hook entry";
+			String message = "Hook entry address '" + entry + "' is illegal"
+					+ " (Function: " + functionName + ")";
+			throw new YamlConverterException(title, message, null);
+		}
+		return addr;
 	}
 	
 	private static Mode getHookMode(String functionName, Map<String, String> hookDetails, Address entry) throws YamlConverterException {
@@ -126,7 +125,7 @@ public class YamlToTraceFileConverter {
 		try {
 			mode = Mode.fromValue(hookDetails.get(MorionInitTraceFile.HOOK_MODE));
 		} catch (IllegalArgumentException e) {
-			String message = "Hook mode " + hookDetails.get(MorionInitTraceFile.HOOK_MODE) + " is illegal" 
+			String message = "Hook mode '" + hookDetails.get(MorionInitTraceFile.HOOK_MODE) + "' is illegal" 
 					+ " (Function: " + functionName + ", Entry: " + entry + ")";
 			throw new YamlConverterException("Illegal hook mode", message, e);
 		}
