@@ -33,7 +33,7 @@ public class HexDocument extends PlainDocument {
 		if (isValidHex(newText)) {
 			super.insertString(offs, str.toLowerCase(), a);
 			if (maxHexDigits == MAX_HEX_DIGITS_UNLIMITED || getLength() > maxHexDigits + 2)
-				super.remove(maxHexDigits, getLength() - (maxHexDigits + 2));
+				super.remove(maxHexDigits + 2, getLength() - (maxHexDigits + 2));
 		}
 	}
 
