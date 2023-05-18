@@ -65,7 +65,7 @@ public class InitTraceFileController {
 	public MorionInitTraceFile getTraceFile() {
 		return traceFile;
 	}
-	
+
 	public void loadTraceFile(Component parent) {
 		// Warn user that current init trace file gets cleared
 		String warning = "Are you sure you want to proceed? The current editor entries are cleared.";
@@ -76,7 +76,8 @@ public class InitTraceFileController {
 		}
 
 		try {
-			YamlToTraceFileConverter.toInitTraceFile(traceFile, getFileStreamToLoad(parent), plugin.getCurrentProgram().getAddressFactory());
+			YamlToTraceFileConverter.toInitTraceFile(traceFile, getFileStreamToLoad(parent),
+					plugin.getCurrentProgram().getAddressFactory());
 		} catch (YamlConverterException e) {
 			if (e.getCause() != null) {
 				Msg.showError(this, parent, e.getTitle(), e.getMessage(), e.getCause());
@@ -173,8 +174,8 @@ public class InitTraceFileController {
 		List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableRegister.getSelectedRows());
 		traceFile.getEntryRegisters().removeAll(toDelete);
 	}
-	
-	private File chooseFile(Component parent) throws TraceFileNotFoundException {
+
+	public static File chooseFile(Component parent) throws TraceFileNotFoundException {
 		JFileChooser fileChooser = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("YAML files", "yaml");
 		fileChooser.setFileFilter(filter);
@@ -184,8 +185,8 @@ public class InitTraceFileController {
 		}
 		throw new TraceFileNotFoundException();
 	}
-	
-	private FileInputStream getFileStreamToLoad(Component parent) throws TraceFileNotFoundException {
+
+	public static FileInputStream getFileStreamToLoad(Component parent) throws TraceFileNotFoundException {
 		File file = chooseFile(parent);
 
 		FileInputStream input;
@@ -194,7 +195,7 @@ public class InitTraceFileController {
 		} catch (FileNotFoundException e) {
 			throw new TraceFileNotFoundException();
 		}
-		
+
 		return input;
 	}
 
