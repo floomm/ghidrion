@@ -1,9 +1,6 @@
 package util;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import ghidra.app.decompiler.CTokenHighlightMatcher;
 import ghidra.app.decompiler.ClangToken;
@@ -11,6 +8,7 @@ import ghidra.app.decompiler.DecompilerHighlighter;
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.AddressSet;
 import ghidrion.GhidrionPlugin;
+import model.Instruction;
 import model.MorionTraceFile;
 
 public class TraceColorizerScript extends GhidraScript {
@@ -34,7 +32,10 @@ public class TraceColorizerScript extends GhidraScript {
 			decolorize();
 		}
 		
-		AddressSet addressesToColorize = getTracedAddresses(traceFile);
+		AddressSet addressesToColorize = new AddressSet();
+		for (Instruction i : traceFile.getInstructions()) {
+			addressesToColorize.add(i.getAddress());
+		}
 		
 		int colorizeId = currentProgram.startTransaction("Colorizing instructions");
 		plugin.getColorizingService().setBackgroundColor(addressesToColorize, traceColor);
@@ -82,20 +83,6 @@ public class TraceColorizerScript extends GhidraScript {
 			}
 		};
 		return plugin.getDecompilerHighlightService().createHighlighter(highlightMatcher);
-	}
-	
-	private AddressSet getTracedAddresses(MorionTraceFile traceFile) {
-        List<String> addressList = traceFile.getInstructions().stream()
-        		.filter(instruction -> !instruction.isEmpty())
-        		.map(instruction -> instruction.get(0))
-        		.map(address -> address.substring(2))
-        		.collect(Collectors.toCollection(ArrayList::new));
-        AddressSet addressSet = new AddressSet();
-        for (String address : addressList) {
-        	addressSet.add(parseAddress(address));
-        }
-		return addressSet;
-		
 	}
 
 }

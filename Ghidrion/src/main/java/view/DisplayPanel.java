@@ -110,16 +110,8 @@ public class DisplayPanel extends JPanel {
 	private void setupBtnClearTrace() {
 		btnClearTrace.addActionListener(e -> {
 			controller.getPlugin().colorizerScript.decolorize();
+			traceFile.clear();
 		});
-		// btnRemoveTraces.addActionListener(e -> {
-		// List<String> selectedItems = traceList.getSelectedValuesList();
-		// controller.getPlugin().colorizerScript.decolorize(selectedItems);
-
-		// int[] selectedIndices = traceList.getSelectedIndices();
-		// for (int i = selectedIndices.length - 1; i >= 0; i--) {
-		// traceListModel.remove(selectedIndices[i]);
-		// }
-		// });
 	}
 
 	private void setupBtnDisplayTrace() {
@@ -130,11 +122,9 @@ public class DisplayPanel extends JPanel {
 			} catch (TraceFileNotFoundException ex) {
 				Msg.showError(this, this, "Trace file not found", "Trace file not found.", ex);
 				ex.printStackTrace();
-				return;
 			} catch (YamlConverterException ex) {
 				Msg.showError(this, this, ex.getTitle(), ex.getMessage(), ex);
 				ex.printStackTrace();
-				return;
 			}
 			controller.getPlugin().colorizerScript.colorize(traceFile, traceColor);
 		});

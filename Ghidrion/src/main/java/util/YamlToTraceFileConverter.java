@@ -8,14 +8,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.parser.ParserException;
 
 import ghidra.program.model.address.Address;
 import ghidra.program.model.address.AddressFactory;
+import ghidra.program.model.address.AddressSet;
 import model.Hook;
 import model.Hook.Mode;
+import model.Instruction;
 import model.MemoryEntry;
 import model.MorionInitTraceFile;
 import model.MorionTraceFile;
@@ -71,11 +74,22 @@ public class YamlToTraceFileConverter {
 		Map<String, Object> traceFileToConvert = loadTraceFile(traceFile, yamlStream);
 		
 		addHooks(traceFile, traceFileToConvert, addressFactory);
-		addInstructions(traceFile, traceFileToConvert);
+		addInstructions(traceFile, traceFileToConvert, addressFactory);
 		addEntryMemory(traceFile, traceFileToConvert);
 		addEntryRegisters(traceFile, traceFileToConvert);
 		addLeaveMemory(traceFile, traceFileToConvert);
 		addLeaveRegisters(traceFile, traceFileToConvert);
+	}
+	
+	public static AddressSet getTracedAddresses(MorionTraceFile traceFile, AddressFactory addressFactory) {
+		List<String> addressList = traceFile.getInstructions().stream()
+				.map(i -> i.getAddress().toString())
+				.collect(Collectors.toCollection(ArrayList::new));
+        AddressSet addressSet = new AddressSet();
+        for (String address : addressList) {
+        	addressSet.add(addressFactory.getAddress(address));
+        }
+		return addressSet;
 	}
 	
 	private static Map<String, Object> loadTraceFile(MorionInitTraceFile oldTraceFile, InputStream yamlStream) throws YamlConverterException {
@@ -96,15 +110,6 @@ public class YamlToTraceFileConverter {
 				(Map<String, Map<String, List<Map<String, String>>>>) traceFileToConvert.get(HOOKS);
 		Set<Hook> hooks = mapToHooks(hookMap, addressFactory);
 		traceFile.getHooks().replaceAll(hooks);
-	}
-	
-	private static void addInstructions(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {
-		if (! (traceFileToConvert.containsKey(INSTRUCTIONS))) {
-			String message = "Instructions are missing";
-			throw new YamlConverterException("Instructions missing", message);
-		}
-		List<List<String>> instructions = (List<List<String>>) traceFileToConvert.get(INSTRUCTIONS);
-		traceFile.setInstructions(instructions);
 	}
 	
 	private static Set<Hook> mapToHooks(Map<String, Map<String, List<Map<String, String>>>> hookMap, AddressFactory addressFactory) throws YamlConverterException {
@@ -152,6 +157,30 @@ public class YamlToTraceFileConverter {
 		}
 
 		return mode.get();
+	}
+	
+	private static void addInstructions(
+			MorionTraceFile traceFile, 
+			Map<String, Object> traceFileToConvert, 
+			AddressFactory addressFactory
+		) throws YamlConverterException {
+		if (! (traceFileToConvert.containsKey(INSTRUCTIONS))) {
+			throw new YamlConverterException("Instructions missing", "Instructions are missing");
+		}
+		
+		Set<Instruction> instructions = new HashSet<>();
+		List<List<String>> instructionList = (List<List<String>>) traceFileToConvert.get(INSTRUCTIONS);
+		for (List<String> instruction : instructionList) {
+			if ((instruction.size() < 4) || (! isValidHex(instruction.get(0), FOUR_BYTE_LENGTH))) {
+				throw new YamlConverterException("Invalid instruction", "An instruction is invalid");
+			}
+			Address address = addressFactory.getAddress(instruction.get(0));
+			String machineCode = instruction.get(1);
+			String assemblyCode = instruction.get(2);
+			String code = instruction.get(3);
+			instructions.add(new Instruction(address, machineCode, assemblyCode, code));
+		}
+		traceFile.getInstructions().addAll(instructions);
 	}
 	
 	private static void addEntryMemory(MorionInitTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {
