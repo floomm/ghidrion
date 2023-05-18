@@ -12,24 +12,11 @@ import org.yaml.snakeyaml.Yaml;
 
 import model.Hook;
 import model.MemoryEntry;
-import model.MorionTraceFile;
+import model.MorionInitTraceFile;
+
+import static util.ConversionConstants.*;
 
 public class TraceFileToYamlConverter {
-
-	public static final String HOOKS = "hooks";
-	public static final String HOOK_ENTRY = "entry";
-	public static final String HOOK_LEAVE = "leave";
-	public static final String HOOK_TARGET = "target";
-	public static final String HOOK_MODE = "mode";
-	public static final String INFO = "info";
-	public static final String INSTRUCTIONS = "instructions";
-	public static final String STATES = "states";
-	public static final String ENTRY_STATE = "entry";
-	public static final String LEAVE_STATE = "leave";
-	public static final String STATE_ADDRESS = "addr";
-	public static final String STATE_MEMORY = "mems";
-	public static final String STATE_REGISTERS = "regs";
-	public static final String SYMBOLIC = "$$";
 
 	private static final long TARGET_ADDRESS_STEP = 0x100;
 	private static long targetAddressCounter = 0;
@@ -40,7 +27,7 @@ public class TraceFileToYamlConverter {
 	 * @param 	traceFile to write to disk
 	 * @return 	traceFile as yaml code
 	 */
-	public static String toYaml(MorionTraceFile traceFile) {
+	public static String toYaml(MorionInitTraceFile traceFile) {
 		Map<String, Object> traceFileDump = new HashMap<>();
 		traceFileDump.put(HOOKS, getHooksMap(traceFile));
 		traceFileDump.put(STATES, getStatesMap(traceFile));
@@ -49,7 +36,7 @@ public class TraceFileToYamlConverter {
 		return new Yaml().dump(traceFileDump);
 	}
 
-	private static Map<String, Map<String, Map<String, List<String>>>> getStatesMap(MorionTraceFile traceFile) {
+	private static Map<String, Map<String, Map<String, List<String>>>> getStatesMap(MorionInitTraceFile traceFile) {
 		return Map.of(ENTRY_STATE,
 				Map.of(
 						STATE_REGISTERS, memoryEntriesToMap(traceFile.getEntryRegisters()),
@@ -74,7 +61,7 @@ public class TraceFileToYamlConverter {
 		return "0x" + s.toString();
 	}
 
-	private static Map<String, Map<String, List<Map<String, String>>>> getHooksMap(MorionTraceFile traceFile) {
+	private static Map<String, Map<String, List<Map<String, String>>>> getHooksMap(MorionInitTraceFile traceFile) {
 		return new TreeSet<>(traceFile.getHooks()) // convert to TreeSet to sort hooks
 				.stream()
 				.collect(

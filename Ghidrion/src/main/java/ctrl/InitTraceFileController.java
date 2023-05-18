@@ -3,6 +3,7 @@ package ctrl;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,27 +14,31 @@ import java.util.stream.LongStream;
 
 import java.util.Set;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import ghidra.util.Msg;
 import ghidrion.GhidrionPlugin;
 import model.Hook;
 import model.HookableFunction;
 import model.MemoryEntry;
-import model.MorionTraceFile;
+import model.MorionInitTraceFile;
 import model.Hook.Mode;
 import util.MemoryEntryTableModel;
 import util.ObservableSet;
 import util.TraceFileToYamlConverter;
+import util.YamlConverterException;
+import util.YamlToTraceFileConverter;
 
-public class TraceFileController {
+public class InitTraceFileController {
 	private final GhidrionPlugin plugin;
-	private final MorionTraceFile traceFile;
+	private final MorionInitTraceFile traceFile;
 
 	private final Set<HookableFunction> allHookableFunctions = new HashSet<>();
 	private final ObservableSet<HookableFunction> currentlyHookableFunctions = new ObservableSet<>();
 
-	public TraceFileController(GhidrionPlugin plugin, MorionTraceFile traceFile) {
+	public InitTraceFileController(GhidrionPlugin plugin, MorionInitTraceFile traceFile) {
 		this.plugin = Objects.requireNonNull(plugin);
 		this.traceFile = Objects.requireNonNull(traceFile);
 
@@ -57,8 +62,30 @@ public class TraceFileController {
 		return plugin;
 	}
 
-	public MorionTraceFile getTraceFile() {
+	public MorionInitTraceFile getTraceFile() {
 		return traceFile;
+	}
+	
+	public void loadTraceFile(Component parent) {
+		// Warn user that current init trace file gets cleared
+		String warning = "Are you sure you want to proceed? The current editor entries are cleared.";
+		int warningResult = JOptionPane.showConfirmDialog(parent, warning, "Confirmation",
+				JOptionPane.OK_CANCEL_OPTION);
+		if (warningResult != JOptionPane.OK_OPTION) {
+			return;
+		}
+
+		try {
+			YamlToTraceFileConverter.toInitTraceFile(traceFile, getFileStreamToLoad(parent), plugin.getCurrentProgram().getAddressFactory());
+		} catch (YamlConverterException e) {
+			if (e.getCause() != null) {
+				Msg.showError(this, parent, e.getTitle(), e.getMessage(), e.getCause());
+			} else {
+				Msg.showError(this, parent, e.getTitle(), e.getMessage());
+			}
+		} catch (TraceFileNotFoundException e) {
+			Msg.showError(this, parent, "No yaml file", "Select a yaml file to load");
+		}
 	}
 
 	/**
@@ -69,22 +96,21 @@ public class TraceFileController {
 	public void writeTraceFile(Component parent) {
 		String content = TraceFileToYamlConverter.toYaml(traceFile);
 
-		JFileChooser fileChooser = new JFileChooser();
-		int result = fileChooser.showSaveDialog(parent);
-		File file = null;
-		if (result == JFileChooser.APPROVE_OPTION) {
-			file = fileChooser.getSelectedFile();
+		File file;
+		try {
+			file = chooseFile(parent);
+		} catch (TraceFileNotFoundException e) {
+			Msg.showError(this, parent, "No yaml file", "Select a yaml file to write to", e);
+			return;
 		}
 
-		if (file != null) {
-			try (FileOutputStream fos = new FileOutputStream(file)) {
-				fos.write(content.getBytes());
-				fos.close();
-			} catch (FileNotFoundException e1) {
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
+		try (FileOutputStream fos = new FileOutputStream(file)) {
+			fos.write(content.getBytes());
+			fos.close();
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
 		}
 	}
 
@@ -146,6 +172,30 @@ public class TraceFileController {
 		MemoryEntryTableModel model = (MemoryEntryTableModel) tableRegister.getModel();
 		List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableRegister.getSelectedRows());
 		traceFile.getEntryRegisters().removeAll(toDelete);
+	}
+	
+	private File chooseFile(Component parent) throws TraceFileNotFoundException {
+		JFileChooser fileChooser = new JFileChooser();
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("YAML files", "yaml");
+		fileChooser.setFileFilter(filter);
+		int result = fileChooser.showSaveDialog(parent);
+		if (result == JFileChooser.APPROVE_OPTION) {
+			return fileChooser.getSelectedFile();
+		}
+		throw new TraceFileNotFoundException();
+	}
+	
+	private FileInputStream getFileStreamToLoad(Component parent) throws TraceFileNotFoundException {
+		File file = chooseFile(parent);
+
+		FileInputStream input;
+		try {
+			input = new FileInputStream(file);
+		} catch (FileNotFoundException e) {
+			throw new TraceFileNotFoundException();
+		}
+		
+		return input;
 	}
 
 	public ObservableSet<HookableFunction> getCurrentlyHookableFunctions() {

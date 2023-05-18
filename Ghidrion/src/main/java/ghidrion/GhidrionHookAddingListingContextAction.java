@@ -12,7 +12,7 @@ import ghidra.program.model.listing.Function;
 import ghidra.program.model.listing.Program;
 import ghidra.program.model.symbol.Reference;
 import model.Hook;
-import model.MorionTraceFile;
+import model.MorionInitTraceFile;
 import model.Hook.Mode;
 
 public class GhidrionHookAddingListingContextAction extends ListingContextAction {
@@ -22,9 +22,9 @@ public class GhidrionHookAddingListingContextAction extends ListingContextAction
     private static final String MENU_PATH_CHANGE_HOOK = "Ghidrion: Change Hook";
     private static final String DELETE_ENTRY = "delete hook";
     private final GhidrionPlugin plugin;
-    private final MorionTraceFile traceFile;
+    private final MorionInitTraceFile traceFile;
 
-    public GhidrionHookAddingListingContextAction(GhidrionPlugin plugin, MorionTraceFile traceFile) {
+    public GhidrionHookAddingListingContextAction(GhidrionPlugin plugin, MorionInitTraceFile traceFile) {
         super("Ghidrion", plugin.getName());
         plugin.addProgramOpenendListener(this::programOpened);
         this.plugin = Objects.requireNonNull(plugin);
