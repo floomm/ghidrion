@@ -32,6 +32,8 @@ import ghidra.framework.plugintool.util.PluginStatus;
 import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.listing.Program;
 import model.MorionInitTraceFile;
+import util.JumpToAddressScript;
+import util.TraceColorizerScript;
 import view.GhidrionProvider;
 
 /**

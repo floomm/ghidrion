@@ -1,4 +1,4 @@
-package ghidrion;
+package util;
 
 import java.awt.Color;
 import java.io.File;
@@ -22,6 +22,7 @@ import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.AddressSet;
 import ghidra.util.Msg;
 import ghidra.util.exception.CancelledException;
+import ghidrion.GhidrionPlugin;
 
 public class TraceColorizerScript extends GhidraScript {
 	
