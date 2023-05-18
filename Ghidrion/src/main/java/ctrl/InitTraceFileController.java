@@ -65,7 +65,7 @@ public class InitTraceFileController {
 	public MorionInitTraceFile getTraceFile() {
 		return traceFile;
 	}
-	
+
 	public void loadTraceFile(Component parent) {
 		// Warn user that current init trace file gets cleared
 		String warning = "Are you sure you want to proceed? The current editor entries are cleared.";
@@ -76,7 +76,8 @@ public class InitTraceFileController {
 		}
 
 		try {
-			YamlToTraceFileConverter.toInitTraceFile(traceFile, getFileStreamToLoad(parent), plugin.getCurrentProgram().getAddressFactory());
+			YamlToTraceFileConverter.toInitTraceFile(traceFile, getFileStreamToLoad(parent),
+					plugin.getCurrentProgram().getAddressFactory());
 		} catch (YamlConverterException e) {
 			if (e.getCause() != null) {
 				Msg.showError(this, parent, e.getTitle(), e.getMessage(), e.getCause());
@@ -118,10 +119,30 @@ public class InitTraceFileController {
 		traceFile.clear();
 	}
 
-	private String padHex(long i) {
+	private String padHexTo4Bytes(long i) {
 		return String.format("0x%8s", Long.toString(i, 16)).replace(' ', '0');
 	}
 
+	/**
+	 * Adds entries to the init trace file.
+	 * 
+	 * If no is provided, the {@param value} is split into 1
+	 * byte chunks and spread over incrementing addresses starting with
+	 * {@param startAddress}.
+	 * 
+	 * If an {@param endAddress} is provided the {@param value} is repeated for each
+	 * byte between the {param startAddress} (inclusive) and {@param endAddress}
+	 * (inclusive).
+	 * 
+	 * Throws up an error message if the value is longer than 1 byte (2 hex chars)
+	 * and a non-empty (except for the `0x`) end address is provided.
+	 * 
+	 * @param startAddress of the new entry
+	 * @param endAddress   of the new entry
+	 * @param value        of the new entry
+	 * @param isSymbolic   true if the new entry is symbolic
+	 * @param component    to use to show error messages
+	 */
 	public void addEntryMemory(
 			String startAddress,
 			String endAddress,
@@ -143,41 +164,50 @@ public class InitTraceFileController {
 			return;
 		}
 
-		if (endAddress.length() > 2) {
-			try {
-				long startAddressLong = Long.parseLong(startAddress.substring(2), 16);
-				long endAddressLong = Long.parseLong(endAddress.substring(2), 16);
-				if (startAddressLong > endAddressLong) {
-					Msg.showError(this, component, "Illegal end address",
-							"End address has to be bigger or equal to start address.");
-					return;
-				} else
-					traceFile.getEntryMemory().replaceAll(LongStream
-							.rangeClosed(startAddressLong, endAddressLong)
-							.mapToObj(i -> new MemoryEntry(padHex(i), value,
-									isSymbolic))
-							.toList());
-			} catch (NumberFormatException e) {
-				Msg.showError(this, component, "Illegal address value", "Addresses are not a hex value.");
-			}
-		} else {
-			try {
-				long startAddressLong = Long.parseLong(startAddress.substring(2), 16);
-				Set<MemoryEntry> entriesToAdd = new HashSet<>();
-				String e = value.substring(2);
-				while (!e.isEmpty()) {
-					String startAddressToAdd = padHex(startAddressLong);
-					int charsToAdd = e.length() >= 2 ? 2 : 1;
-					String valueToAdd = "0x" + e.substring(0, charsToAdd);
-					entriesToAdd.add(new MemoryEntry(startAddressToAdd, valueToAdd, isSymbolic));
-					startAddressLong++;
-					e = e.substring(charsToAdd);
-				}
-				traceFile.getEntryMemory().replaceAll(entriesToAdd);
-			} catch (NumberFormatException e) {
-				Msg.showError(this, component, "Illegal address value", "Addresses are not a hex value.");
-			}
+		if (endAddress.length() > 2)
+			repeatMemoryEntry(startAddress, endAddress, component, value, isSymbolic);
+		else
+			spreadMemoryValue(startAddress, value, isSymbolic, component);
+	}
+
+	private void repeatMemoryEntry(String startAddress, String endAddress, Component component, String value,
+			boolean isSymbolic) {
+		try {
+			long startAddressLong = Long.parseLong(startAddress.substring(2), 16);
+			long endAddressLong = Long.parseLong(endAddress.substring(2), 16);
+			if (startAddressLong > endAddressLong) {
+				Msg.showError(this, component, "Illegal end address",
+						"End address has to be bigger or equal to start address.");
+				return;
+			} else
+				traceFile.getEntryMemory().replaceAll(LongStream
+						.rangeClosed(startAddressLong, endAddressLong)
+						.mapToObj(i -> new MemoryEntry(padHexTo4Bytes(i), value,
+								isSymbolic))
+						.toList());
+		} catch (NumberFormatException e) {
+			Msg.showError(this, component, "Illegal address value", "Addresses are not a hex value.");
 		}
+	}
+
+	private void spreadMemoryValue(String startAddress, String value, boolean isSymbolic, Component component) {
+		try {
+			long startAddressLong = Long.parseLong(startAddress.substring(2), 16);
+			Set<MemoryEntry> entriesToAdd = new HashSet<>();
+			String e = value.substring(2);
+			while (!e.isEmpty()) {
+				String startAddressToAdd = padHexTo4Bytes(startAddressLong);
+				int charsToAdd = e.length() >= 2 ? 2 : 1;
+				String valueToAdd = "0x" + e.substring(0, charsToAdd);
+				entriesToAdd.add(new MemoryEntry(startAddressToAdd, valueToAdd, isSymbolic));
+				startAddressLong++;
+				e = e.substring(charsToAdd);
+			}
+			traceFile.getEntryMemory().replaceAll(entriesToAdd);
+		} catch (NumberFormatException e) {
+			Msg.showError(this, component, "Illegal address value", "Addresses are not a hex value.");
+		}
+
 	}
 
 	public void removeAllEntryMemory(JTable tableMemory) {
@@ -203,7 +233,7 @@ public class InitTraceFileController {
 		List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableRegister.getSelectedRows());
 		traceFile.getEntryRegisters().removeAll(toDelete);
 	}
-	
+
 	private File chooseFile(Component parent) throws TraceFileNotFoundException {
 		JFileChooser fileChooser = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("YAML files", "yaml");
@@ -214,7 +244,7 @@ public class InitTraceFileController {
 		}
 		throw new TraceFileNotFoundException();
 	}
-	
+
 	private FileInputStream getFileStreamToLoad(Component parent) throws TraceFileNotFoundException {
 		File file = chooseFile(parent);
 
@@ -224,7 +254,7 @@ public class InitTraceFileController {
 		} catch (FileNotFoundException e) {
 			throw new TraceFileNotFoundException();
 		}
-		
+
 		return input;
 	}
 
