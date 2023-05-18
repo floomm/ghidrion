@@ -73,12 +73,14 @@ public class YamlToTraceFileConverter {
 		
 		addHooks(traceFile, traceFileToConvert, addressFactory);
 		addInstructions(traceFile, traceFileToConvert, addressFactory);
+		addEntryAddress(traceFile, traceFileToConvert, addressFactory);
 		addEntryMemory(traceFile, traceFileToConvert);
 		addEntryRegisters(traceFile, traceFileToConvert);
+		addLeaveAddress(traceFile, traceFileToConvert, addressFactory);
 		addLeaveMemory(traceFile, traceFileToConvert);
 		addLeaveRegisters(traceFile, traceFileToConvert);
 	}
-	
+
 	private static Map<String, Object> loadTraceFile(MorionInitTraceFile oldTraceFile, InputStream yamlStream) throws YamlConverterException {
 		oldTraceFile.clear();
 		try {
@@ -178,37 +180,55 @@ public class YamlToTraceFileConverter {
 		}
 		traceFile.getInstructions().addAll(instructions);
 	}
+
+	private static void addEntryAddress(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert,
+			AddressFactory addressFactory) {
+		Map<String, Object> entryStateMap = getEntryStateMap(traceFileToConvert);
+		String address = (String) entryStateMap.get(STATE_ADDRESS);
+		traceFile.setEntryAddress(addressFactory.getAddress(address));
+	}
 	
 	private static void addEntryMemory(MorionInitTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {
-		Map<String, Map<String, List<String>>> entryStateMap = getEntryStateMap(traceFileToConvert);
+		Map<String, Object> entryStateMap = getEntryStateMap(traceFileToConvert);
 		if (entryStateMap.containsKey(STATE_MEMORY)) {
-			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryStateMap.get(STATE_MEMORY), ONE_BYTE_LENGTH);
+			Map<String, List<String>> entryMap = (Map<String, List<String>>) entryStateMap.get(STATE_MEMORY);
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryMap, ONE_BYTE_LENGTH);
 			checkMemoryStateAddresses(memoryEntries);
 			traceFile.getEntryMemory().replaceAll(memoryEntries);
 		}
 	}
 	
 	private static void addEntryRegisters(MorionInitTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {
-		Map<String, Map<String, List<String>>> entryStateMap = getEntryStateMap(traceFileToConvert);
+		Map<String, Object> entryStateMap = getEntryStateMap(traceFileToConvert);
 		if (entryStateMap.containsKey(STATE_REGISTERS)) {
-			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryStateMap.get(STATE_REGISTERS), FOUR_BYTE_LENGTH);
+			Map<String, List<String>> entryMap = (Map<String, List<String>>) entryStateMap.get(STATE_REGISTERS);
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryMap, FOUR_BYTE_LENGTH);
 			traceFile.getEntryRegisters().replaceAll(memoryEntries);
 		}
 	}
 	
+	private static void addLeaveAddress(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert,
+			AddressFactory addressFactory) {
+		Map<String, Object> leaveStateMap = getLeaveStateMap(traceFileToConvert);
+		String address = (String) leaveStateMap.get(STATE_ADDRESS);
+		traceFile.setLeaveAddress(addressFactory.getAddress(address));
+	}
+	
 	private static void addLeaveMemory(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {
-		Map<String, Map<String, List<String>>> leaveStateMap = getLeaveStateMap(traceFileToConvert);
+		Map<String, Object> leaveStateMap = getLeaveStateMap(traceFileToConvert);
 		if (leaveStateMap.containsKey(STATE_MEMORY)) {
-			List<MemoryEntry> memoryEntries = mapToMemoryEntries(leaveStateMap.get(STATE_MEMORY), ONE_BYTE_LENGTH);
+			Map<String, List<String>> entryMap = (Map<String, List<String>>) leaveStateMap.get(STATE_MEMORY);
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryMap, ONE_BYTE_LENGTH);
 			checkMemoryStateAddresses(memoryEntries);
 			traceFile.getLeaveMemory().replaceAll(memoryEntries);
 		}
 	}
 	
 	private static void addLeaveRegisters(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {
-		Map<String, Map<String, List<String>>> leaveStateMap = getLeaveStateMap(traceFileToConvert);
+		Map<String, Object> leaveStateMap = getLeaveStateMap(traceFileToConvert);
 		if (leaveStateMap.containsKey(STATE_REGISTERS)) {
-			List<MemoryEntry> memoryEntries = mapToMemoryEntries(leaveStateMap.get(STATE_REGISTERS), FOUR_BYTE_LENGTH);
+			Map<String, List<String>> entryMap = (Map<String, List<String>>) leaveStateMap.get(STATE_REGISTERS);
+			List<MemoryEntry> memoryEntries = mapToMemoryEntries(entryMap, FOUR_BYTE_LENGTH);
 			traceFile.getLeaveRegisters().replaceAll(memoryEntries);
 		}
 	}
@@ -244,28 +264,28 @@ public class YamlToTraceFileConverter {
 		return entries;
 	}
 	
-	private static Map<String, Map<String, List<String>>> getEntryStateMap(Map<String, Object> traceFileToConvert) {
-		Map<String, Map<String, List<String>>> entryStateMap = new HashMap<>();
-		Map<String, Map<String, Map<String, List<String>>>> statesMap = getStatesMap(traceFileToConvert);
+	private static Map<String, Object> getEntryStateMap(Map<String, Object> traceFileToConvert) {
+		Map<String, Object> entryStateMap = new HashMap<>();
+		Map<String, Map<String, Object>> statesMap = getStatesMap(traceFileToConvert);
 		if (statesMap.containsKey(ENTRY_STATE)) {
 			entryStateMap = statesMap.get(ENTRY_STATE);
 		}
 		return entryStateMap;
 	}
 	
-	private static Map<String, Map<String, List<String>>> getLeaveStateMap(Map<String, Object> traceFileToConvert) {
-		Map<String, Map<String, List<String>>> leaveStateMap = new HashMap<>();
-		Map<String, Map<String, Map<String, List<String>>>> statesMap = getStatesMap(traceFileToConvert);
+	private static Map<String, Object> getLeaveStateMap(Map<String, Object> traceFileToConvert) {
+		Map<String, Object> leaveStateMap = new HashMap<>();
+		Map<String, Map<String, Object>> statesMap = getStatesMap(traceFileToConvert);
 		if (statesMap.containsKey(LEAVE_STATE)) {
 			leaveStateMap = statesMap.get(LEAVE_STATE);
 		}
 		return leaveStateMap;
 	}
 	
-	private static Map<String, Map<String, Map<String, List<String>>>> getStatesMap(Map<String, Object> traceFileToConvert) {
-		Map<String, Map<String, Map<String, List<String>>>> statesMap = new HashMap<>();
+	private static Map<String, Map<String, Object>> getStatesMap(Map<String, Object> traceFileToConvert) {
+		Map<String, Map<String, Object>> statesMap = new HashMap<>();
 		if (traceFileToConvert.containsKey(STATES)) {
-			statesMap = (Map<String, Map<String, Map<String, List<String>>>>) traceFileToConvert.get(STATES);
+			statesMap = (Map<String, Map<String, Object>>) traceFileToConvert.get(STATES);
 		}
 		return statesMap;
 	}

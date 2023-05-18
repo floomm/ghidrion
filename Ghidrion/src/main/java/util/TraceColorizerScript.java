@@ -41,8 +41,7 @@ public class TraceColorizerScript extends GhidraScript {
 		plugin.getColorizingService().setBackgroundColor(addressesToColorize, traceColor);
 		currentProgram.endTransaction(colorizeId, true);
 		colorizedAddresses.add(addressesToColorize);
-		// TODO: The address set also contains hooked addresses
-		goTo(addressesToColorize.getMaxAddress());
+		goTo(traceFile.getEntryAddress());
 		
 		highlightDecompiler(addressesToColorize, traceColor);
 
