@@ -1,31 +1,20 @@
 package util;
 
 import java.awt.Color;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.yaml.snakeyaml.Yaml;
 
 import ghidra.app.decompiler.CTokenHighlightMatcher;
 import ghidra.app.decompiler.ClangToken;
 import ghidra.app.decompiler.DecompilerHighlighter;
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.AddressSet;
-import ghidra.util.Msg;
-import ghidra.util.exception.CancelledException;
 import ghidrion.GhidrionPlugin;
+import model.MorionTraceFile;
 
 public class TraceColorizerScript extends GhidraScript {
 	
-	private static final String INSTRUCTIONS_KEY = "instructions";
-
 	private final GhidrionPlugin plugin;
 	private final AddressSet colorizedAddresses = new AddressSet();
 
@@ -40,14 +29,9 @@ public class TraceColorizerScript extends GhidraScript {
 	protected void run() throws Exception {
 	}
 	
-	public void colorize(Color traceColor) {
+	public void colorize(MorionTraceFile traceFile, Color traceColor) {
 		if (hasColorizedInstructions) {
 			decolorize();
-		}
-		
-		File traceFile = getTraceFile();
-		if (traceFile == null) {
-			return;
 		}
 		
 		AddressSet addressesToColorize = getTracedAddresses(traceFile);
@@ -99,37 +83,9 @@ public class TraceColorizerScript extends GhidraScript {
 		};
 		return plugin.getDecompilerHighlightService().createHighlighter(highlightMatcher);
 	}
-
-	private File getTraceFile() {
-		File traceFile;
-		try {
-			traceFile = askFile("Select Trace File", "OK");
-		} catch (CancelledException e) {
-            Msg.info(this, "No trace file selected");
-            return null;
-		}
-		if (! traceFile.getName().endsWith(".yaml")) {
-            Msg.showError(this, null, "No yaml file", "Trace file has to be a .yaml file");
-			return null;
-		}
-		
-		return traceFile;
-	}
 	
-	private AddressSet getTracedAddresses(File traceFile) {
-		InputStream input;
-		try {
-			input = new FileInputStream(traceFile);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			Msg.showError(this, null, "No trace file", "Couldn't find the Morion trace file");
-			return null;
-		}
-		
-		Yaml yaml = new Yaml();
-        Map<String, Object> trace = (LinkedHashMap<String, Object>) yaml.load(input);
-        List<List<String>> instructions = (List<List<String>>) trace.get(INSTRUCTIONS_KEY);
-        List<String> addressList = instructions.stream()
+	private AddressSet getTracedAddresses(MorionTraceFile traceFile) {
+        List<String> addressList = traceFile.getInstructions().stream()
         		.filter(instruction -> !instruction.isEmpty())
         		.map(instruction -> instruction.get(0))
         		.map(address -> address.substring(2))
@@ -139,6 +95,7 @@ public class TraceColorizerScript extends GhidraScript {
         	addressSet.add(parseAddress(address));
         }
 		return addressSet;
+		
 	}
 
 }

@@ -136,7 +136,7 @@ public class DisplayPanel extends JPanel {
 				ex.printStackTrace();
 				return;
 			}
-			controller.getPlugin().colorizerScript.colorize(traceColor);
+			controller.getPlugin().colorizerScript.colorize(traceFile, traceColor);
 		});
 	}
 
