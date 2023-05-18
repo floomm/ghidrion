@@ -2,12 +2,12 @@ package view;
 
 import javax.swing.JPanel;
 import ctrl.DisplayController;
-import ctrl.InitTraceFileController;
 import ctrl.TraceFileNotFoundException;
 import ghidra.util.Msg;
 import model.DiffEntry;
 import model.MorionTraceFile;
 import util.DiffViewTableModel;
+import util.FileHelper;
 import util.ObservableSet;
 import util.YamlConverterException;
 import util.YamlToTraceFileConverter;
@@ -117,7 +117,7 @@ public class DisplayPanel extends JPanel {
 	private void setupBtnDisplayTrace() {
 		btnDisplayTrace.addActionListener(e -> {
 			try {
-				YamlToTraceFileConverter.toTraceFile(traceFile, InitTraceFileController.getFileStreamToLoad(this),
+				YamlToTraceFileConverter.toTraceFile(traceFile, FileHelper.getFileStreamToLoad(this),
 						controller.getPlugin().getCurrentProgram().getAddressFactory());
 			} catch (TraceFileNotFoundException ex) {
 				Msg.showError(this, this, "Trace file not found", "Trace file not found.", ex);

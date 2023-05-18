@@ -8,14 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.parser.ParserException;
 
 import ghidra.program.model.address.Address;
 import ghidra.program.model.address.AddressFactory;
-import ghidra.program.model.address.AddressSet;
 import model.Hook;
 import model.Hook.Mode;
 import model.Instruction;
@@ -79,17 +77,6 @@ public class YamlToTraceFileConverter {
 		addEntryRegisters(traceFile, traceFileToConvert);
 		addLeaveMemory(traceFile, traceFileToConvert);
 		addLeaveRegisters(traceFile, traceFileToConvert);
-	}
-	
-	public static AddressSet getTracedAddresses(MorionTraceFile traceFile, AddressFactory addressFactory) {
-		List<String> addressList = traceFile.getInstructions().stream()
-				.map(i -> i.getAddress().toString())
-				.collect(Collectors.toCollection(ArrayList::new));
-        AddressSet addressSet = new AddressSet();
-        for (String address : addressList) {
-        	addressSet.add(addressFactory.getAddress(address));
-        }
-		return addressSet;
 	}
 	
 	private static Map<String, Object> loadTraceFile(MorionInitTraceFile oldTraceFile, InputStream yamlStream) throws YamlConverterException {

@@ -3,7 +3,6 @@ package ctrl;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,10 +12,8 @@ import java.util.Objects;
 import java.util.stream.LongStream;
 
 import java.util.Set;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import ghidra.util.Msg;
 import ghidrion.GhidrionPlugin;
@@ -25,6 +22,7 @@ import model.HookableFunction;
 import model.MemoryEntry;
 import model.MorionInitTraceFile;
 import model.Hook.Mode;
+import util.FileHelper;
 import util.MemoryEntryTableModel;
 import util.ObservableSet;
 import util.TraceFileToYamlConverter;
@@ -76,7 +74,7 @@ public class InitTraceFileController {
 		}
 
 		try {
-			YamlToTraceFileConverter.toInitTraceFile(traceFile, getFileStreamToLoad(parent),
+			YamlToTraceFileConverter.toInitTraceFile(traceFile, FileHelper.getFileStreamToLoad(parent),
 					plugin.getCurrentProgram().getAddressFactory());
 		} catch (YamlConverterException e) {
 			if (e.getCause() != null) {
@@ -99,7 +97,7 @@ public class InitTraceFileController {
 
 		File file;
 		try {
-			file = chooseFile(parent);
+			file = FileHelper.chooseFile(parent);
 		} catch (TraceFileNotFoundException e) {
 			Msg.showError(this, parent, "No yaml file", "Select a yaml file to write to", e);
 			return;
@@ -232,30 +230,6 @@ public class InitTraceFileController {
 		MemoryEntryTableModel model = (MemoryEntryTableModel) tableRegister.getModel();
 		List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableRegister.getSelectedRows());
 		traceFile.getEntryRegisters().removeAll(toDelete);
-	}
-
-	private File chooseFile(Component parent) throws TraceFileNotFoundException {
-		JFileChooser fileChooser = new JFileChooser();
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("YAML files", "yaml");
-		fileChooser.setFileFilter(filter);
-		int result = fileChooser.showSaveDialog(parent);
-		if (result == JFileChooser.APPROVE_OPTION) {
-			return fileChooser.getSelectedFile();
-		}
-		throw new TraceFileNotFoundException();
-	}
-
-	private FileInputStream getFileStreamToLoad(Component parent) throws TraceFileNotFoundException {
-		File file = chooseFile(parent);
-
-		FileInputStream input;
-		try {
-			input = new FileInputStream(file);
-		} catch (FileNotFoundException e) {
-			throw new TraceFileNotFoundException();
-		}
-
-		return input;
 	}
 
 	public ObservableSet<HookableFunction> getCurrentlyHookableFunctions() {
