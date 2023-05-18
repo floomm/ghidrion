@@ -83,7 +83,7 @@ public class InitTraceFileController {
 				Msg.showError(this, parent, e.getTitle(), e.getMessage());
 			}
 		} catch (TraceFileNotFoundException e) {
-			Msg.showError(this, parent, "No yaml file", "Select a yaml file to load");
+			return;
 		}
 	}
 
@@ -94,15 +94,12 @@ public class InitTraceFileController {
 	 */
 	public void writeTraceFile(Component parent) {
 		String content = TraceFileToYamlConverter.toYaml(traceFile);
-
 		File file;
 		try {
-			file = FileHelper.chooseFile(parent);
+			file = FileHelper.saveFile(parent);
 		} catch (TraceFileNotFoundException e) {
-			Msg.showError(this, parent, "No yaml file", "Select a yaml file to write to", e);
 			return;
 		}
-
 		try (FileOutputStream fos = new FileOutputStream(file)) {
 			fos.write(content.getBytes());
 			fos.close();

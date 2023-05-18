@@ -82,28 +82,34 @@ public class YamlToTraceFileConverter {
 	private static Map<String, Object> loadTraceFile(MorionInitTraceFile oldTraceFile, InputStream yamlStream) throws YamlConverterException {
 		oldTraceFile.clear();
 		try {
-			return new Yaml().load(yamlStream);
+			Map<String, Object> newTraceFile = new Yaml().load(yamlStream);
+			if (newTraceFile == null) {
+				throw new YamlConverterException("Empty file", "The loaded trace file is empty");
+			}
+			return newTraceFile;
 		} catch (ParserException e) {
 			throw new YamlConverterException("Parser exception", e.getMessage(), e);
 		}
 	}
 	
 	private static void addHooks(MorionInitTraceFile traceFile, Map<String, Object> traceFileToConvert, AddressFactory addressFactory) throws YamlConverterException {
-		if (! (traceFileToConvert.containsKey(HOOKS))) {
-			String message = "Hooks are missing";
-			throw new YamlConverterException("Hooks missing", message);
+		if (traceFileToConvert.containsKey(HOOKS)) {
+			Map<String, Map<String, List<Map<String, String>>>> hookMap =
+					(Map<String, Map<String, List<Map<String, String>>>>) traceFileToConvert.get(HOOKS);
+			Set<Hook> hooks = mapToHooks(hookMap, addressFactory);
+			traceFile.getHooks().replaceAll(hooks);
 		}
-		Map<String, Map<String, List<Map<String, String>>>> hookMap =
-				(Map<String, Map<String, List<Map<String, String>>>>) traceFileToConvert.get(HOOKS);
-		Set<Hook> hooks = mapToHooks(hookMap, addressFactory);
-		traceFile.getHooks().replaceAll(hooks);
 	}
 	
 	private static Set<Hook> mapToHooks(Map<String, Map<String, List<Map<String, String>>>> hookMap, AddressFactory addressFactory) throws YamlConverterException {
+		if (hookMap == null) return new HashSet<>(); // No libraries -> no hooks
+
 		Set<Hook> hooks = new HashSet<>();
 		for (String libName : hookMap.keySet()) {
 			Map<String, List<Map<String, String>>> functions = hookMap.get(libName);
+			if (functions == null) continue; // Ignore empty libraries
 			for (String functionName : functions.keySet()) {
+				if (functions.get(functionName) == null) continue; // Ignore empty functions
 				for (Map<String, String> hookDetails : functions.get(functionName)) {
 					Address entry = getHookEntryAddress(functionName, hookDetails, addressFactory);
 					Mode mode = getHookMode(functionName, hookDetails, entry);
@@ -152,11 +158,14 @@ public class YamlToTraceFileConverter {
 			AddressFactory addressFactory
 		) throws YamlConverterException {
 		if (! (traceFileToConvert.containsKey(INSTRUCTIONS))) {
-			throw new YamlConverterException("Instructions missing", "Instructions are missing");
+			throw new YamlConverterException("No instructions section", "Instructions section is missing");
 		}
 		
 		Set<Instruction> instructions = new HashSet<>();
 		List<List<String>> instructionList = (List<List<String>>) traceFileToConvert.get(INSTRUCTIONS);
+		if (instructionList == null) {
+			throw new YamlConverterException("No instructions", "The instructions section is empty");
+		}
 		for (List<String> instruction : instructionList) {
 			if ((instruction.size() < 4) || (! isValidHex(instruction.get(0), FOUR_BYTE_LENGTH))) {
 				throw new YamlConverterException("Invalid instruction", "An instruction is invalid");
@@ -214,6 +223,8 @@ public class YamlToTraceFileConverter {
 	}
 
 	private static List<MemoryEntry> mapToMemoryEntries(Map<String, List<String>> entryMap, int maxValueLength) throws YamlConverterException {
+		if (entryMap == null) return new ArrayList<>(); // Ignore, if the mems/regs section is empty
+		
 		List<MemoryEntry> entries = new ArrayList<>();
 		for (String name : entryMap.keySet()) {
 			List<String> details = entryMap.get(name);

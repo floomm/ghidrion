@@ -29,6 +29,17 @@ public class FileHelper {
 		JFileChooser fileChooser = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("YAML files", "yaml");
 		fileChooser.setFileFilter(filter);
+		int result = fileChooser.showOpenDialog(parent);
+		if (result == JFileChooser.APPROVE_OPTION) {
+			return fileChooser.getSelectedFile();
+		}
+		throw new TraceFileNotFoundException();
+	}
+
+	public static File saveFile(Component parent) throws TraceFileNotFoundException {
+		JFileChooser fileChooser = new JFileChooser();
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("YAML files", "yaml");
+		fileChooser.setFileFilter(filter);
 		int result = fileChooser.showSaveDialog(parent);
 		if (result == JFileChooser.APPROVE_OPTION) {
 			return fileChooser.getSelectedFile();

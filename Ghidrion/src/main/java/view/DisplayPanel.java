@@ -120,8 +120,7 @@ public class DisplayPanel extends JPanel {
 				YamlToTraceFileConverter.toTraceFile(traceFile, FileHelper.getFileStreamToLoad(this),
 						controller.getPlugin().getCurrentProgram().getAddressFactory());
 			} catch (TraceFileNotFoundException ex) {
-				Msg.showError(this, this, "Trace file not found", "Trace file not found.", ex);
-				ex.printStackTrace();
+				return;
 			} catch (YamlConverterException ex) {
 				Msg.showError(this, this, ex.getTitle(), ex.getMessage(), ex);
 				ex.printStackTrace();
