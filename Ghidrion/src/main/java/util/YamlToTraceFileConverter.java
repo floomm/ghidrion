@@ -78,15 +78,6 @@ public class YamlToTraceFileConverter {
 		addLeaveRegisters(traceFile, traceFileToConvert);
 	}
 	
-	private static void addInstructions(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {
-		if (! (traceFileToConvert.containsKey(INSTRUCTIONS))) {
-			String message = "Instructions are missing";
-			throw new YamlConverterException("Missing instructions", message);
-		}
-		List<List<String>> instructions = (List<List<String>>) traceFileToConvert.get(INSTRUCTIONS);
-		traceFile.setInstructions(instructions);
-	}
-	
 	private static Map<String, Object> loadTraceFile(MorionInitTraceFile oldTraceFile, InputStream yamlStream) throws YamlConverterException {
 		oldTraceFile.clear();
 		try {
@@ -97,14 +88,23 @@ public class YamlToTraceFileConverter {
 	}
 	
 	private static void addHooks(MorionInitTraceFile traceFile, Map<String, Object> traceFileToConvert, AddressFactory addressFactory) throws YamlConverterException {
-		Map<String, Map<String, List<Map<String, String>>>> hookMap = new HashMap<>();
-		// TODO: throw exception if it doesnt contain key
-		if (traceFileToConvert.containsKey(HOOKS)) {
-			hookMap = (Map<String, Map<String, List<Map<String, String>>>>) traceFileToConvert
-				.get(HOOKS);
+		if (! (traceFileToConvert.containsKey(HOOKS))) {
+			String message = "Hooks are missing";
+			throw new YamlConverterException("Hooks missing", message);
 		}
+		Map<String, Map<String, List<Map<String, String>>>> hookMap =
+				(Map<String, Map<String, List<Map<String, String>>>>) traceFileToConvert.get(HOOKS);
 		Set<Hook> hooks = mapToHooks(hookMap, addressFactory);
 		traceFile.getHooks().replaceAll(hooks);
+	}
+	
+	private static void addInstructions(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {
+		if (! (traceFileToConvert.containsKey(INSTRUCTIONS))) {
+			String message = "Instructions are missing";
+			throw new YamlConverterException("Instructions missing", message);
+		}
+		List<List<String>> instructions = (List<List<String>>) traceFileToConvert.get(INSTRUCTIONS);
+		traceFile.setInstructions(instructions);
 	}
 	
 	private static Set<Hook> mapToHooks(Map<String, Map<String, List<Map<String, String>>>> hookMap, AddressFactory addressFactory) throws YamlConverterException {
