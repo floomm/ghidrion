@@ -2,26 +2,22 @@ package model;
 
 import util.ObservableSet;
 
-public class MorionTraceFile {
-	private final ObservableSet<Hook> hooks = new ObservableSet<>();
-	private final ObservableSet<MemoryEntry> entryMemory = new ObservableSet<>();
-	private final ObservableSet<MemoryEntry> entryRegisters = new ObservableSet<>();
-
-	public ObservableSet<MemoryEntry> getEntryMemory() {
-		return entryMemory;
+public class MorionTraceFile extends MorionInitTraceFile {
+	private final ObservableSet<MemoryEntry> leaveMemory = new ObservableSet<>();
+	private final ObservableSet<MemoryEntry> leaveRegisters = new ObservableSet<>();
+	
+	public ObservableSet<MemoryEntry> getLeaveMemory() {
+		return leaveMemory;
+	}
+	
+	public ObservableSet<MemoryEntry> getLeaveRegisters() {
+		return leaveRegisters;
 	}
 
-	public ObservableSet<MemoryEntry> getEntryRegisters() {
-		return entryRegisters;
-	}
-
-	public ObservableSet<Hook> getHooks() {
-		return hooks;
-	}
-
+	@Override
 	public void clear() {
-		hooks.clear();
-		entryMemory.clear();
-		entryRegisters.clear();
+		super.clear();
+		leaveMemory.clear();
+		leaveRegisters.clear();
 	}
 }

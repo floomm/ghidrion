@@ -11,11 +11,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 
-import ctrl.TraceFileController;
+import ctrl.InitTraceFileController;
 import util.MemoryEntryTableModel;
 
 public class RegistersPanel extends JPanel {
-	private final TraceFileController controller;
+	private final InitTraceFileController controller;
 
 	private final JTextField textFieldRegisterName = new JTextField();
 	private final JTextField textFieldRegisterValue = new JTextField();
@@ -25,7 +25,7 @@ public class RegistersPanel extends JPanel {
 	private final JScrollPane scrollPaneRegisters = new JScrollPane();
 	private final JTable tableRegister = new JTable();
 
-	public RegistersPanel(TraceFileController controller) {
+	public RegistersPanel(InitTraceFileController controller) {
 		this.controller = controller;
 		init();
 		setupComponents();

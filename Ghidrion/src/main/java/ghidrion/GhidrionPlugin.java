@@ -31,7 +31,7 @@ import ghidra.framework.plugintool.PluginTool;
 import ghidra.framework.plugintool.util.PluginStatus;
 import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.listing.Program;
-import model.MorionTraceFile;
+import model.MorionInitTraceFile;
 import view.GhidrionProvider;
 
 /**
@@ -78,7 +78,7 @@ public class GhidrionPlugin extends ProgramPlugin {
 
 		String owner = getName();
 
-		MorionTraceFile traceFile = new MorionTraceFile();
+		MorionInitTraceFile traceFile = new MorionInitTraceFile();
 		addProgramOpenendListener(p -> traceFile.clear()); // clear trace when a new program is loaded
 
 		provider = new GhidrionProvider(this, PLUGIN_NAME, owner, traceFile);

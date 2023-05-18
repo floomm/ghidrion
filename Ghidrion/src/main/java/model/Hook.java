@@ -1,6 +1,7 @@
 package model;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import ghidra.program.model.address.Address;
 
@@ -77,13 +78,13 @@ public class Hook implements Comparable<Hook> {
 			return value;
 		}
 
-		public static Mode fromValue(String value) {
+		public static Optional<Mode> fromValue(String value) {
 			for (Mode mode : values()) {
 				if (mode.value.equalsIgnoreCase(value)) {
-					return mode;
+					return Optional.of(mode);
 				}
 			}
-			throw new IllegalArgumentException("Invalid Mode value: " + value);
+			return Optional.empty();
 		}
 
 		@Override
