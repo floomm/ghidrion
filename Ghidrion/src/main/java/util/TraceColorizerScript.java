@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,6 @@ import org.yaml.snakeyaml.Yaml;
 import ghidra.app.decompiler.CTokenHighlightMatcher;
 import ghidra.app.decompiler.ClangToken;
 import ghidra.app.decompiler.DecompilerHighlighter;
-import ghidra.app.plugin.core.colorizer.ColorizingService;
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.AddressSet;
 import ghidra.util.Msg;
@@ -28,11 +26,11 @@ public class TraceColorizerScript extends GhidraScript {
 	
 	private static final String INSTRUCTIONS_KEY = "instructions";
 
-	private GhidrionPlugin plugin;
-	private ColorizingService colorizingService;
-	
-	private Map<String, AddressSet> traces = new HashMap<>();
-	private Map<String, DecompilerHighlighter> highlighters = new HashMap<>();
+	private final GhidrionPlugin plugin;
+	private final AddressSet colorizedAddresses = new AddressSet();
+
+	private DecompilerHighlighter decompilerHighlighter;
+	private boolean hasColorizedInstructions = false;
 	
 	public TraceColorizerScript(GhidrionPlugin plugin) {
 		this.plugin = plugin;
@@ -42,62 +40,51 @@ public class TraceColorizerScript extends GhidraScript {
 	protected void run() throws Exception {
 	}
 	
-	public String colorize(Color traceColor) {
-		colorizingService = plugin.getColorizingService();
+	public void colorize(Color traceColor) {
+		if (hasColorizedInstructions) {
+			decolorize();
+		}
 		
 		File traceFile = getTraceFile();
 		if (traceFile == null) {
-			return null;
+			return;
 		}
 		
-		String traceName = traceFile.getName();
+		AddressSet addressesToColorize = getTracedAddresses(traceFile);
 		
-		if (traces.containsKey(traceName)) {
-			Msg.showInfo(this, null, "Trace already exists", "A trace of file " + traceName + " already exists");
-			return null;
-		}
-		
-		AddressSet addresses = getTracedAddresses(traceFile);
-		
-		int colorizeId = currentProgram.startTransaction("Colorize " + traceName);
-		colorizingService.setBackgroundColor(addresses, traceColor);
+		int colorizeId = currentProgram.startTransaction("Colorizing instructions");
+		plugin.getColorizingService().setBackgroundColor(addressesToColorize, traceColor);
 		currentProgram.endTransaction(colorizeId, true);
-		
-		traces.put(traceName, addresses);
-		
+		colorizedAddresses.add(addressesToColorize);
 		// TODO: The address set also contains hooked addresses
-		plugin.jumpToAddressScript.run(addresses.getMaxAddress());
+		goTo(addressesToColorize.getMaxAddress());
 		
-		highlightDecompiler(addresses, traceColor, traceName);
-		
-		return traceName;
+		highlightDecompiler(addressesToColorize, traceColor);
+
+		hasColorizedInstructions = true;
 	}
 	
-	public void decolorize(List<String> traceNames) {
-		for (String traceName : traceNames) {
-			// Clear background colors in Listing window
-			AddressSet addresses = traces.get(traceName);
-			int decolorizeId = currentProgram.startTransaction("Decolorize" + traceName);
-			colorizingService.clearBackgroundColor(addresses);
-			currentProgram.endTransaction(decolorizeId, true);
-			
-			// Clear highlights in Decompiler window
-			DecompilerHighlighter decompilerHighlighter = highlighters.get(traceName);
-			int clearHighlightsId = currentProgram.startTransaction("Clear highlight" + traceName);
-			decompilerHighlighter.clearHighlights();
-			decompilerHighlighter.dispose();
-			currentProgram.endTransaction(clearHighlightsId, true);
-			highlighters.remove(traceName);
-		}
+	public void decolorize() {
+		int decolorizeId = currentProgram.startTransaction("Decolorizing instructions");
+		plugin.getColorizingService().clearBackgroundColor(colorizedAddresses);
+		currentProgram.endTransaction(decolorizeId, true);
+		colorizedAddresses.clear();
+		
+		int clearHighlightsId = currentProgram.startTransaction("Clearing decompiler highlights");
+		decompilerHighlighter.clearHighlights();
+		decompilerHighlighter.dispose();
+		currentProgram.endTransaction(clearHighlightsId, true);
+
+		hasColorizedInstructions = false;
 	}
 	
-	private void highlightDecompiler(AddressSet addresses, Color color, String traceName) {
-		DecompilerHighlighter decompilerHighlighter = createHighlighter(addresses, color, traceName);
-		highlighters.put(traceName, decompilerHighlighter);
-		decompilerHighlighter.applyHighlights();
+	private void highlightDecompiler(AddressSet addresses, Color color) {
+		DecompilerHighlighter highlighter = createHighlighter(addresses, color);
+		this.decompilerHighlighter = highlighter;
+		highlighter.applyHighlights();
 	}
 
-	private DecompilerHighlighter createHighlighter(AddressSet addresses, Color color, String traceName) {
+	private DecompilerHighlighter createHighlighter(AddressSet addresses, Color color) {
 		CTokenHighlightMatcher highlightMatcher = new CTokenHighlightMatcher() {
 			@Override
 			public Color getTokenHighlight(ClangToken token) {
@@ -110,8 +97,7 @@ public class TraceColorizerScript extends GhidraScript {
 				return null;
 			}
 		};
-		DecompilerHighlighter decompilerHighlighter = plugin.getDecompilerHighlightService().createHighlighter(traceName, highlightMatcher);
-		return decompilerHighlighter;
+		return plugin.getDecompilerHighlightService().createHighlighter(highlightMatcher);
 	}
 
 	private File getTraceFile() {

@@ -87,7 +87,7 @@ public class DisplayPanel extends JPanel {
 	private void setupComponents() {
 		setupBtnDisplayTrace();
 		setupBtnChooseTraceColor();
-		setupBtnRemoveTraces();
+		setupBtnClearTrace();
 		setupDiffViews();
 	}
 
@@ -107,7 +107,10 @@ public class DisplayPanel extends JPanel {
 		registerModel.setColumnHeaders(tableDiffViewRegisters.getColumnModel());
 	}
 
-	private void setupBtnRemoveTraces() {
+	private void setupBtnClearTrace() {
+		btnClearTrace.addActionListener(e -> {
+			controller.getPlugin().colorizerScript.decolorize();
+		});
 		// btnRemoveTraces.addActionListener(e -> {
 		// List<String> selectedItems = traceList.getSelectedValuesList();
 		// controller.getPlugin().colorizerScript.decolorize(selectedItems);
@@ -133,11 +136,7 @@ public class DisplayPanel extends JPanel {
 				ex.printStackTrace();
 				return;
 			}
-			// String traceName =
-			// controller.getPlugin().colorizerScript.colorize(traceColor);
-			// if (traceName != null) {
-			// traceListModel.addElement(traceName);
-			// }
+			controller.getPlugin().colorizerScript.colorize(traceColor);
 		});
 	}
 

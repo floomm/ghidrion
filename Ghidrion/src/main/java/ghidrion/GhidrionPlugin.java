@@ -32,7 +32,6 @@ import ghidra.framework.plugintool.util.PluginStatus;
 import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.listing.Program;
 import model.MorionInitTraceFile;
-import util.JumpToAddressScript;
 import util.TraceColorizerScript;
 import view.GhidrionProvider;
 
@@ -53,7 +52,6 @@ public class GhidrionPlugin extends ProgramPlugin {
 
 	// Scripts
 	public final TraceColorizerScript colorizerScript = new TraceColorizerScript(this);
-	public final JumpToAddressScript jumpToAddressScript = new JumpToAddressScript();
 
 	// Services
 	private ColorizingService colorizingService;
@@ -76,7 +74,6 @@ public class GhidrionPlugin extends ProgramPlugin {
 		GhidraState state = new GhidraState(tool, tool.getProject(), currentProgram, currentLocation, currentSelection,
 				currentHighlight);
 		colorizerScript.set(new GhidraState(state), null, null);
-		jumpToAddressScript.set(new GhidraState(state), null, null);
 
 		String owner = getName();
 
@@ -110,7 +107,6 @@ public class GhidrionPlugin extends ProgramPlugin {
 		GhidraState state = new GhidraState(tool, tool.getProject(), program, currentLocation, currentSelection,
 				currentHighlight);
 		colorizerScript.set(state, null, null);
-		jumpToAddressScript.set(state, null, null);
 
 		super.programActivated(program);
 	}
