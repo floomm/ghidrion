@@ -178,14 +178,18 @@ public class YamlToTraceFileConverter {
 			String code = instruction.get(3);
 			instructions.add(new Instruction(address, machineCode, assemblyCode, code));
 		}
-		traceFile.getInstructions().addAll(instructions);
+		traceFile.getInstructions().replaceAll(instructions);
 	}
 
 	private static void addEntryAddress(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert,
 			AddressFactory addressFactory) {
 		Map<String, Object> entryStateMap = getEntryStateMap(traceFileToConvert);
-		String address = (String) entryStateMap.get(STATE_ADDRESS);
-		traceFile.setEntryAddress(addressFactory.getAddress(address));
+		if (entryStateMap.containsKey(STATE_ADDRESS)) {
+			String address = (String) entryStateMap.get(STATE_ADDRESS);
+			if (address != null) {
+				traceFile.setEntryAddress(addressFactory.getAddress(address));
+			}
+		}
 	}
 	
 	private static void addEntryMemory(MorionInitTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {
@@ -210,8 +214,12 @@ public class YamlToTraceFileConverter {
 	private static void addLeaveAddress(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert,
 			AddressFactory addressFactory) {
 		Map<String, Object> leaveStateMap = getLeaveStateMap(traceFileToConvert);
-		String address = (String) leaveStateMap.get(STATE_ADDRESS);
-		traceFile.setLeaveAddress(addressFactory.getAddress(address));
+		if (leaveStateMap.containsKey(STATE_ADDRESS)) {
+			String address = (String) leaveStateMap.get(STATE_ADDRESS);
+			if (address != null) {
+				traceFile.setLeaveAddress(addressFactory.getAddress(address));
+			}
+		}
 	}
 	
 	private static void addLeaveMemory(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert) throws YamlConverterException {

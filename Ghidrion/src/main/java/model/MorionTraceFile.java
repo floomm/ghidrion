@@ -44,5 +44,7 @@ public class MorionTraceFile extends MorionInitTraceFile {
 		leaveMemory.clear();
 		leaveRegisters.clear();
 		instructions.clear();
+		entryAddress = null;
+		leaveAddress = null;
 	}
 }

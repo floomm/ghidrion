@@ -41,7 +41,12 @@ public class TraceColorizerScript extends GhidraScript {
 		plugin.getColorizingService().setBackgroundColor(addressesToColorize, traceColor);
 		currentProgram.endTransaction(colorizeId, true);
 		colorizedAddresses.add(addressesToColorize);
-		goTo(traceFile.getEntryAddress());
+		if (! goTo(traceFile.getEntryAddress()) && 
+				! goTo(traceFile.getLeaveAddress())) {
+			// Go to max address if there is no entry or leave address
+			// (min address doesn't work because of hook target addresses)
+			goTo(addressesToColorize.getMaxAddress()); 
+		}
 		
 		highlightDecompiler(addressesToColorize, traceColor);
 
