@@ -178,7 +178,7 @@ public class YamlToTraceFileConverter {
 			String code = instruction.get(3);
 			instructions.add(new Instruction(address, machineCode, assemblyCode, code));
 		}
-		traceFile.getInstructions().replaceAll(instructions);
+		traceFile.getInstructions().replaceContent(instructions);
 	}
 
 	private static void addEntryAddress(MorionTraceFile traceFile, Map<String, Object> traceFileToConvert,
