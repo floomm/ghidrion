@@ -29,14 +29,22 @@ import ghidra.app.services.GhidraScriptService;
 import ghidra.framework.plugintool.PluginInfo;
 import ghidra.framework.plugintool.PluginTool;
 import ghidra.framework.plugintool.util.PluginStatus;
-import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.listing.Program;
 import model.MorionInitTraceFile;
 import util.TraceColorizerScript;
 import view.GhidrionProvider;
 
 /**
- * TODO: Provide class-level documentation that describes what this plugin does.
+ * This plugin allows a user to leverage the power of Ghidra to create and
+ * analyze Morion traces. It has two parts:
+ * 
+ * First, it allows a user to create init hook files. These can then be used to
+ * create traces in Morion. They contain hooked functions and initial memory and
+ * register values.
+ * 
+ * Second, it allows a user to analyze a trace by analyzing the visited
+ * addresses in Ghidra's listing view and quickly finding differences in memory
+ * and registers created during the tracing.
  */
 //@formatter:off
 @PluginInfo(
@@ -58,7 +66,6 @@ public class GhidrionPlugin extends ProgramPlugin {
 	private DecompilerHighlightService decompilerHighlightService;
 
 	private GhidrionProvider provider;
-	private FlatProgramAPI flatAPI;
 
 	private final List<Consumer<Program>> programOpenedListeners = new ArrayList<>();
 
@@ -82,10 +89,6 @@ public class GhidrionPlugin extends ProgramPlugin {
 
 		provider = new GhidrionProvider(this, PLUGIN_NAME, owner, traceFile);
 		new GhidrionHookAddingListingContextAction(this, traceFile);
-
-		if (currentProgram != null) {
-			this.flatAPI = new FlatProgramAPI(currentProgram);
-		}
 	}
 
 	@Override
@@ -101,7 +104,6 @@ public class GhidrionPlugin extends ProgramPlugin {
 	@Override
 	protected void programActivated(Program program) {
 		currentProgram = program;
-		flatAPI = new FlatProgramAPI(program);
 
 		// Set state of scripts
 		GhidraState state = new GhidraState(tool, tool.getProject(), program, currentLocation, currentSelection,
@@ -117,6 +119,10 @@ public class GhidrionPlugin extends ProgramPlugin {
 		super.programOpened(program);
 	}
 
+	/**
+	 * @param listener gets triggered when a program is opened (according to
+	 *                 {@link ghidra.app.plugin.ProgramPlugin#programOpened}).
+	 */
 	public void addProgramOpenendListener(Consumer<Program> listener) {
 		programOpenedListeners.add(listener);
 	}
@@ -131,9 +137,5 @@ public class GhidrionPlugin extends ProgramPlugin {
 
 	public DecompilerHighlightService getDecompilerHighlightService() {
 		return decompilerHighlightService;
-	}
-
-	public FlatProgramAPI getFlatAPI() {
-		return flatAPI;
 	}
 }

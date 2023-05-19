@@ -5,6 +5,7 @@ import java.awt.Component;
 import ghidra.framework.plugintool.PluginTool;
 import ghidra.util.Msg;
 
+// TODO: Why is this even a thing?
 public class ServiceHelper {
 
 	/**

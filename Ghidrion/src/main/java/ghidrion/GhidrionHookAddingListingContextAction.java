@@ -15,6 +15,19 @@ import model.Hook;
 import model.MorionInitTraceFile;
 import model.Hook.Mode;
 
+/**
+ * Adds the following context actions to the Ghidra listing entries that contain
+ * a hookable function:
+ * 
+ * <ul>
+ * <li>If a function is not yet hooked an entry that allows you to hook it with
+ * each {@link model.Hook.Mode}</li>
+ * <li>If a function is already hooked an entry that allows you to hook it with
+ * the other {@link model.Hook.Mode}</li>
+ * <li>If a function is already hooked an entry that allows you to delete the
+ * hook</li>
+ * </ul>
+ */
 public class GhidrionHookAddingListingContextAction extends ListingContextAction {
     private static final String LISTENING_CONTEXT_ACTION_NAME = "Ghidrion";
     private static final String MENU_GROUP = "Ghidrion";

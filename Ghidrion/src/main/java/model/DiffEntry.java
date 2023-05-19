@@ -3,6 +3,9 @@ package model;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Entry in the diff tables in the display trace part of the plugin.
+ */
 public class DiffEntry implements Comparable<DiffEntry> {
     public final String name;
     public final boolean isEntrySymbolic;

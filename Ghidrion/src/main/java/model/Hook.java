@@ -5,12 +5,26 @@ import java.util.Optional;
 
 import ghidra.program.model.address.Address;
 
+/**
+ * Emulates a hook that can be written to a Morion YAML file.
+ * 
+ * Two hooks are considered the same if they have the same function name,
+ * library name and entry address. They are ordered by those in order.
+ */
 public class Hook implements Comparable<Hook> {
 	private final String libraryName = "libc";
 	private final String functionName;
 	private final Address entryAddress;
 	private final Mode mode;
 
+	/**
+	 * @param functionName Name of the function to be hooked
+	 * @param entryAddress Address of the function to be hooked. Assumption: next
+	 *                     address
+	 *                     ({@link ghidra.program.model.address.Address#next()}) is
+	 *                     the leave address of the hook.
+	 * @param mode         of the hook.
+	 */
 	public Hook(String functionName, Address entryAddress, Mode mode) {
 		this.functionName = Objects.requireNonNull(functionName);
 		this.entryAddress = Objects.requireNonNull(entryAddress);
@@ -63,6 +77,9 @@ public class Hook implements Comparable<Hook> {
 		return this.entryAddress.compareTo(o.entryAddress);
 	}
 
+	/**
+	 * Modes a hook can use.
+	 */
 	public enum Mode {
 		MODEL("model"),
 		SKIP("skip"),
@@ -70,6 +87,9 @@ public class Hook implements Comparable<Hook> {
 
 		private final String value;
 
+		/**
+		 * @param value recognized by Morion
+		 */
 		Mode(String value) {
 			this.value = Objects.requireNonNull(value);
 		}

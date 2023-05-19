@@ -12,14 +12,22 @@ import ghidra.program.model.mem.Memory;
 import ghidra.program.model.symbol.Reference;
 import ghidra.program.model.symbol.ReferenceManager;
 
+/**
+ * Used when filtering hooks to add to the init trace file.
+ */
 public class HookableFunction implements Comparable<HookableFunction> {
 	private final String name;
 	private final String blockName;
 	private final Address address;
 
-	public HookableFunction(String name, Address a, Memory m) {
+	/**
+	 * @param name    of the function
+	 * @param address of the function
+	 * @param m       to use for ELF block detection
+	 */
+	public HookableFunction(String name, Address address, Memory m) {
 		this.name = Objects.requireNonNull(name);
-		this.address = Objects.requireNonNull(a);
+		this.address = Objects.requireNonNull(address);
 		this.blockName = m.getBlock(this.address).getName();
 	}
 
@@ -61,6 +69,11 @@ public class HookableFunction implements Comparable<HookableFunction> {
 		return address.compareTo(o.getAddress());
 	}
 
+	/**
+	 * @param p program to consider
+	 * @return all hookable functions in the provided program that are linked to an
+	 *         external function.
+	 */
 	public static Set<HookableFunction> getFunctions(Program p) {
 		FunctionManager fm = p.getFunctionManager();
 		ReferenceManager rm = p.getReferenceManager();
