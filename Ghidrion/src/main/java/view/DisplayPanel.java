@@ -2,28 +2,20 @@ package view;
 
 import javax.swing.JPanel;
 import ctrl.DisplayController;
-import ctrl.TraceFileNotFoundException;
-import ghidra.util.Msg;
-import model.DiffEntry;
-import model.MorionTraceFile;
 import util.DiffViewTableModel;
-import util.FileHelper;
 import util.ObservableSet;
-import util.YamlConverterException;
-import util.YamlToTraceFileConverter;
-
-import java.awt.Color;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 
+/**
+ * UI for the Trace File Display part of the plugin.
+ */
 public class DisplayPanel extends JPanel {
 	private final DisplayController controller;
-	private final MorionTraceFile traceFile = new MorionTraceFile();
 
 	private final JButton btnDisplayTrace = new JButton("Import and Display");
 	private final JButton btnChooseTraceColor = new JButton("Color");
@@ -33,8 +25,6 @@ public class DisplayPanel extends JPanel {
 	private final JTable tableDiffViewMemory = new JTable();
 	private final JScrollPane scrollPaneDiffViewMemory = new JScrollPane(tableDiffViewMemory);
 	private final JTabbedPane tabbedPaneDiffView = new JTabbedPane(JTabbedPane.TOP);
-
-	private Color traceColor = Color.GREEN;
 
 	public DisplayPanel(DisplayController controller) {
 		this.controller = controller;
@@ -68,6 +58,7 @@ public class DisplayPanel extends JPanel {
 		gbc_btnChooseTraceColor.gridx = 1;
 		gbc_btnChooseTraceColor.gridy = 0;
 		add(btnChooseTraceColor, gbc_btnChooseTraceColor);
+		btnChooseTraceColor.setOpaque(true);
 
 		GridBagConstraints gbc_btnClearTrace = new GridBagConstraints();
 		gbc_btnClearTrace.gridx = 2;
@@ -85,60 +76,27 @@ public class DisplayPanel extends JPanel {
 	}
 
 	private void setupComponents() {
-		setupBtnDisplayTrace();
-		setupBtnChooseTraceColor();
-		setupBtnClearTrace();
+		btnDisplayTrace.addActionListener(e -> controller.loadTraceFile(this));
+		btnClearTrace.addActionListener(e -> controller.clearTrace());
+		btnChooseTraceColor.addActionListener(e -> controller.updateTraceColor(this));
+		btnChooseTraceColor.setBackground(controller.getTraceColor().getColor());
+		controller.getTraceColor().addObserver(color -> btnChooseTraceColor.setBackground(color));
 		setupDiffViews();
 	}
 
 	private void setupDiffViews() {
-		ObservableSet<DiffEntry> diffEntriesMemory = new ObservableSet<>();
-		DiffViewTableModel memoryModel = new DiffViewTableModel(diffEntriesMemory, traceFile.getEntryMemory(),
-				traceFile.getLeaveMemory());
+		DiffViewTableModel memoryModel = new DiffViewTableModel(new ObservableSet<>(),
+				controller.getTraceFile().getEntryMemory(),
+				controller.getTraceFile().getLeaveMemory());
 		tableDiffViewMemory.setModel(memoryModel);
 		tableDiffViewMemory.setCellSelectionEnabled(false);
 		memoryModel.setColumnHeaders(tableDiffViewMemory.getColumnModel());
 
-		ObservableSet<DiffEntry> diffEntriesRegister = new ObservableSet<>();
-		DiffViewTableModel registerModel = new DiffViewTableModel(diffEntriesRegister, traceFile.getEntryRegisters(),
-				traceFile.getLeaveRegisters());
+		DiffViewTableModel registerModel = new DiffViewTableModel(new ObservableSet<>(),
+				controller.getTraceFile().getEntryRegisters(),
+				controller.getTraceFile().getLeaveRegisters());
 		tableDiffViewRegisters.setModel(registerModel);
 		tableDiffViewRegisters.setCellSelectionEnabled(false);
 		registerModel.setColumnHeaders(tableDiffViewRegisters.getColumnModel());
 	}
-
-	private void setupBtnClearTrace() {
-		btnClearTrace.addActionListener(e -> {
-			controller.getPlugin().colorizerScript.decolorize();
-			traceFile.clear();
-		});
-	}
-
-	private void setupBtnDisplayTrace() {
-		btnDisplayTrace.addActionListener(e -> {
-			try {
-				YamlToTraceFileConverter.toTraceFile(traceFile, FileHelper.getFileStreamToLoad(this),
-						controller.getPlugin().getCurrentProgram().getAddressFactory());
-			} catch (TraceFileNotFoundException ex) {
-				return;
-			} catch (YamlConverterException ex) {
-				Msg.showError(this, this, ex.getTitle(), ex.getMessage(), ex);
-				ex.printStackTrace();
-			}
-			controller.getPlugin().colorizerScript.colorize(traceFile, traceColor);
-		});
-	}
-
-	private void setupBtnChooseTraceColor() {
-		btnChooseTraceColor.setOpaque(true);
-		btnChooseTraceColor.setBackground(traceColor);
-		btnChooseTraceColor.addActionListener(e -> {
-			Color newColor = JColorChooser.showDialog(this, "Choose a color", traceColor);
-			if (newColor != null) {
-				traceColor = newColor;
-				btnChooseTraceColor.setBackground(traceColor);
-			}
-		});
-	}
-
 }

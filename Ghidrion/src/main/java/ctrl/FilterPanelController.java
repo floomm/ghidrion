@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -21,6 +20,9 @@ import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
 
 import util.ObservableList;
 
+/**
+ * Controller for {@link view.FilterPanel}.
+ */
 public class FilterPanelController<E> {
     private final Function<E, String> displayMapper;
     private final DefaultListModel<String> listModel;
@@ -32,6 +34,13 @@ public class FilterPanelController<E> {
             Color.RED);
     private Object highlight = null;
 
+    /**
+     * @param displayMapper     Maps from the elements to the displayed text.
+     * @param listModel         Model of the {@link javax.swing.JList}
+     * @param filterDocument    Document in the filter text field
+     * @param filterHighlighter Highlighter of the filter text field, used to
+     *                          display illegal regex
+     */
     public FilterPanelController(Function<E, String> displayMapper, DefaultListModel<String> listModel,
             PlainDocument filterDocument, Highlighter filterHighlighter) {
         this.displayMapper = Objects.requireNonNull(displayMapper);
@@ -99,6 +108,9 @@ public class FilterPanelController<E> {
         return Pattern.compile(getFilterText()).matcher(displayMapper.apply(e)).find();
     }
 
+    /**
+     * @param elements All elements that should now be filtered from.
+     */
     public void updateElements(Collection<E> elements) {
         inputElements.clear();
         inputElements.addAll(elements);
@@ -108,10 +120,6 @@ public class FilterPanelController<E> {
 
     public ObservableList<E> getOutputList() {
         return outputList;
-    }
-
-    public void addOutputObserver(Consumer<List<E>> observer) {
-        outputList.addObserver(observer);
     }
 
     private void updateDisplay() {
@@ -125,19 +133,22 @@ public class FilterPanelController<E> {
                 .toList());
     }
 
-    public void updateOutput() {
-        updateOutput(List.of());
+    private void updateOutput() {
+        updateSelectedElements(List.of());
     }
 
-    public void updateOutput(List<String> selectedValuesList) {
-        outputList.clear();
-        if (selectedValuesList.isEmpty())
-            outputList.addAll(inputElements.stream().filter(this::filterElement).toList());
+    /**
+     * @param selectedElements that should now be selected. If empty, all elements
+     *                         get passed to the output.
+     */
+    public void updateSelectedElements(List<String> selectedElements) {
+        if (selectedElements.isEmpty())
+            outputList.replaceContent(inputElements.stream().filter(this::filterElement).toList());
         else
-            outputList.addAll(inputElements
+            outputList.replaceContent(inputElements
                     .stream()
                     .filter(this::filterElement)
-                    .filter(e -> selectedValuesList.contains(displayMapper.apply(e)))
+                    .filter(e -> selectedElements.contains(displayMapper.apply(e)))
                     .toList());
     }
 }

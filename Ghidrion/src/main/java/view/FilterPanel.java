@@ -34,7 +34,8 @@ public class FilterPanel<E extends Comparable<E>> extends JPanel {
         this.title = new JLabel(title);
         this.controller = new FilterPanelController<>(displayMapper, listModel, filterDocument,
                 filter.getHighlighter());
-        this.list.addListSelectionListener(event -> controller.updateOutput(list.getSelectedValuesList()));
+        this.list.addListSelectionListener(
+                event -> controller.updateSelectedElements(list.getSelectedValuesList()));
 
         GridBagLayout gbl = new GridBagLayout();
         gbl.rowHeights = new int[] { 0, 0, 100 };
@@ -64,7 +65,7 @@ public class FilterPanel<E extends Comparable<E>> extends JPanel {
     }
 
     public void addFilteredElementsObserver(Consumer<List<E>> observer) {
-        controller.addOutputObserver(observer);
+        controller.getOutputList().addObserver(observer);
     }
 
     public List<E> getFilteredElements() {

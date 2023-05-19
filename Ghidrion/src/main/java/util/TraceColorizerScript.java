@@ -59,10 +59,12 @@ public class TraceColorizerScript extends GhidraScript {
 		currentProgram.endTransaction(decolorizeId, true);
 		colorizedAddresses.clear();
 		
-		int clearHighlightsId = currentProgram.startTransaction("Clearing decompiler highlights");
-		decompilerHighlighter.clearHighlights();
-		decompilerHighlighter.dispose();
-		currentProgram.endTransaction(clearHighlightsId, true);
+		if (decompilerHighlighter != null) {
+			int clearHighlightsId = currentProgram.startTransaction("Clearing decompiler highlights");
+			decompilerHighlighter.clearHighlights();
+			decompilerHighlighter.dispose();
+			currentProgram.endTransaction(clearHighlightsId, true);
+		}
 
 		hasColorizedInstructions = false;
 	}
