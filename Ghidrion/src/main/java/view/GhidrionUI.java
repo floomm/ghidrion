@@ -55,7 +55,7 @@ public class GhidrionUI {
 		initialize();
 	}
 
-	public JComponent getTabbedPane() {
+	public JComponent getPanel() {
 		return tabbedPane;
 	}
 
