@@ -16,6 +16,7 @@ import util.YamlToTraceFileConverter;
 
 /**
  * Controller for the Trace File Display part of the plugin.
+ * See {@link view.DisplayPanel} and {@link model.MorionTraceFile}
  */
 public class DisplayController {
 	private final GhidrionPlugin plugin;

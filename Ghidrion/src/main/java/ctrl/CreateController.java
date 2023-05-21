@@ -29,14 +29,18 @@ import util.TraceFileToYamlConverter;
 import util.YamlConverterException;
 import util.YamlToTraceFileConverter;
 
-public class InitTraceFileController {
+/**
+ * Controller for the Trace File Create part of the plugin.
+ * See {@link view.CreatePanel} and {@link model.MorionInitTraceFile}
+ */
+public class CreateController {
 	private final GhidrionPlugin plugin;
 	private final MorionInitTraceFile traceFile;
 
 	private final Set<HookableFunction> allHookableFunctions = new HashSet<>();
 	private final ObservableSet<HookableFunction> currentlyHookableFunctions = new ObservableSet<>();
 
-	public InitTraceFileController(GhidrionPlugin plugin, MorionInitTraceFile traceFile) {
+	public CreateController(GhidrionPlugin plugin, MorionInitTraceFile traceFile) {
 		this.plugin = Objects.requireNonNull(plugin);
 		this.traceFile = Objects.requireNonNull(traceFile);
 
@@ -64,7 +68,14 @@ public class InitTraceFileController {
 		return traceFile;
 	}
 
-	public void loadTraceFile(Component parent) {
+	/**
+	 * Reads a YAML Morion trace file from disk after displaying a warning message to the user.
+	 * If the user confirms the operation, the current {@link MorionInitTraceFile} is cleared
+	 * and converted using {@link util.YamlToTraceFileConverter}.
+	 *
+	 * @param parent the parent component used for displaying dialog boxes
+	 */
+	public void readTraceFile(Component parent) {
 		// Warn user that current init trace file gets cleared
 		String warning = "Are you sure you want to proceed? The current editor entries are cleared.";
 		int warningResult = JOptionPane.showConfirmDialog(parent, warning, "Confirmation",
@@ -88,9 +99,10 @@ public class InitTraceFileController {
 	}
 
 	/**
-	 * Write the information in the @param tracefile to a `.yaml` file on disk.
-	 * 
-	 * @param parent to show the Save As dialog from
+	 * Writes the contents of a {@link MorionInitTraceFile} to a YAML file selected by the user.
+	 * The trace file is converted to YAML format using {@link TraceFileToYamlConverter}.
+	 *
+	 * @param parent the parent component used for displaying dialog boxes
 	 */
 	public void writeTraceFile(Component parent) {
 		String content = TraceFileToYamlConverter.toYaml(traceFile);
@@ -110,6 +122,11 @@ public class InitTraceFileController {
 		}
 	}
 
+	/**
+	 * Clears the {@link MorionInitTraceFile}.
+	 *
+	 * @param e the {@link ActionEvent} object associated with the event that triggered the method
+	 */
 	public void clearTraceFileListener(ActionEvent e) {
 		traceFile.clear();
 	}
@@ -119,14 +136,14 @@ public class InitTraceFileController {
 	}
 
 	/**
-	 * Adds entries to the init trace file.
+	 * Adds entries to the {@link MorionInitTraceFile}.
 	 * 
 	 * If no is provided, the {@param value} is split into 1
 	 * byte chunks and spread over incrementing addresses starting with
 	 * {@param startAddress}.
 	 * 
 	 * If an {@param endAddress} is provided the {@param value} is repeated for each
-	 * byte between the {param startAddress} (inclusive) and {@param endAddress}
+	 * byte between the {@param startAddress} (inclusive) and {@param endAddress}
 	 * (inclusive).
 	 * 
 	 * Throws up an error message if the value is longer than 1 byte (2 hex chars)
@@ -205,12 +222,25 @@ public class InitTraceFileController {
 
 	}
 
+	/**
+	 * Removes all selected {@link MemoryEntry} from the {@link MorionInitTraceFile} based on the selected rows in the provided {@link JTable}.
+	 *
+	 * @param tableMemory the JTable containing the memory entries
+	 */
 	public void removeAllEntryMemory(JTable tableMemory) {
 		MemoryEntryTableModel model = (MemoryEntryTableModel) tableMemory.getModel();
 		List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableMemory.getSelectedRows());
 		traceFile.getEntryMemory().removeAll(toDelete);
 	}
 
+	/**
+	 * Adds or replaces a register entry in the {@link MorionInitTraceFile} with the specified name, value, and symbolic flag.
+	 *
+	 * @param name       the name of the register
+	 * @param value      the hexadecimal value of the register
+	 * @param isSymbolic a flag indicating if the register is symbolic or not
+	 * @param component  the component used for displaying error messages
+	 */
 	public void addEntryRegister(String name, String value, boolean isSymbolic, Component component) {
 		if (name.isEmpty()) {
 			Msg.showError(this, component, "Empty Name", "Name can not be empty.");
@@ -223,6 +253,11 @@ public class InitTraceFileController {
 		traceFile.getEntryRegisters().replace(new MemoryEntry(name, value, isSymbolic));
 	}
 
+	/**
+	 * Removes all selected register entries from the {@link MorionInitTraceFile} based on the selected rows in the provided {@link JTable}.
+	 *
+	 * @param tableRegister the JTable containing the register entries
+	 */
 	public void removeAllEntryRegisters(JTable tableRegister) {
 		MemoryEntryTableModel model = (MemoryEntryTableModel) tableRegister.getModel();
 		List<MemoryEntry> toDelete = model.getElementsAtRowIndices(tableRegister.getSelectedRows());
@@ -233,6 +268,12 @@ public class InitTraceFileController {
 		return currentlyHookableFunctions;
 	}
 
+	/**
+	 * Adds or replaces {@link Hook}s in the {@link MorionInitTraceFile} based on the provided list of {@link HookableFunction} objects and the {@link Mode}.
+	 *
+	 * @param hooksToAdd the list of HookableFunction objects representing the hooks to add or replace
+	 * @param mode       the mode to set for the hooks
+	 */
 	public void addHooks(List<HookableFunction> hooksToAdd, Mode mode) {
 		traceFile.getHooks().replaceAll(hooksToAdd
 				.stream()

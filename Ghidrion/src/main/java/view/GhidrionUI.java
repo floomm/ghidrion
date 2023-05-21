@@ -8,8 +8,12 @@ import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 
 import ctrl.DisplayController;
-import ctrl.InitTraceFileController;
+import ctrl.CreateController;
 
+/**
+ * The GhidrionUI class represents the user interface for the Ghidrion application.
+ * It has been designed to allow the user interface to be manipulated using the WindowBuilder plugin from Eclipse.
+ */
 public class GhidrionUI {
 
 	private JFrame frame;
@@ -46,11 +50,11 @@ public class GhidrionUI {
 	/**
 	 * Create the application.
 	 * 
-	 * @param traceFileController controls the {@link CreatePanel}
-	 * @param displayController   controls the {@link DisplayPanel}
+	 * @param createController 		controls the {@link CreatePanel}
+	 * @param displayController		controls the {@link DisplayPanel}
 	 */
-	public GhidrionUI(InitTraceFileController traceFileController, DisplayController displayController) {
-		this.panelCreate = new CreatePanel(traceFileController);
+	public GhidrionUI(CreateController createController, DisplayController displayController) {
+		this.panelCreate = new CreatePanel(createController);
 		this.panelDisplay = new DisplayPanel(displayController);
 		initialize();
 	}

@@ -2,7 +2,7 @@ package view;
 
 import javax.swing.JPanel;
 
-import ctrl.InitTraceFileController;
+import ctrl.CreateController;
 
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -11,7 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JTabbedPane;
 
 public class CreatePanel extends JPanel {
-	private final InitTraceFileController controller;
+	private final CreateController controller;
 	private final HookPanel panelHooks;
 	private final MemoryPanel memoryPanel;
 	private final RegistersPanel registersPanel;
@@ -21,7 +21,7 @@ public class CreatePanel extends JPanel {
 	private final JButton btnClearTraceFile = new JButton("Clear Added Elements");
 	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 
-	public CreatePanel(InitTraceFileController controller) {
+	public CreatePanel(CreateController controller) {
 		this.controller = controller;
 		this.panelHooks = new HookPanel(controller);
 		this.memoryPanel = new MemoryPanel(controller);
@@ -78,7 +78,7 @@ public class CreatePanel extends JPanel {
 	}
 
 	private void setupBtnLoadTraceFile() {
-		btnLoadTraceFile.addActionListener(e -> controller.loadTraceFile(this));
+		btnLoadTraceFile.addActionListener(e -> controller.readTraceFile(this));
 	}
 
 	private void setupBtnCreateTraceFile() {
