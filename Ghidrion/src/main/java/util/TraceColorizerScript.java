@@ -1,6 +1,7 @@
 package util;
 
 import java.awt.Color;
+import java.util.Objects;
 
 import ghidra.app.decompiler.CTokenHighlightMatcher;
 import ghidra.app.decompiler.ClangToken;
@@ -11,6 +12,10 @@ import ghidrion.GhidrionPlugin;
 import model.Instruction;
 import model.MorionTraceFile;
 
+/**
+ * A {@link GhidraScript} used for (de-)colorizing instructions in the Listing window 
+ * and applying highlights in the decompiler based on a given {@link MorionTraceFile} and color.
+ */
 public class TraceColorizerScript extends GhidraScript {
 	
 	private final GhidrionPlugin plugin;
@@ -20,13 +25,23 @@ public class TraceColorizerScript extends GhidraScript {
 	private boolean hasColorizedInstructions = false;
 	
 	public TraceColorizerScript(GhidrionPlugin plugin) {
-		this.plugin = plugin;
+		this.plugin = Objects.requireNonNull(plugin);
 	}
 
+	/**
+	 * Do not use this method, it is an empty implementation.
+	 * Instead, use {@link #colorize(MorionTraceFile, Color)} or {@link #decolorize()}.
+	 */
 	@Override
 	protected void run() throws Exception {
 	}
 	
+	/**
+     * Colorizes the traced instructions of a given {@link MorionTraceFile} with the specified color.
+     *
+     * @param traceFile   the MorionTraceFile containing the traced instructions to be colorized
+     * @param traceColor  the color to apply to the instructions
+     */
 	public void colorize(MorionTraceFile traceFile, Color traceColor) {
 		if (hasColorizedInstructions) {
 			decolorize();
@@ -53,6 +68,9 @@ public class TraceColorizerScript extends GhidraScript {
 		hasColorizedInstructions = true;
 	}
 	
+	/**
+     * Decolorizes the previously colorized instructions and clears the decompiler highlights.
+     */
 	public void decolorize() {
 		int decolorizeId = currentProgram.startTransaction("Decolorizing instructions");
 		plugin.getColorizingService().clearBackgroundColor(colorizedAddresses);

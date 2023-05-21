@@ -10,8 +10,18 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import ctrl.TraceFileNotFoundException;
 
+/**
+ * Provides utility methods for YAML file-related operations such as loading and saving YAML files.
+ */
 public class FileHelper {
 
+	/**
+     * Retrieves a FileInputStream of a YAML file selected by the user.
+     *
+     * @param parent	the parent component used for displaying the file chooser dialog
+     * @return a FileInputStream for the selected YAML file
+     * @throws TraceFileNotFoundException if the selected file is not found
+     */
 	public static FileInputStream getFileStreamToLoad(Component parent) throws TraceFileNotFoundException {
 		File file = chooseFile(parent);
 
@@ -25,6 +35,13 @@ public class FileHelper {
 		return input;
 	}
 
+	/**
+     * Displays a file chooser dialog for selecting a YAML file.
+     *
+     * @param parent 	the parent component used for displaying the file chooser dialog
+     * @return the selected File object
+     * @throws TraceFileNotFoundException if the user cancels the file selection or no file is selected
+     */
 	public static File chooseFile(Component parent) throws TraceFileNotFoundException {
 		JFileChooser fileChooser = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("YAML files", "yaml");
@@ -36,6 +53,13 @@ public class FileHelper {
 		throw new TraceFileNotFoundException();
 	}
 
+	/**
+     * Displays a file chooser dialog for saving respectively overriding a YAML file.
+     *
+     * @param parent 	the parent component used for displaying the file chooser dialog
+     * @return the selected File object
+     * @throws TraceFileNotFoundException if the user cancels the file selection or no file is selected
+     */
 	public static File saveFile(Component parent) throws TraceFileNotFoundException {
 		JFileChooser fileChooser = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("YAML files", "yaml");

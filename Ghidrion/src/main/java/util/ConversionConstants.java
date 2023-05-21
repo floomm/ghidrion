@@ -1,5 +1,12 @@
 package util;
 
+import model.MorionInitTraceFile;
+import model.MorionTraceFile;
+
+/**
+ * Provides constant values used for converting {@link MorionInitTraceFile}s respectively {@link MorionTraceFile}s.
+ * It contains string constants related to hooks, instructions, states, and symbolic representation.
+ */
 public class ConversionConstants {
     public static final String HOOKS = "hooks";
     public static final String HOOK_ENTRY = "entry";
