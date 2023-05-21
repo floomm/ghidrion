@@ -2,13 +2,26 @@ package model;
 
 import ghidra.program.model.address.Address;
 
-// TODO: JavaDoc
+/**
+ * Represents an instruction of a Morion trace file.
+ * An instruction consists of an address, machine code, assembly code, and C code.
+ * 
+ * Two instructions are considered the same if they have the same address.
+ */
 public class Instruction implements Comparable<Instruction> {
 	private final Address address;
 	private final String machineCode;
 	private final String assemblyCode;
 	private final String code;
 
+	/**
+     * Constructs a new Instruction object with the specified address, machine code, assembly code, and C code.
+     *
+     * @param address      the address of the instruction
+     * @param machineCode  the machine code representation of the instruction
+     * @param assemblyCode the assembly code representation of the instruction
+     * @param code         the code representation of the instruction
+     */
 	public Instruction(Address address, String machineCode, String assemblyCode, String code) {
 		this.address = address;
 		this.machineCode = machineCode;
