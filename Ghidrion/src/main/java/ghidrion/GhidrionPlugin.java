@@ -15,21 +15,22 @@
  */
 package ghidrion;
 
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import ghidra.app.ExamplesPluginPackage;
+import ghidra.MiscellaneousPluginPackage;
 import ghidra.app.decompiler.DecompilerHighlightService;
 import ghidra.app.plugin.PluginCategoryNames;
 import ghidra.app.plugin.ProgramPlugin;
 import ghidra.app.plugin.core.colorizer.ColorizingService;
 import ghidra.app.script.GhidraState;
-import ghidra.app.services.GhidraScriptService;
 import ghidra.framework.plugintool.PluginInfo;
 import ghidra.framework.plugintool.PluginTool;
 import ghidra.framework.plugintool.util.PluginStatus;
 import ghidra.program.model.listing.Program;
+import ghidra.util.Msg;
 import model.MorionInitTraceFile;
 import util.TraceColorizerScript;
 import view.GhidrionProvider;
@@ -49,11 +50,20 @@ import view.GhidrionProvider;
 //@formatter:off
 @PluginInfo(
 	status = PluginStatus.STABLE,
-	packageName = ExamplesPluginPackage.NAME,
-	category = PluginCategoryNames.EXAMPLES,
-	shortDescription = "Plugin short description goes here.",
-	description = "Plugin long description goes here.",
-	servicesRequired = { GhidraScriptService.class }
+	packageName = MiscellaneousPluginPackage.NAME,
+	category = PluginCategoryNames.MISC,
+	shortDescription = "Create and analyze Morion traces",
+	description = "This plugin allows a user to leverage the power of Ghidra to create and\r\n"
+			+ " analyze Morion traces. It has two parts:\r\n"
+			+ " \r\n"
+			+ " First, it allows a user to create init hook files. These can then be used to\r\n"
+			+ " create traces in Morion. They contain hooked functions and initial memory and\r\n"
+			+ " register values.\r\n"
+			+ " \r\n"
+			+ " Second, it allows a user to analyze a trace by analyzing the visited\r\n"
+			+ " addresses in Ghidra's listing view and quickly finding differences in memory\r\n"
+			+ " and registers created during the tracing.",
+	servicesRequired = { ColorizingService.class, DecompilerHighlightService.class }
 )
 //@formatter:on
 public class GhidrionPlugin extends ProgramPlugin {
@@ -96,8 +106,8 @@ public class GhidrionPlugin extends ProgramPlugin {
 		super.init();
 
 		// Acquire services here
-		colorizingService = ServiceHelper.getService(tool, ColorizingService.class, this, provider.getComponent());
-		decompilerHighlightService = ServiceHelper.getService(tool, DecompilerHighlightService.class, this,
+		colorizingService = getService(ColorizingService.class, this, provider.getComponent());
+		decompilerHighlightService = getService(DecompilerHighlightService.class, this,
 				provider.getComponent());
 	}
 
@@ -137,5 +147,15 @@ public class GhidrionPlugin extends ProgramPlugin {
 
 	public DecompilerHighlightService getDecompilerHighlightService() {
 		return decompilerHighlightService;
+	}
+
+	private <T> T getService(Class<T> c, Object originator, Component parent) {
+		T service = tool.getService(c);
+		if (service == null) {
+			String serviceName = c.getName();
+			Msg.showError(originator, parent, "No " + serviceName, "Can't find " + serviceName);
+		}
+		
+		return service;
 	}
 }
