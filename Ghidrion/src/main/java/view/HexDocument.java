@@ -4,6 +4,9 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
+/**
+ * Extends {@link PlainDocument} and restricts the input to hexadecimal values.
+ */
 public class HexDocument extends PlainDocument {
 	public static final int MAX_HEX_DIGITS_MEMORY_ADDRESS = 8;
 	public static final int MAX_HEX_DIGITS_REGISTER_VALUE = 8;
@@ -13,6 +16,12 @@ public class HexDocument extends PlainDocument {
 
 	private final int maxHexDigits;
 
+	/**
+     * Constructs a HexDocument with the specified maximum number of hexadecimal digits.
+     *
+     * @param maxHexDigits the maximum number of hexadecimal digits allowed, or {@link #MAX_HEX_DIGITS_UNLIMITED}
+     *                     for unlimited digits
+     */
 	public HexDocument(int maxHexDigits) {
 		this.maxHexDigits = maxHexDigits;
 		try {
