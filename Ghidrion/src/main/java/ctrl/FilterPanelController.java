@@ -105,7 +105,8 @@ public class FilterPanelController<E> {
     }
 
     private boolean filterElement(E e) {
-        return displayMapper.apply(e).matches(getFilterText());
+        String filterString = getFilterText();
+        return filterString.isBlank() || displayMapper.apply(e).matches(filterString);
     }
 
     /**
