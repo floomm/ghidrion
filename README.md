@@ -1,5 +1,10 @@
 # Ghidrion
 
+## Installation
+
+1. Download current release
+2. Run Ghidra -> File -> Install Extensions -> Select Ghidrion zip -> Restart Ghidra -> Open Codebrowser -> Windows -> Ghidrion
+
 ## How to contribute
 
 There are a few requirements:
