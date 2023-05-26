@@ -10,6 +10,10 @@ import java.awt.GridBagConstraints;
 import javax.swing.JButton;
 import javax.swing.JTabbedPane;
 
+/**
+ * Panel responsible for all UI for creating a YAML file. Includes parts for
+ * adding hooks, memory entries, and registers.
+ */
 public class CreatePanel extends JPanel {
 	private final CreateController controller;
 	private final HookPanel panelHooks;

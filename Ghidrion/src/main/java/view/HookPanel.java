@@ -15,6 +15,11 @@ import model.HookableFunction;
 import model.Hook.Mode;
 import util.HookTableModel;
 
+/**
+ * Panel where a user can add hooks to their trace file based on external
+ * functions in the program as detected by Ghidra. Provides filters based on
+ * function name, block name, and address.
+ */
 public class HookPanel extends JPanel {
     private final CreateController controller;
 

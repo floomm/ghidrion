@@ -18,6 +18,11 @@ import javax.swing.text.PlainDocument;
 
 import ctrl.FilterPanelController;
 
+/**
+ * Contains a list that can be filtered using a regular expression in a text
+ * field above. All selected elements (or all elements if none are selected) are
+ * passed to the output.
+ */
 public class FilterPanel<E extends Comparable<E>> extends JPanel {
     private final JTextField filter = new JTextField();
     private final JList<String> list = new JList<>();
@@ -26,6 +31,11 @@ public class FilterPanel<E extends Comparable<E>> extends JPanel {
 
     private final FilterPanelController<E> controller;
 
+    /**
+     * @param displayMapper used to transform the elements to their display
+     *                      representation.
+     * @param title         to display above the text field
+     */
     public FilterPanel(Function<E, String> displayMapper, String title) {
         DefaultListModel<String> listModel = new DefaultListModel<>();
         PlainDocument filterDocument = new PlainDocument();
@@ -60,14 +70,24 @@ public class FilterPanel<E extends Comparable<E>> extends JPanel {
         add(this.listScrollPane, listGBC);
     }
 
+    /**
+     * @param newElements that should be filtered by this component.
+     */
     public void updateElements(Collection<E> newElements) {
         controller.updateElements(newElements);
     }
 
+    /**
+     * @param observer triggered whenever the filter or selection changes with all
+     *                 passing elements.
+     */
     public void addFilteredElementsObserver(Consumer<List<E>> observer) {
         controller.getOutputList().addObserver(observer);
     }
 
+    /**
+     * @return all elements currently passing the filter.
+     */
     public List<E> getFilteredElements() {
         return new ArrayList<>(controller.getOutputList());
     }

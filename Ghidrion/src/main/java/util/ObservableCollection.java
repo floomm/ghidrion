@@ -4,6 +4,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
 
+/**
+ * {@link util.Observable} collection. Updates trigger on any action that
+ * changes the contents of the collection. Contains additional methods that
+ * allow executing multiple actions before triggering an update to improve
+ * performance.
+ */
 public class ObservableCollection<E, C extends Collection<E>> extends Observable<C> implements Collection<E> {
     private final C collection;
 
@@ -15,7 +21,7 @@ public class ObservableCollection<E, C extends Collection<E>> extends Observable
      * @param e first gets removed if present and then re-added.
      * @return same value as {@link ObservableCollection#add(Object)}.
      */
-    public boolean replace(E e) {
+    public boolean update(E e) {
         collection.remove(e);
         return add(e);
     }
@@ -24,7 +30,7 @@ public class ObservableCollection<E, C extends Collection<E>> extends Observable
      * @param es first get removed if present and then re-added.
      * @return same value as {@link ObservableCollection#addAll(Collection)}.
      */
-    public boolean replaceAll(Collection<E> es) {
+    public boolean updateAll(Collection<E> es) {
         collection.removeAll(es);
         return addAll(es);
     }

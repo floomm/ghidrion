@@ -15,6 +15,18 @@ import javax.swing.table.TableColumnModel;
 import model.DiffEntry;
 import model.MemoryEntry;
 
+/**
+ * {@link javax.swing.table.TableModel} to use in the diff view part of the
+ * application. Observes entry and leave states and reactively calculates and
+ * displays the diff.
+ * 
+ * Coloring scheme:
+ * <ul>
+ * <li>red: either the entry or leave state has no value</li>
+ * <li>green name/address: entry and leave value differ</li>
+ * <li>blue value: symbolic</li>
+ * </ul>
+ */
 public class DiffViewTableModel extends CustomTableModel<DiffEntry> {
     private final ObservableSet<MemoryEntry> entry;
     private final ObservableSet<MemoryEntry> leave;

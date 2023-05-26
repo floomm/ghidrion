@@ -14,6 +14,9 @@ import javax.swing.JTextField;
 import ctrl.CreateController;
 import util.MemoryEntryTableModel;
 
+/**
+ * Panel where the user can add registers to their trace file.
+ */
 public class RegistersPanel extends JPanel {
 	private final CreateController controller;
 

@@ -88,7 +88,7 @@ public class GhidrionHookAddingListingContextAction extends ListingContextAction
             protected void actionPerformed(ListingActionContext context) {
                 Address a = context.getLocation().getAddress();
                 Optional<Function> f = getFunction(context, program);
-                traceFile.getHooks().replace(new Hook(f.get().getName(), a, mode));
+                traceFile.getHooks().update(new Hook(f.get().getName(), a, mode));
             }
 
             @Override

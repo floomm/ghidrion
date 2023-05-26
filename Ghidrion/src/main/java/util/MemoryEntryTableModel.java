@@ -4,6 +4,10 @@ import java.util.List;
 
 import model.MemoryEntry;
 
+/**
+ * {@link javax.swing.table.TableModel} to use for displaying memory entries or
+ * registers.
+ */
 public class MemoryEntryTableModel extends CustomTableModel<MemoryEntry> {
 
     public MemoryEntryTableModel(ObservableSet<MemoryEntry> hooks) {

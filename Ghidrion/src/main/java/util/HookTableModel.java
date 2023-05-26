@@ -4,6 +4,9 @@ import java.util.List;
 
 import model.Hook;
 
+/**
+ * {@link javax.swing.table.TableModel} to use for displaying hooks.
+ */
 public class HookTableModel extends CustomTableModel<Hook> {
     public HookTableModel(ObservableSet<Hook> hooks) {
         super(hooks);

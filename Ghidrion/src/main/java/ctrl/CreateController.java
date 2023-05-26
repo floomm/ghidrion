@@ -69,8 +69,10 @@ public class CreateController {
 	}
 
 	/**
-	 * Reads a YAML Morion trace file from disk after displaying a warning message to the user.
-	 * If the user confirms the operation, the current {@link MorionInitTraceFile} is cleared
+	 * Reads a YAML Morion trace file from disk after displaying a warning message
+	 * to the user.
+	 * If the user confirms the operation, the current {@link MorionInitTraceFile}
+	 * is cleared
 	 * and converted using {@link util.YamlToTraceFileConverter}.
 	 *
 	 * @param parent the parent component used for displaying dialog boxes
@@ -99,8 +101,10 @@ public class CreateController {
 	}
 
 	/**
-	 * Writes the contents of a {@link MorionInitTraceFile} to a YAML file selected by the user.
-	 * The trace file is converted to YAML format using {@link TraceFileToYamlConverter}.
+	 * Writes the contents of a {@link MorionInitTraceFile} to a YAML file selected
+	 * by the user.
+	 * The trace file is converted to YAML format using
+	 * {@link TraceFileToYamlConverter}.
 	 *
 	 * @param parent the parent component used for displaying dialog boxes
 	 */
@@ -125,7 +129,8 @@ public class CreateController {
 	/**
 	 * Clears the {@link MorionInitTraceFile}.
 	 *
-	 * @param e the {@link ActionEvent} object associated with the event that triggered the method
+	 * @param e the {@link ActionEvent} object associated with the event that
+	 *          triggered the method
 	 */
 	public void clearTraceFileListener(ActionEvent e) {
 		traceFile.clear();
@@ -192,7 +197,7 @@ public class CreateController {
 						"End address has to be bigger or equal to start address.");
 				return;
 			} else
-				traceFile.getEntryMemory().replaceAll(LongStream
+				traceFile.getEntryMemory().updateAll(LongStream
 						.rangeClosed(startAddressLong, endAddressLong)
 						.mapToObj(i -> new MemoryEntry(padHexTo4Bytes(i), value,
 								isSymbolic))
@@ -215,7 +220,7 @@ public class CreateController {
 				startAddressLong++;
 				e = e.substring(charsToAdd);
 			}
-			traceFile.getEntryMemory().replaceAll(entriesToAdd);
+			traceFile.getEntryMemory().updateAll(entriesToAdd);
 		} catch (NumberFormatException e) {
 			Msg.showError(this, component, "Illegal address value", "Addresses are not a hex value.");
 		}
@@ -223,7 +228,8 @@ public class CreateController {
 	}
 
 	/**
-	 * Removes all selected {@link MemoryEntry} from the {@link MorionInitTraceFile} based on the selected rows in the provided {@link JTable}.
+	 * Removes all selected {@link MemoryEntry} from the {@link MorionInitTraceFile}
+	 * based on the selected rows in the provided {@link JTable}.
 	 *
 	 * @param tableMemory the JTable containing the memory entries
 	 */
@@ -234,7 +240,8 @@ public class CreateController {
 	}
 
 	/**
-	 * Adds or replaces a register entry in the {@link MorionInitTraceFile} with the specified name, value, and symbolic flag.
+	 * Adds or replaces a register entry in the {@link MorionInitTraceFile} with the
+	 * specified name, value, and symbolic flag.
 	 *
 	 * @param name       the name of the register
 	 * @param value      the hexadecimal value of the register
@@ -250,11 +257,12 @@ public class CreateController {
 			Msg.showError(this, component, "Empty Value", "Value can not be empty.");
 			return;
 		}
-		traceFile.getEntryRegisters().replace(new MemoryEntry(name, value, isSymbolic));
+		traceFile.getEntryRegisters().update(new MemoryEntry(name, value, isSymbolic));
 	}
 
 	/**
-	 * Removes all selected register entries from the {@link MorionInitTraceFile} based on the selected rows in the provided {@link JTable}.
+	 * Removes all selected register entries from the {@link MorionInitTraceFile}
+	 * based on the selected rows in the provided {@link JTable}.
 	 *
 	 * @param tableRegister the JTable containing the register entries
 	 */
@@ -269,13 +277,15 @@ public class CreateController {
 	}
 
 	/**
-	 * Adds or replaces {@link Hook}s in the {@link MorionInitTraceFile} based on the provided list of {@link HookableFunction} objects and the {@link Mode}.
+	 * Adds or replaces {@link Hook}s in the {@link MorionInitTraceFile} based on
+	 * the provided list of {@link HookableFunction} objects and the {@link Mode}.
 	 *
-	 * @param hooksToAdd the list of HookableFunction objects representing the hooks to add or replace
+	 * @param hooksToAdd the list of HookableFunction objects representing the hooks
+	 *                   to add or replace
 	 * @param mode       the mode to set for the hooks
 	 */
 	public void addHooks(List<HookableFunction> hooksToAdd, Mode mode) {
-		traceFile.getHooks().replaceAll(hooksToAdd
+		traceFile.getHooks().updateAll(hooksToAdd
 				.stream()
 				.map(e -> new Hook(e.getName(), e.getAddress(), mode))
 				.toList());
