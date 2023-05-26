@@ -24,15 +24,13 @@ public class TraceFileToYamlConverter {
 	/**
 	 * Convert the information in the @param traceFile to yaml code.
 	 * 
-	 * @param 	traceFile to write to disk
-	 * @return 	traceFile as yaml code
+	 * @param traceFile to write to disk
+	 * @return traceFile as yaml code
 	 */
 	public static String toYaml(MorionInitTraceFile traceFile) {
 		Map<String, Object> traceFileDump = new HashMap<>();
 		traceFileDump.put(HOOKS, getHooksMap(traceFile));
 		traceFileDump.put(STATES, getStatesMap(traceFile));
-		// traceFileDump.put(INFO, traceFile.getInfo());
-		// traceFileDump.put(INSTRUCTIONS, traceFile.getInstructions());
 		return new Yaml().dump(traceFileDump);
 	}
 
@@ -42,7 +40,6 @@ public class TraceFileToYamlConverter {
 						STATE_REGISTERS, memoryEntriesToMap(traceFile.getEntryRegisters()),
 						STATE_MEMORY, memoryEntriesToMap(traceFile.getEntryMemory())));
 	}
-	
 
 	private static Map<String, List<String>> memoryEntriesToMap(Collection<MemoryEntry> ms) {
 		return new TreeMap<>(ms
