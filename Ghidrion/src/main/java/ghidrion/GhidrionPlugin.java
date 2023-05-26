@@ -32,8 +32,8 @@ import ghidra.framework.plugintool.util.PluginStatus;
 import ghidra.program.model.listing.Program;
 import ghidra.util.Msg;
 import model.MorionInitTraceFile;
-import util.TraceColorizerScript;
-import view.GhidrionProvider;
+import ui.view.GhidrionProvider;
+import util.yaml.TraceColorizerScript;
 
 /**
  * This plugin allows a user to leverage the power of Ghidra to create and
@@ -98,7 +98,7 @@ public class GhidrionPlugin extends ProgramPlugin {
 		addProgramOpenendListener(p -> traceFile.clear()); // clear trace when a new program is loaded
 
 		provider = new GhidrionProvider(this, PLUGIN_NAME, owner, traceFile);
-		new GhidrionHookAddingListingContextAction(this, traceFile);
+		new GhidrionHookListingContextMenu(this, traceFile);
 	}
 
 	@Override
@@ -155,7 +155,7 @@ public class GhidrionPlugin extends ProgramPlugin {
 			String serviceName = c.getName();
 			Msg.showError(originator, parent, "No " + serviceName, "Can't find " + serviceName);
 		}
-		
+
 		return service;
 	}
 }
