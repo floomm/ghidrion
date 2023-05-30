@@ -3,6 +3,8 @@ package ghidrion;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.swing.JOptionPane;
+
 import docking.Tool;
 import docking.action.MenuData;
 import ghidra.app.context.ListingActionContext;
@@ -64,7 +66,8 @@ public class GhidrionHookListingContextMenu extends ListingContextAction {
             protected void actionPerformed(ListingActionContext context) {
                 Address a = context.getLocation().getAddress();
                 Optional<Function> f = getFunction(context, program);
-                traceFile.getHooks().add(new Hook(f.get().getName(), a, mode));
+                String libraryName = JOptionPane.showInputDialog("Input library name", "libc");
+                traceFile.getHooks().add(new Hook(libraryName, f.get().getName(), a, mode));
             }
 
             @Override
@@ -88,7 +91,14 @@ public class GhidrionHookListingContextMenu extends ListingContextAction {
             protected void actionPerformed(ListingActionContext context) {
                 Address a = context.getLocation().getAddress();
                 Optional<Function> f = getFunction(context, program);
-                traceFile.getHooks().update(new Hook(f.get().getName(), a, mode));
+                String libraryName = traceFile
+                        .getHooks()
+                        .stream()
+                        .filter(hook -> hook.getEntryAddress().equals(a))
+                        .findFirst()
+                        .get()
+                        .getLibraryName();
+                traceFile.getHooks().update(new Hook(libraryName, f.get().getName(), a, mode));
             }
 
             @Override
