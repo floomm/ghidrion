@@ -110,6 +110,7 @@ public class HookPanel extends JPanel {
         GridBagConstraints gbc_btnAddHook = new GridBagConstraints();
         gbc_btnAddHook.gridx = 5;
         gbc_btnAddHook.gridy = 1;
+        gbc_btnAddHook.fill = GridBagConstraints.HORIZONTAL;
         add(btnAddHook, gbc_btnAddHook);
 
         GridBagConstraints gbc_tableAddedHooks = new GridBagConstraints();

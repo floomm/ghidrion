@@ -109,6 +109,7 @@ public class MemoryPanel extends JPanel {
 		GridBagConstraints gbc_btnAddMemory = new GridBagConstraints();
 		gbc_btnAddMemory.gridx = 4;
 		gbc_btnAddMemory.gridy = 1;
+		gbc_btnAddMemory.fill = GridBagConstraints.HORIZONTAL;
 		add(btnAddMemory, gbc_btnAddMemory);
 
 		GridBagConstraints gbc_btnRemoveMemory = new GridBagConstraints();
