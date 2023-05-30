@@ -28,7 +28,7 @@ public class HookableFunction implements Comparable<HookableFunction> {
 	public HookableFunction(String name, Address address, Memory m) {
 		this.name = Objects.requireNonNull(name);
 		this.address = Objects.requireNonNull(address);
-		this.blockName = m.getBlock(this.address).getName();
+		this.blockName = m.getBlock(this.address) == null? "undefined" : m.getBlock(this.address).getName();
 	}
 
 	public String getName() {
