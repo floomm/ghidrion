@@ -28,7 +28,7 @@ public class HookableFunction implements Comparable<HookableFunction> {
 	public HookableFunction(String name, Address address, Memory m) {
 		this.name = Objects.requireNonNull(name);
 		this.address = Objects.requireNonNull(address);
-		this.blockName = m.getBlock(this.address) == null? "undefined" : m.getBlock(this.address).getName();
+		this.blockName = m.getBlock(this.address) == null ? "undefined" : m.getBlock(this.address).getName();
 	}
 
 	public String getName() {
@@ -80,16 +80,12 @@ public class HookableFunction implements Comparable<HookableFunction> {
 		Memory m = p.getMemory();
 		Set<HookableFunction> res = new HashSet<>();
 
-		Set<Address> thunkAddresses = new HashSet<>();
-		for (Function f : fm.getExternalFunctions()) {
+		for (Function f : fm.getExternalFunctions())
 			for (Address a : f.getFunctionThunkAddresses(true))
-				thunkAddresses.add(a);
-		}
-		for (Address a : thunkAddresses) {
-			String name = fm.getFunctionAt(a).getName();
-			for (Reference r : rm.getReferencesTo(a))
-				res.add(new HookableFunction(name, r.getFromAddress(), m));
-		}
+				for (Reference r : rm.getReferencesTo(a))
+					if (!r.isEntryPointReference())
+						res.add(new HookableFunction(f.getName(), r.getFromAddress(), m));
+
 		return res;
 	}
 }
