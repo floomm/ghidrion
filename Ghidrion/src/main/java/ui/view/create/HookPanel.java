@@ -28,6 +28,7 @@ public class HookPanel extends JPanel {
     private final CreateController controller;
 
     private final JLabel labelLibraryName = new JLabel("Library");
+    private final JLabel labelMode = new JLabel("Mode");
     private final JTextField textFieldLibraryName = new JTextField("libc");
     private final FilterPanel<HookableFunction> filterFunctionNames = new FilterPanel<>(HookableFunction::getName,
             "Function Name");
@@ -96,16 +97,19 @@ public class HookPanel extends JPanel {
         gbc_filterAddresses.gridheight = 2;
         add(filterAddresses, gbc_filterAddresses);
 
+        GridBagConstraints gbc_labelMode = new GridBagConstraints();
+        gbc_labelMode.gridx = 4;
+        gbc_labelMode.gridy = 0;
+        add(labelMode, gbc_labelMode);
+
         GridBagConstraints gbc_comboBoxHookMode = new GridBagConstraints();
         gbc_comboBoxHookMode.gridx = 4;
-        gbc_comboBoxHookMode.gridy = 0;
-        gbc_comboBoxHookMode.gridheight = 2;
+        gbc_comboBoxHookMode.gridy = 1;
         add(comboBoxHookMode, gbc_comboBoxHookMode);
 
         GridBagConstraints gbc_btnAddHook = new GridBagConstraints();
         gbc_btnAddHook.gridx = 5;
-        gbc_btnAddHook.gridy = 0;
-        gbc_btnAddHook.gridheight = 2;
+        gbc_btnAddHook.gridy = 1;
         add(btnAddHook, gbc_btnAddHook);
 
         GridBagConstraints gbc_tableAddedHooks = new GridBagConstraints();
