@@ -125,7 +125,7 @@ public class YamlToTraceFileConverter {
 				for (Map<String, String> hookDetails : functions.get(functionName)) {
 					Address entry = getHookEntryAddress(functionName, hookDetails, addressFactory);
 					Mode mode = getHookMode(functionName, hookDetails, entry);
-					hooks.add(new Hook(functionName, entry, mode));
+					hooks.add(new Hook(libName, functionName, entry, mode));
 				}
 			}
 		}

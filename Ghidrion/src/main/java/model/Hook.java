@@ -12,12 +12,13 @@ import ghidra.program.model.address.Address;
  * library name and entry address. They are ordered by those in order.
  */
 public class Hook implements Comparable<Hook> {
-	private final String libraryName = "libc";
+	private final String libraryName;
 	private final String functionName;
 	private final Address entryAddress;
 	private final Mode mode;
 
 	/**
+	 * @param libraryName  Name of the library of the function to be hooked
 	 * @param functionName Name of the function to be hooked
 	 * @param entryAddress Address of the function to be hooked. Assumption: next
 	 *                     address
@@ -25,7 +26,8 @@ public class Hook implements Comparable<Hook> {
 	 *                     the leave address of the hook.
 	 * @param mode         of the hook.
 	 */
-	public Hook(String functionName, Address entryAddress, Mode mode) {
+	public Hook(String libraryName, String functionName, Address entryAddress, Mode mode) {
+		this.libraryName = Objects.requireNonNull(libraryName);
 		this.functionName = Objects.requireNonNull(functionName);
 		this.entryAddress = Objects.requireNonNull(entryAddress);
 		this.mode = Objects.requireNonNull(mode);

@@ -280,14 +280,16 @@ public class CreateController {
 	 * Adds or replaces {@link Hook}s in the {@link MorionInitTraceFile} based on
 	 * the provided list of {@link HookableFunction} objects and the {@link Mode}.
 	 *
-	 * @param hooksToAdd the list of HookableFunction objects representing the hooks
-	 *                   to add or replace
-	 * @param mode       the mode to set for the hooks
+	 * @param libraryName of the functions to add
+	 * @param hooksToAdd  the list of HookableFunction objects representing the
+	 *                    hooks
+	 *                    to add or replace
+	 * @param mode        the mode to set for the hooks
 	 */
-	public void addHooks(List<HookableFunction> hooksToAdd, Mode mode) {
+	public void addHooks(String libraryName, List<HookableFunction> hooksToAdd, Mode mode) {
 		traceFile.getHooks().updateAll(hooksToAdd
 				.stream()
-				.map(e -> new Hook(e.getName(), e.getAddress(), mode))
+				.map(e -> new Hook(libraryName, e.getName(), e.getAddress(), mode))
 				.toList());
 	}
 }

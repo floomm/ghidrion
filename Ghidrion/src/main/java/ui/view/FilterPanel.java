@@ -56,7 +56,6 @@ public class FilterPanel<E extends Comparable<E>> extends JPanel {
         GridBagConstraints titleGBC = new GridBagConstraints();
         titleGBC.gridx = 0;
         titleGBC.gridy = 0;
-        titleGBC.fill = GridBagConstraints.HORIZONTAL;
         add(this.title, titleGBC);
         GridBagConstraints filterGBC = new GridBagConstraints();
         filterGBC.gridx = 0;
