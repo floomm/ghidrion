@@ -27,7 +27,7 @@ public class DiffEntry implements Comparable<DiffEntry> {
         this.isError = entry.isEmpty() || leave.isEmpty();
         this.entryValue = entry.isPresent() ? entry.get().getValue() : "";
         this.leaveValue = leave.isPresent() ? leave.get().getValue() : "";
-        this.isDiff = this.entryValue.equals(this.leaveValue);
+        this.isDiff = !this.entryValue.equals(this.leaveValue);
     }
 
     @Override
