@@ -77,8 +77,8 @@ public class GhidrionUI {
 
 		frame.getContentPane().add(tabbedPane);
 
-		tabbedPane.addTab("Create Init Trace File", null, panelCreate, null);
+		tabbedPane.addTab("Create Init YAML File", null, panelCreate, null);
 
-		tabbedPane.addTab("Display Trace", null, panelDisplay, null);
+		tabbedPane.addTab("Analyze Traced YAML File", null, panelDisplay, null);
 	}
 }

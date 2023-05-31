@@ -20,9 +20,9 @@ import ui.ctrl.DisplayController;
 public class DisplayPanel extends JPanel {
 	private final DisplayController controller;
 
-	private final JButton btnDisplayTrace = new JButton("Import and Display");
+	private final JButton btnDisplayTrace = new JButton("Load Traced YAML File");
 	private final JButton btnChooseTraceColor = new JButton("Color");
-	private final JButton btnClearTrace = new JButton("Clear Trace");
+	private final JButton btnClearTrace = new JButton("Clear");
 	private final JTable tableDiffViewRegisters = new JTable();
 	private final JScrollPane scrollPaneDiffViewRegisters = new JScrollPane(tableDiffViewRegisters);
 	private final JTable tableDiffViewMemory = new JTable();

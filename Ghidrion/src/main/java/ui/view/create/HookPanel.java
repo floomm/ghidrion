@@ -31,9 +31,9 @@ public class HookPanel extends JPanel {
     private final JLabel labelMode = new JLabel("Mode");
     private final JTextField textFieldLibraryName = new JTextField("libc");
     private final FilterPanel<HookableFunction> filterFunctionNames = new FilterPanel<>(HookableFunction::getName,
-            "Function Name");
+            "Function");
     private final FilterPanel<HookableFunction> filterBlockNames = new FilterPanel<>(HookableFunction::getBlockName,
-            "Block Name");;
+            "Block");;
     private final FilterPanel<HookableFunction> filterAddresses = new FilterPanel<>(f -> f.getAddress().toString(),
             "Address");;
     private final JComboBox<Mode> comboBoxHookMode = new JComboBox<>(new DefaultComboBoxModel<>(Mode.values()));

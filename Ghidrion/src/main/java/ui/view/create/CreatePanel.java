@@ -20,8 +20,8 @@ public class CreatePanel extends JPanel {
 	private final MemoryPanel memoryPanel;
 	private final RegistersPanel registersPanel;
 
-	private final JButton btnLoadTraceFile = new JButton("Load Init Trace File");
-	private final JButton btnCreateTraceFile = new JButton("Create Init Trace File");
+	private final JButton btnLoadTraceFile = new JButton("Load Init YAML File");
+	private final JButton btnCreateTraceFile = new JButton("Export Init YAML File");
 	private final JButton btnClearTraceFile = new JButton("Clear Added Elements");
 	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 
@@ -71,8 +71,8 @@ public class CreatePanel extends JPanel {
 		gbc_tabbedPane.gridy = 0;
 		add(tabbedPane, gbc_tabbedPane);
 		tabbedPane.addTab("Hooks", null, panelHooks, null);
-		tabbedPane.addTab("Entry Memory", null, memoryPanel, null);
-		tabbedPane.addTab("Entry Registers", null, registersPanel, null);
+		tabbedPane.addTab("Memory", null, memoryPanel, null);
+		tabbedPane.addTab("Registers", null, registersPanel, null);
 	}
 
 	private void setupComponents() {
