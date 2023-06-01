@@ -123,9 +123,10 @@ public class YamlToTraceFileConverter {
 				if (functions.get(functionName) == null)
 					continue; // Ignore empty functions
 				for (Map<String, String> hookDetails : functions.get(functionName)) {
-					Address entry = getHookEntryAddress(functionName, hookDetails, addressFactory);
-					Mode mode = getHookMode(functionName, hookDetails, entry);
-					hooks.add(new Hook(libName, functionName, entry, mode));
+					Address entryAddress = getHookEntryAddress(functionName, hookDetails, addressFactory);
+					Address leaveAddress = getHookLeaveAddress(functionName, hookDetails, addressFactory);
+					Mode mode = getHookMode(functionName, hookDetails, leaveAddress);
+					hooks.add(new Hook(libName, functionName, entryAddress, leaveAddress, mode));
 				}
 			}
 		}
@@ -143,6 +144,23 @@ public class YamlToTraceFileConverter {
 		if ((addr == null) || (!isValidHex(entry, FOUR_BYTE_LENGTH))) {
 			String title = "Illegal hook entry";
 			String message = "Hook entry address '" + entry + "' is illegal"
+					+ " (Function: " + functionName + ")";
+			throw new YamlConverterException(title, message);
+		}
+		return addr;
+	}
+
+	private static Address getHookLeaveAddress(String functionName, Map<String, String> hookDetails,
+			AddressFactory addressFactory) throws YamlConverterException {
+		if (!(hookDetails.containsKey(HOOK_LEAVE))) {
+			String message = "Hook leave address is missing (Function: " + functionName + ")";
+			throw new YamlConverterException("Leave missing", message);
+		}
+		String entry = hookDetails.get(HOOK_LEAVE);
+		Address addr = addressFactory.getAddress(entry);
+		if ((addr == null) || (!isValidHex(entry, FOUR_BYTE_LENGTH))) {
+			String title = "Illegal hook entry";
+			String message = "Hook leave address '" + entry + "' is illegal"
 					+ " (Function: " + functionName + ")";
 			throw new YamlConverterException(title, message);
 		}

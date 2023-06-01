@@ -64,10 +64,11 @@ public class GhidrionHookListingContextMenu extends ListingContextAction {
         return new ListingContextAction(LISTENING_CONTEXT_ACTION_NAME, getName()) {
             @Override
             protected void actionPerformed(ListingActionContext context) {
-                Address a = context.getLocation().getAddress();
+                Address entryAddress = context.getLocation().getAddress();
+                Address leaveAddress = program.getListing().getInstructionAfter(entryAddress).getAddress();
                 Optional<Function> f = getFunction(context, program);
                 String libraryName = JOptionPane.showInputDialog("Input library name", "libc");
-                traceFile.getHooks().add(new Hook(libraryName, f.get().getName(), a, mode));
+                traceFile.getHooks().add(new Hook(libraryName, f.get().getName(), entryAddress, leaveAddress, mode));
             }
 
             @Override
@@ -89,16 +90,17 @@ public class GhidrionHookListingContextMenu extends ListingContextAction {
         return new ListingContextAction(LISTENING_CONTEXT_ACTION_NAME, getName()) {
             @Override
             protected void actionPerformed(ListingActionContext context) {
-                Address a = context.getLocation().getAddress();
+                Address entryAddress = context.getLocation().getAddress();
+                Address leaveAddress = program.getListing().getInstructionAfter(entryAddress).getAddress();
                 Optional<Function> f = getFunction(context, program);
                 String libraryName = traceFile
                         .getHooks()
                         .stream()
-                        .filter(hook -> hook.getEntryAddress().equals(a))
+                        .filter(hook -> hook.getEntryAddress().equals(entryAddress))
                         .findFirst()
                         .get()
                         .getLibraryName();
-                traceFile.getHooks().update(new Hook(libraryName, f.get().getName(), a, mode));
+                traceFile.getHooks().update(new Hook(libraryName, f.get().getName(), entryAddress, leaveAddress, mode));
             }
 
             @Override

@@ -18,17 +18,19 @@ import ghidra.program.model.symbol.ReferenceManager;
 public class HookableFunction implements Comparable<HookableFunction> {
 	private final String name;
 	private final String blockName;
-	private final Address address;
+	private final Address entryAddress;
+	private final Address leaveAddress;
 
 	/**
-	 * @param name    of the function
-	 * @param address of the function
-	 * @param m       to use for ELF block detection
+	 * @param name         of the function
+	 * @param entryAddress of the function
+	 * @param m            to use for ELF block detection
 	 */
-	public HookableFunction(String name, Address address, Memory m) {
+	public HookableFunction(String name, Address entryAddress, Address leaveAddress, Memory m) {
 		this.name = Objects.requireNonNull(name);
-		this.address = Objects.requireNonNull(address);
-		this.blockName = m.getBlock(this.address) == null ? "undefined" : m.getBlock(this.address).getName();
+		this.entryAddress = Objects.requireNonNull(entryAddress);
+		this.leaveAddress = Objects.requireNonNull(leaveAddress);
+		this.blockName = m.getBlock(this.entryAddress) == null ? "undefined" : m.getBlock(this.entryAddress).getName();
 	}
 
 	public String getName() {
@@ -39,8 +41,12 @@ public class HookableFunction implements Comparable<HookableFunction> {
 		return blockName;
 	}
 
-	public Address getAddress() {
-		return address;
+	public Address getEntryAddress() {
+		return entryAddress;
+	}
+
+	public Address getLeaveAddress() {
+		return leaveAddress;
 	}
 
 	@Override
@@ -50,14 +56,14 @@ public class HookableFunction implements Comparable<HookableFunction> {
 		if (obj == null || !obj.getClass().equals(this.getClass()))
 			return false;
 		HookableFunction o = (HookableFunction) obj;
-		return o.getAddress().equals(getAddress()) &&
+		return o.getEntryAddress().equals(getEntryAddress()) &&
 				o.getBlockName().equals(getBlockName()) &&
 				o.getName().equals(getName());
 	}
 
 	@Override
 	public int hashCode() {
-		return 3 * name.hashCode() + 5 * blockName.hashCode() + 7 * address.hashCode();
+		return 3 * name.hashCode() + 5 * blockName.hashCode() + 7 * entryAddress.hashCode();
 	}
 
 	@Override
@@ -66,7 +72,7 @@ public class HookableFunction implements Comparable<HookableFunction> {
 			return name.compareTo(o.getName());
 		if (!blockName.equals(o.getBlockName()))
 			return blockName.compareTo(o.getBlockName());
-		return address.compareTo(o.getAddress());
+		return entryAddress.compareTo(o.getEntryAddress());
 	}
 
 	/**
@@ -83,8 +89,15 @@ public class HookableFunction implements Comparable<HookableFunction> {
 		for (Function f : fm.getExternalFunctions())
 			for (Address a : f.getFunctionThunkAddresses(true))
 				for (Reference r : rm.getReferencesTo(a))
-					if (!r.isEntryPointReference())
-						res.add(new HookableFunction(f.getName(), r.getFromAddress(), m));
+					if (!r.isEntryPointReference()) {
+						Address entryAddress = r.getFromAddress();
+						ghidra.program.model.listing.Instruction i = p.getListing().getInstructionAfter(entryAddress);
+						if (i == null) // this happens in .got, where there is no next instruction
+							continue;
+
+						Address leaveAddress = i.getAddress();
+						res.add(new HookableFunction(f.getName(), entryAddress, leaveAddress, m));
+					}
 
 		return res;
 	}
