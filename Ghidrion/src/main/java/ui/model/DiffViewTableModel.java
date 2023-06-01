@@ -123,16 +123,15 @@ public class DiffViewTableModel extends CustomTableModel<DiffEntry> {
                 int row, int column) {
 
             Color c = Color.BLACK;
-            if (model.isRowError(row))
+
+            if (column == 0 && model.isRowDiff(row))
+                c = new Color(0, 0xa0, 0);
+            else if (column == 0 && model.isRowError(row))
                 c = new Color(0xa0, 0, 0);
-            else {
-                if (column == 0 && model.isRowDiff(row))
-                    c = new Color(0, 0xa0, 0);
-                else if (column == 1 && model.isRowEntrySymbolic(row))
-                    c = new Color(0, 0, 0xa0);
-                else if (column == 2 && model.isRowLeaveSymbolic(row))
-                    c = new Color(0, 0, 0xa0);
-            }
+            else if (column == 1 && model.isRowEntrySymbolic(row))
+                c = new Color(0, 0, 0xa0);
+            else if (column == 2 && model.isRowLeaveSymbolic(row))
+                c = new Color(0, 0, 0xa0);
 
             JLabel label = new JLabel(value.toString());
             label.setForeground(c);
