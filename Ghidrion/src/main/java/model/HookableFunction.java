@@ -24,6 +24,7 @@ public class HookableFunction implements Comparable<HookableFunction> {
 	/**
 	 * @param name         of the function
 	 * @param entryAddress of the function
+	 * @param leaveAddress of the function
 	 * @param m            to use for ELF block detection
 	 */
 	public HookableFunction(String name, Address entryAddress, Address leaveAddress, Memory m) {
