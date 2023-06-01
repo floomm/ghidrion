@@ -55,7 +55,7 @@ public class CreateController {
 					.filter(e -> !alreadyHooked
 							.stream()
 							.map(nH -> nH.getEntryAddress())
-							.anyMatch(nH -> nH.equals(e.getAddress())))
+							.anyMatch(nH -> nH.equals(e.getEntryAddress())))
 					.toList());
 		});
 	}
@@ -289,7 +289,7 @@ public class CreateController {
 	public void addHooks(String libraryName, List<HookableFunction> hooksToAdd, Mode mode) {
 		traceFile.getHooks().updateAll(hooksToAdd
 				.stream()
-				.map(e -> new Hook(libraryName, e.getName(), e.getAddress(), mode))
+				.map(e -> new Hook(libraryName, e.getName(), e.getEntryAddress(), e.getLeaveAddress(), mode))
 				.toList());
 	}
 }

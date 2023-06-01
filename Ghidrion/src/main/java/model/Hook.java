@@ -15,21 +15,22 @@ public class Hook implements Comparable<Hook> {
 	private final String libraryName;
 	private final String functionName;
 	private final Address entryAddress;
+	private final Address leaveAddress;
 	private final Mode mode;
 
 	/**
 	 * @param libraryName  Name of the library of the function to be hooked
 	 * @param functionName Name of the function to be hooked
-	 * @param entryAddress Address of the function to be hooked. Assumption: next
-	 *                     address
-	 *                     ({@link ghidra.program.model.address.Address#next()}) is
-	 *                     the leave address of the hook.
+	 * @param entryAddress Address of the function to be hooked.
+	 * @param leaveAddress Address of the instruction after the function to be
+	 *                     hooked.
 	 * @param mode         of the hook.
 	 */
-	public Hook(String libraryName, String functionName, Address entryAddress, Mode mode) {
+	public Hook(String libraryName, String functionName, Address entryAddress, Address leaveAddress, Mode mode) {
 		this.libraryName = Objects.requireNonNull(libraryName);
 		this.functionName = Objects.requireNonNull(functionName);
 		this.entryAddress = Objects.requireNonNull(entryAddress);
+		this.leaveAddress = Objects.requireNonNull(leaveAddress);
 		this.mode = Objects.requireNonNull(mode);
 	}
 
@@ -46,7 +47,7 @@ public class Hook implements Comparable<Hook> {
 	}
 
 	public Address getLeaveAddress() {
-		return entryAddress.next();
+		return leaveAddress;
 	}
 
 	public Mode getMode() {
