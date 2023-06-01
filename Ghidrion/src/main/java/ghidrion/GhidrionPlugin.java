@@ -15,37 +15,55 @@
  */
 package ghidrion;
 
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import ghidra.app.ExamplesPluginPackage;
+import ghidra.MiscellaneousPluginPackage;
 import ghidra.app.decompiler.DecompilerHighlightService;
 import ghidra.app.plugin.PluginCategoryNames;
 import ghidra.app.plugin.ProgramPlugin;
 import ghidra.app.plugin.core.colorizer.ColorizingService;
 import ghidra.app.script.GhidraState;
-import ghidra.app.services.GhidraScriptService;
 import ghidra.framework.plugintool.PluginInfo;
 import ghidra.framework.plugintool.PluginTool;
 import ghidra.framework.plugintool.util.PluginStatus;
-import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.listing.Program;
+import ghidra.util.Msg;
 import model.MorionInitTraceFile;
-import util.TraceColorizerScript;
-import view.GhidrionProvider;
+import ui.view.GhidrionProvider;
+import util.yaml.TraceColorizerScript;
 
 /**
- * TODO: Provide class-level documentation that describes what this plugin does.
+ * This plugin allows a user to leverage the power of Ghidra to create and
+ * analyze Morion traces. It has two parts:
+ * 
+ * First, it allows a user to create init hook files. These can then be used to
+ * create traces in Morion. They contain hooked functions and initial memory and
+ * register values.
+ * 
+ * Second, it allows a user to analyze a trace by analyzing the visited
+ * addresses in Ghidra's listing view and quickly finding differences in memory
+ * and registers created during the tracing.
  */
 //@formatter:off
 @PluginInfo(
 	status = PluginStatus.STABLE,
-	packageName = ExamplesPluginPackage.NAME,
-	category = PluginCategoryNames.EXAMPLES,
-	shortDescription = "Plugin short description goes here.",
-	description = "Plugin long description goes here.",
-	servicesRequired = { GhidraScriptService.class }
+	packageName = MiscellaneousPluginPackage.NAME,
+	category = PluginCategoryNames.MISC,
+	shortDescription = "Create and analyze Morion traces",
+	description = "This plugin allows a user to leverage the power of Ghidra to create and\r\n"
+			+ " analyze Morion traces. It has two parts:\r\n"
+			+ " \r\n"
+			+ " First, it allows a user to create init hook files. These can then be used to\r\n"
+			+ " create traces in Morion. They contain hooked functions and initial memory and\r\n"
+			+ " register values.\r\n"
+			+ " \r\n"
+			+ " Second, it allows a user to analyze a trace by analyzing the visited\r\n"
+			+ " addresses in Ghidra's listing view and quickly finding differences in memory\r\n"
+			+ " and registers created during the tracing.",
+	servicesRequired = { ColorizingService.class, DecompilerHighlightService.class }
 )
 //@formatter:on
 public class GhidrionPlugin extends ProgramPlugin {
@@ -58,7 +76,6 @@ public class GhidrionPlugin extends ProgramPlugin {
 	private DecompilerHighlightService decompilerHighlightService;
 
 	private GhidrionProvider provider;
-	private FlatProgramAPI flatAPI;
 
 	private final List<Consumer<Program>> programOpenedListeners = new ArrayList<>();
 
@@ -81,11 +98,7 @@ public class GhidrionPlugin extends ProgramPlugin {
 		addProgramOpenendListener(p -> traceFile.clear()); // clear trace when a new program is loaded
 
 		provider = new GhidrionProvider(this, PLUGIN_NAME, owner, traceFile);
-		new GhidrionHookAddingListingContextAction(this, traceFile);
-
-		if (currentProgram != null) {
-			this.flatAPI = new FlatProgramAPI(currentProgram);
-		}
+		new GhidrionHookListingContextMenu(this, traceFile);
 	}
 
 	@Override
@@ -93,15 +106,14 @@ public class GhidrionPlugin extends ProgramPlugin {
 		super.init();
 
 		// Acquire services here
-		colorizingService = ServiceHelper.getService(tool, ColorizingService.class, this, provider.getComponent());
-		decompilerHighlightService = ServiceHelper.getService(tool, DecompilerHighlightService.class, this,
+		colorizingService = getService(ColorizingService.class, this, provider.getComponent());
+		decompilerHighlightService = getService(DecompilerHighlightService.class, this,
 				provider.getComponent());
 	}
 
 	@Override
 	protected void programActivated(Program program) {
 		currentProgram = program;
-		flatAPI = new FlatProgramAPI(program);
 
 		// Set state of scripts
 		GhidraState state = new GhidraState(tool, tool.getProject(), program, currentLocation, currentSelection,
@@ -117,6 +129,10 @@ public class GhidrionPlugin extends ProgramPlugin {
 		super.programOpened(program);
 	}
 
+	/**
+	 * @param listener gets triggered when a program is opened (according to
+	 *                 {@link ghidra.app.plugin.ProgramPlugin#programOpened}).
+	 */
 	public void addProgramOpenendListener(Consumer<Program> listener) {
 		programOpenedListeners.add(listener);
 	}
@@ -133,7 +149,13 @@ public class GhidrionPlugin extends ProgramPlugin {
 		return decompilerHighlightService;
 	}
 
-	public FlatProgramAPI getFlatAPI() {
-		return flatAPI;
+	private <T> T getService(Class<T> c, Object originator, Component parent) {
+		T service = tool.getService(c);
+		if (service == null) {
+			String serviceName = c.getName();
+			Msg.showError(originator, parent, "No " + serviceName, "Can't find " + serviceName);
+		}
+
+		return service;
 	}
 }

@@ -1,5 +1,11 @@
 package model;
 
+/**
+ * Used for both register and memory entries as equivalent elements to those
+ * present in the YAML files.
+ * 
+ * Two {@link MemoryEntry} are considered the same if they have the same name.
+ */
 public class MemoryEntry implements Comparable<MemoryEntry> {
     private final String name;
     private final String value;

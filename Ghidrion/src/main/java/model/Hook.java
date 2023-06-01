@@ -5,15 +5,32 @@ import java.util.Optional;
 
 import ghidra.program.model.address.Address;
 
+/**
+ * Emulates a hook that can be written to a Morion YAML file.
+ * 
+ * Two hooks are considered the same if they have the same function name,
+ * library name and entry address. They are ordered by those in order.
+ */
 public class Hook implements Comparable<Hook> {
-	private final String libraryName = "libc";
+	private final String libraryName;
 	private final String functionName;
 	private final Address entryAddress;
+	private final Address leaveAddress;
 	private final Mode mode;
 
-	public Hook(String functionName, Address entryAddress, Mode mode) {
+	/**
+	 * @param libraryName  Name of the library of the function to be hooked
+	 * @param functionName Name of the function to be hooked
+	 * @param entryAddress Address of the function to be hooked.
+	 * @param leaveAddress Address of the instruction after the function to be
+	 *                     hooked.
+	 * @param mode         of the hook.
+	 */
+	public Hook(String libraryName, String functionName, Address entryAddress, Address leaveAddress, Mode mode) {
+		this.libraryName = Objects.requireNonNull(libraryName);
 		this.functionName = Objects.requireNonNull(functionName);
 		this.entryAddress = Objects.requireNonNull(entryAddress);
+		this.leaveAddress = Objects.requireNonNull(leaveAddress);
 		this.mode = Objects.requireNonNull(mode);
 	}
 
@@ -30,7 +47,7 @@ public class Hook implements Comparable<Hook> {
 	}
 
 	public Address getLeaveAddress() {
-		return entryAddress.next();
+		return leaveAddress;
 	}
 
 	public Mode getMode() {
@@ -63,6 +80,9 @@ public class Hook implements Comparable<Hook> {
 		return this.entryAddress.compareTo(o.entryAddress);
 	}
 
+	/**
+	 * Modes a hook can use.
+	 */
 	public enum Mode {
 		MODEL("model"),
 		SKIP("skip"),
@@ -70,6 +90,9 @@ public class Hook implements Comparable<Hook> {
 
 		private final String value;
 
+		/**
+		 * @param value recognized by Morion
+		 */
 		Mode(String value) {
 			this.value = Objects.requireNonNull(value);
 		}
