@@ -66,21 +66,22 @@ public class GhidrionHookListingContextMenu extends ListingContextAction {
             protected void actionPerformed(ListingActionContext context) {
                 Address entryAddress = context.getLocation().getAddress();
                 Address leaveAddress = program.getListing().getInstructionAfter(entryAddress).getAddress();
-                Optional<Function> f = getFunction(context, program);
+                Optional<Function> function = getFunctionAtSelectedLocation(context, program);
+                String name = function.get().getName(); // checks are done in isValidContext
                 String libraryName = JOptionPane.showInputDialog("Input library name", "libc");
-                traceFile.getHooks().add(new Hook(libraryName, f.get().getName(), entryAddress, leaveAddress, mode));
+                traceFile.getHooks().add(new Hook(libraryName, name, entryAddress, leaveAddress, mode));
             }
 
             @Override
             protected boolean isValidContext(ListingActionContext context) {
-                Address a = context.getLocation().getAddress();
-                Optional<Function> f = getFunction(context, plugin.getCurrentProgram());
-                return f.isPresent()
-                        && f.get().isExternal()
+                Address address = context.getLocation().getAddress();
+                Optional<Function> function = getFunctionAtSelectedLocation(context, plugin.getCurrentProgram());
+                return function.isPresent()
+                        && function.get().isExternal()
                         && traceFile
                                 .getHooks()
                                 .stream()
-                                .filter(hook -> hook.getEntryAddress().equals(a))
+                                .filter(hook -> hook.getEntryAddress().equals(address))
                                 .count() == 0;
             }
         };
@@ -92,7 +93,8 @@ public class GhidrionHookListingContextMenu extends ListingContextAction {
             protected void actionPerformed(ListingActionContext context) {
                 Address entryAddress = context.getLocation().getAddress();
                 Address leaveAddress = program.getListing().getInstructionAfter(entryAddress).getAddress();
-                Optional<Function> f = getFunction(context, program);
+                Optional<Function> function = getFunctionAtSelectedLocation(context, program);
+                String name = function.get().getName(); // checks are done in isValidContext
                 String libraryName = traceFile
                         .getHooks()
                         .stream()
@@ -100,19 +102,19 @@ public class GhidrionHookListingContextMenu extends ListingContextAction {
                         .findFirst()
                         .get()
                         .getLibraryName();
-                traceFile.getHooks().update(new Hook(libraryName, f.get().getName(), entryAddress, leaveAddress, mode));
+                traceFile.getHooks().update(new Hook(libraryName, name, entryAddress, leaveAddress, mode));
             }
 
             @Override
             protected boolean isValidContext(ListingActionContext context) {
-                Address a = context.getLocation().getAddress();
-                Optional<Function> f = getFunction(context, plugin.getCurrentProgram());
-                return f.isPresent()
-                        && f.get().isExternal()
+                Address address = context.getLocation().getAddress();
+                Optional<Function> function = getFunctionAtSelectedLocation(context, plugin.getCurrentProgram());
+                return function.isPresent()
+                        && function.get().isExternal()
                         && traceFile
                                 .getHooks()
                                 .stream()
-                                .filter(hook -> hook.getEntryAddress().equals(a))
+                                .filter(hook -> hook.getEntryAddress().equals(address))
                                 .filter(hook -> !hook.getMode().equals(mode))
                                 .count() > 0;
             }
@@ -123,41 +125,38 @@ public class GhidrionHookListingContextMenu extends ListingContextAction {
         return new ListingContextAction(LISTENING_CONTEXT_ACTION_NAME, getName()) {
             @Override
             protected void actionPerformed(ListingActionContext context) {
-                Address a = context.getLocation().getAddress();
-                Optional<Hook> toDelete = traceFile
+                Address address = context.getLocation().getAddress();
+                traceFile
                         .getHooks()
                         .stream()
-                        .filter(hook -> hook.getEntryAddress().equals(a))
-                        .findFirst();
-                if (toDelete.isPresent())
-                    traceFile.getHooks().remove(toDelete.get());
+                        .filter(hook -> hook.getEntryAddress().equals(address))
+                        .forEach(hook -> traceFile.getHooks().remove(hook));
             }
 
             @Override
             protected boolean isValidContext(ListingActionContext context) {
-                Address a = context.getLocation().getAddress();
-                Optional<Function> f = getFunction(context, plugin.getCurrentProgram());
-                return f.isPresent()
-                        && f.get().isExternal()
+                Address address = context.getLocation().getAddress();
+                Optional<Function> function = getFunctionAtSelectedLocation(context, plugin.getCurrentProgram());
+                return function.isPresent()
+                        && function.get().isExternal()
                         && traceFile
                                 .getHooks()
                                 .stream()
-                                .filter(hook -> hook.getEntryAddress().equals(a))
+                                .filter(hook -> hook.getEntryAddress().equals(address))
                                 .count() > 0;
             }
         };
     }
 
-    private static Optional<Function> getFunction(ListingActionContext context, Program p) {
+    private static Optional<Function> getFunctionAtSelectedLocation(ListingActionContext context, Program p) {
         Reference[] references = p.getReferenceManager()
                 .getReferencesFrom(context.getLocation().getAddress());
         if (references.length != 1)
             return Optional.empty();
-        Function f = p.getFunctionManager().getFunctionAt(references[0].getToAddress());
-        if (f == null)
+        Function function = p.getFunctionManager().getFunctionAt(references[0].getToAddress());
+        if (function == null)
             return Optional.empty();
-        f = f.isThunk() ? f.getThunkedFunction(true) : f;
-        return Optional.of(f);
-
+        function = function.isThunk() ? function.getThunkedFunction(true) : function;
+        return Optional.of(function);
     }
 }
