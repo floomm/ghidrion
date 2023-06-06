@@ -78,11 +78,11 @@ public class HookableFunction implements Comparable<HookableFunction> {
 	}
 
 	/**
-	 * @param program program to consider
+	 * @param program to gather functions from
 	 * @return all hookable functions in the provided program that are linked to an
 	 *         external function.
 	 */
-	public static Set<HookableFunction> getFunctions(Program program) {
+	public static Set<HookableFunction> getHookableFunctions(Program program) {
 		FunctionManager functionManager = program.getFunctionManager();
 		ReferenceManager referenceManager = program.getReferenceManager();
 		Memory memory = program.getMemory();

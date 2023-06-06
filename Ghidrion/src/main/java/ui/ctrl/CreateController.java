@@ -46,7 +46,7 @@ public class CreateController {
 
 		plugin.addProgramOpenendListener(p -> {
 			allHookableFunctions.clear();
-			allHookableFunctions.addAll(HookableFunction.getFunctions(p));
+			allHookableFunctions.addAll(HookableFunction.getHookableFunctions(p));
 			traceFile.getHooks().clear(); // trigger update of lists
 		});
 		traceFile.getHooks().addObserver(alreadyHooked -> {
