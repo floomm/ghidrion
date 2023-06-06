@@ -11,6 +11,7 @@ import ghidra.program.model.listing.Program;
 import ghidra.program.model.mem.Memory;
 import ghidra.program.model.symbol.Reference;
 import ghidra.program.model.symbol.ReferenceManager;
+import ghidra.program.model.listing.Instruction;
 
 /**
  * Used when filtering hooks to add to the init trace file.
@@ -77,29 +78,28 @@ public class HookableFunction implements Comparable<HookableFunction> {
 	}
 
 	/**
-	 * @param p program to consider
+	 * @param program program to consider
 	 * @return all hookable functions in the provided program that are linked to an
 	 *         external function.
 	 */
-	public static Set<HookableFunction> getFunctions(Program p) {
-		FunctionManager fm = p.getFunctionManager();
-		ReferenceManager rm = p.getReferenceManager();
-		Memory m = p.getMemory();
+	public static Set<HookableFunction> getFunctions(Program program) {
+		FunctionManager functionManager = program.getFunctionManager();
+		ReferenceManager referenceManager = program.getReferenceManager();
+		Memory memory = program.getMemory();
 		Set<HookableFunction> res = new HashSet<>();
 
-		for (Function f : fm.getExternalFunctions())
-			for (Address a : f.getFunctionThunkAddresses(true))
-				for (Reference r : rm.getReferencesTo(a))
-					if (!r.isEntryPointReference()) {
-						Address entryAddress = r.getFromAddress();
-						ghidra.program.model.listing.Instruction i = p.getListing().getInstructionAfter(entryAddress);
-						if (i == null) // this happens in .got, where there is no next instruction
+		for (Function externalFunction : functionManager.getExternalFunctions())
+			for (Address thunkAddress : externalFunction.getFunctionThunkAddresses(true))
+				for (Reference reference : referenceManager.getReferencesTo(thunkAddress))
+					if (!reference.isEntryPointReference()) {
+						String name = externalFunction.getName();
+						Address entryAddress = reference.getFromAddress();
+						Instruction instruction = program.getListing().getInstructionAfter(entryAddress);
+						if (instruction == null) // if there is no next instruction, hooking doesn't work
 							continue;
-
-						Address leaveAddress = i.getAddress();
-						res.add(new HookableFunction(f.getName(), entryAddress, leaveAddress, m));
+						Address leaveAddress = instruction.getAddress();
+						res.add(new HookableFunction(name, entryAddress, leaveAddress, memory));
 					}
-
 		return res;
 	}
 }
